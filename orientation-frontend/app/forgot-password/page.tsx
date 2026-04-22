@@ -1,0 +1,134 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
+import { Input } from "../components/ui/input"
+import { Button } from "../components/ui/button"
+import { Label } from "../components/ui/label"
+import { ArrowLeft, Mail } from "lucide-react"
+import Link from "next/link"
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    setSuccess(false)
+
+    if (!email) {
+      setError("Please enter your email address")
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const res = await fetch("http://localhost:3001/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.message || "Failed to send reset link. Please try again.")
+        return
+      }
+      
+      setSuccess(true)
+      setEmail("")
+    } catch (err) {
+      setError("Failed to send reset link. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen w-full bg-slate-100 px-4 py-8 sm:py-10 dark:bg-slate-950">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md items-center justify-center">
+        <Card className="w-full rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
+          <CardHeader className="space-y-2 pb-6">
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <div className="flex-1">
+                <CardTitle className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                  Forgot Password
+                </CardTitle>
+                <CardDescription className="text-sm text-slate-500 dark:text-slate-400">
+                  Enter your email to receive a reset link
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900/70 dark:bg-red-950/50 dark:text-red-300">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-600 dark:border-green-900/70 dark:bg-green-950/50 dark:text-green-300">
+                Reset link has been sent to your email address!
+              </div>
+            )}
+
+            {!success && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      className="rounded-xl pl-10"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="h-11 w-full rounded-xl"
+                >
+                  {loading ? "Sending..." : "Send Reset Link"}
+                </Button>
+              </form>
+            )}
+
+            {success && (
+              <div className="text-center">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  Check your email and follow the instructions to reset your password.
+                </p>
+                <Link href="/login">
+                  <Button variant="outline" className="h-11 w-full rounded-xl">
+                    Back to Login
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

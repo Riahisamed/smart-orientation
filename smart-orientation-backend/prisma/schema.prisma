@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+ 
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+//////////////////////////////
+// ENUMS
+//////////////////////////////
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum BacType {
+  MATH
+  SVT
+  INFO
+  ECO
+  TECH
+  LETTRES
+  SPORT
+}
+
+//////////////////////////////
+// USER
+//////////////////////////////
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String?
+  role      Role     @default(STUDENT)
+  resetPasswordToken     String?   @unique
+  resetPasswordExpiresAt DateTime?
+
+  student   Student?
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////
+// STUDENT
+//////////////////////////////
+
+model Student {
+  id           Int      @id @default(autoincrement())
+  name         String
+
+  bacType      BacType
+  gov          String?      // الولاية (التنفيل الجغرافي)
+
+  bacAverage   Float        // MG
+
+  //////////////////////////////////
+  // المواد
+  //////////////////////////////////
+
+  math         Float?
+  physics      Float?
+  svt          Float?
+
+  algo         Float?
+  sti          Float?
+
+  tech         Float?
+
+  economy      Float?
+  gestion      Float?
+
+  arabic       Float?
+  philosophy   Float?
+  historyGeo   Float?
+
+  french       Float
+  english      Float
+
+  //////////////////////////////////
+  // لغات إضافية
+  //////////////////////////////////
+
+  spanish      Float?
+  italian      Float?
+  german       Float?
+
+  //////////////////////////////////
+  // باك رياضة
+  //////////////////////////////////
+
+  bioSport     Float?
+  spSport      Float?
+  physEd       Float?
+
+  //////////////////////////////////
+
+  interests    String?
+
+  FG           Float?
+
+  //////////////////////////////////
+
+  skills       Skill[]  @relation("StudentSkills")
+
+  userId       Int?     @unique
+  user         User?    @relation(fields: [userId], references: [id])
+
+  roadmaps     Roadmap[]
+
+  createdAt    DateTime @default(now())
+}
+
+//////////////////////////////
+// SKILLS
+//////////////////////////////
+
+model Skill {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+
+  students  Student[] @relation("StudentSkills")
+  filieres  Filiere[] @relation("FiliereSkills")
+}
+
+//////////////////////////////
+// FILIERE
+//////////////////////////////
+
+model Filiere {
+  id          Int      @id @default(autoincrement())
+
+  code        String   @unique
+  program     String
+  institution String
+
+  formula     String   // FG+M / FG+AR / FG+ANG
+
+  gov         String?
+
+  bacTypes    FiliereBac[]
+  scores      FiliereScore[]
+
+  skills      Skill[]  @relation("FiliereSkills")
+}
+
+//////////////////////////////
+// FILIERE BAC
+//////////////////////////////
+
+model FiliereBac {
+  id        Int     @id @default(autoincrement())
+
+  type      BacType
+  capacity  Int
+  lastScore Float?
+
+  filiereId Int
+  filiere   Filiere @relation(fields: [filiereId], references: [id])
+}
+
+model FiliereScore {
+  id        Int     @id @default(autoincrement())
+
+  bacType   BacType
+  lastScore Float?
+
+  filiereId Int
+  filiere   Filiere @relation(fields: [filiereId], references: [id])
+
+  @@unique([filiereId, bacType])
+}
+
+//////////////////////////////
+// ROADMAP
+//////////////////////////////
+
+model Roadmap {
+  id        Int      @id @default(autoincrement())
+
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  result    Json
+
+  createdAt DateTime @default(now())
+}
