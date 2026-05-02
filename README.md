@@ -50,7 +50,7 @@ An intelligent system that helps students choose their university path using Art
 ### AI & Data
 
 * **Ollama** – Local LLM server
-* **Mistral** – Language model
+* **gemma4:e2b** – Language model
 * **RAG (Retrieval-Augmented Generation)** – Combines AI with structured job data
 
 ---
@@ -97,8 +97,8 @@ npx prisma db seed
 #### 4. Install and run AI model
 
 ```bash
-ollama pull mistral
-ollama run mistral
+ollama pull gemma4:e2b
+ollama run gemma4:e2b
 ```
 
 ---

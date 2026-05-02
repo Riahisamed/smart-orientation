@@ -26,6 +26,8 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const [score, setScore] = useState<string>('');
   const [bac, setBac] = useState<BacType>('MATH');
   const [language, setLanguage] = useState<'fr' | 'ar'>('fr');
+  const [t, setT] = useState<Record<string, string> | null>(null);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chatStarted, setChatStarted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -92,6 +94,11 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         },
         body: JSON.stringify({
           message: inputMessage,
+          studentData: {
+            score: numScore,
+            bacType: bac,
+            language,
+          },
         }),
       });
 
@@ -167,10 +174,41 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     );
   };
 
-  const suggestedQuestions = {
-    fr: ['Quels programmes me convient le mieux?', 'Quels sont mes meilleures chances?', 'Que dois-je améliorer?'],
-    ar: ['ما هي أفضل برامج لي؟', 'ما هي فرصي الحقيقية؟', 'ماذا يجب أن أفعل الآن؟'],
-  };
+  const isArabic = language === 'ar';
+
+  useEffect(() => {
+    // fetch questions and i18n strings for quick questions from backend
+    const lang = language || 'fr';
+
+    // fetch a dedicated questions endpoint if available
+    (async () => {
+      try {
+        const qRes = await fetch(`http://localhost:3001/chatbot/questions`);
+        if (qRes.ok) {
+          const qJson = await qRes.json();
+          // expect { questions: string[] } or an array
+          if (Array.isArray(qJson)) {
+            setSuggestedQuestions(qJson as string[]);
+          } else if (Array.isArray(qJson.questions)) {
+            setSuggestedQuestions(qJson.questions as string[]);
+          }
+        }
+      } catch (err) {
+        // ignore, we'll fallback to i18n
+      }
+
+      try {
+        const r = await fetch(`http://localhost:3001/chatbot/i18n/${lang}`);
+        const json = await r.json();
+        setT(json);
+        if (!suggestedQuestions && json?.suggestedQuestions && Array.isArray(json.suggestedQuestions)) {
+          setSuggestedQuestions(json.suggestedQuestions as string[]);
+        }
+      } catch (e) {
+        setT(null);
+      }
+    })();
+  }, [language]);
 
   const containerClasses = hideHeader
     ? 'h-full bg-white dark:bg-gray-900 p-3'
@@ -280,12 +318,29 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
 
         <div className={messageWrapperClasses}>
           {!chatStarted ? (
-            <div className="text-center py-12">
+            <div className="mx-auto max-w-3xl py-12 text-center">
               <p className="text-gray-500 dark:text-gray-400 mb-6">
-                💬 No messages yet. Fill in your details and ask a question to get started!
+                {t?.empty_intro || '💬 No messages yet. Fill in your details and ask a question to get started!'}
               </p>
-              <div className="space-y-2">
-                {suggestedQuestions[language].map((q, idx) => (
+              <div className="space-y-3" dir={isArabic ? 'rtl' : 'ltr'}>
+                {(suggestedQuestions && Array.isArray(suggestedQuestions)
+                  ? suggestedQuestions
+                  : (
+                      t?.suggestedQuestions && Array.isArray(t.suggestedQuestions)
+                        ? t.suggestedQuestions
+                        : [
+                            language === 'ar'
+                              ? 'ما هي أفضل الاختصاصات المناسبة لي؟'
+                              : 'Quels programmes me conviennent le mieux ?',
+                            language === 'ar'
+                              ? 'ما هي فرص قبولي الحقيقية؟'
+                              : 'Quelles sont mes meilleures chances ?',
+                            language === 'ar'
+                              ? 'ماذا يجب أن أفعل لتحسين اختياري؟'
+                              : 'Que dois-je améliorer ?',
+                          ]
+                    )
+                ).map((q, idx) => (
                   <button
                     key={idx}
                     type="button"
@@ -293,9 +348,12 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
                       setInputMessage(q);
                       setTimeout(() => inputRef.current?.focus(), 100);
                     }}
-                    className="block w-full text-left p-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition text-sm text-gray-700 dark:text-gray-300"
+                    className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-5 py-4 text-start text-base font-semibold leading-relaxed text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 dark:hover:border-indigo-500 dark:hover:bg-gray-600"
                   >
-                    📌 {q}
+                    <span className="shrink-0 text-lg" aria-hidden="true">
+                      📌
+                    </span>
+                    <span className="flex-1">{q}</span>
                   </button>
                 ))}
               </div>
@@ -375,11 +433,12 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder={
-                language === 'ar'
+                isArabic
                   ? 'اسأل أي سؤال عن مسارك الجامعي...'
                   : 'Ask any question about your university path...'
               }
               disabled={isLoading || !score}
+              dir={isArabic ? 'rtl' : 'ltr'}
               className="flex-1"
             />
             <Button

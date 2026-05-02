@@ -34,7 +34,7 @@ Provide orientation advice:`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'mistral',
+        model: 'gemma4:e2b',
         prompt: prompt,
         stream: false,
       }),

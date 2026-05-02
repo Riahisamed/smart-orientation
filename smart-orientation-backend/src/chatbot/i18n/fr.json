@@ -1,0 +1,19 @@
+{
+  "quick_q_1": "Quels programmes me conviennent le mieux ?",
+  "quick_q_2": "Quelles sont mes meilleures chances ?",
+  "quick_q_3": "Que dois-je améliorer ?",
+  "empty_intro": "💬 No messages yet. Fill in your details and ask a question to get started!",
+  "start_title": "Start Your Orientation Journey",
+  "language_label": "Language",
+  "bac_label": "Bac Type",
+  "score_label": "Your Score"
+
+  ,
+  "suggestedQuestions": [
+    "Quels programmes me conviennent le mieux ?",
+    "Quelles sont mes meilleures chances ?",
+    "Que dois-je améliorer ?",
+    "Comment améliorer mes chances d'admission ?",
+    "Quel domaine correspond le mieux à mon bac ?"
+  ]
+}

@@ -30,6 +30,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [t, setT] = useState<Record<string, string> | null>(null)
   const [hasWelcomed, setHasWelcomed] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -42,6 +43,14 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    const lang = (studentData as any)?.language || 'ar'
+    fetch(`http://localhost:3001/chatbot/i18n/${lang}`)
+      .then((r) => r.json())
+      .then((json) => setT(json))
+      .catch(() => setT(null))
+  }, [studentData])
 
   // Auto-welcome when chatbot opens and student data is available
   useEffect(() => {
@@ -59,7 +68,8 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
     const fg = data.FG || 0
     const bacType = data.bacType || "غير محدد"
 
-    let msg = `👋 أهلا بيك يا ${data.name || "عزيزي"}!\n\n`
+    const greet = t?.greeting_default || 'صديقي،'
+    let msg = `👋 ${greet} ${data.name || ""}\n\n`
     msg += `🤖 أنا المساعد الذكي تاع التوجيه الجامعي، وهاذي المعطيات اللي عندي عليك:\n\n`
     msg += `📊 **معدلك في الباكا**: ${avg}\n`
     msg += `🎯 **معدلك في المناظرة (FG)**: ${fg}\n`
@@ -69,7 +79,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
       msg += `🔥 **شفت إليك اخترت ${data.selectedFiliere}**، خليني نفسرلك وضعيتك...\n\n`
       msg += generateFiliereAnalysis(data)
     } else {
-      msg += `💡 قلّي شنّا اللي تحب تدرس ولا شنّا السؤال اللي عندك， وانا نعاونك!\n\n`
+      msg += `${t?.welcome_intro || '💡 قلّي شنّا اللي تحب تدرس ولا شنّا السؤال اللي عندك، وانا نعاونك!'}\n\n`
       msg += `مثلا تقدر تسألني على:\n`
       msg += `• شنّا أحسن شعبة ليك حسب معدلك؟\n`
       msg += `• شنّا الـ skills اللي لازمك؟\n`
@@ -537,8 +547,8 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
         {messages.length === 0 && (
           <div className="text-center text-gray-400 py-10">
             <Bot size={48} className="mx-auto mb-4 opacity-50" />
-            <p>👋 أهلا بيك! أنا المساعد الذكي تاع التوجيه</p>
-            <p className="text-sm mt-2">قلّي شنّا اللي تحب تعرف؟</p>
+            <p>{t?.empty_intro || '👋 أهلا بيك! أنا المساعد الذكي تاع التوجيه'}</p>
+            <p className="text-sm mt-2">{t?.welcome_intro || 'قلّي شنّا اللي تحب تعرف؟'}</p>
           </div>
         )}
 
@@ -573,7 +583,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
           <div className="flex justify-start animate-[fadeIn_0.3s_ease-out]">
             <div className="bg-[#334155] p-3 rounded-2xl rounded-bl-md flex items-center gap-2">
               <Loader2 size={18} className="animate-spin text-blue-400" />
-              <span className="text-sm text-gray-300">جاري الكتابة...</span>
+              <span className="text-sm text-gray-300">{t?.loading_text || 'جاري الكتابة...'}</span>
             </div>
           </div>
         )}
@@ -588,7 +598,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="اكتب رسالتك..."
+            placeholder={t?.input_placeholder || 'اكتب رسالتك...'}
             className="flex-1 bg-[#0f172a] text-white px-4 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
             dir="auto"
           />

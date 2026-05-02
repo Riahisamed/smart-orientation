@@ -126,7 +126,7 @@ async function callOllama(prompt: string): Promise<string> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'mistral',
+        model: 'gemma4:e2b',
         prompt,
         stream: false,
       }),

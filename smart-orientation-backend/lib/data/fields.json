@@ -1,0 +1,436 @@
+{
+"fields": [
+{
+"field": "IT",
+"programs": [
+"العلوم المعلوماتية",
+"هندسة نظم المعلومات",
+"الإعلامية",
+"تقنيات الإعلامية",
+"تكنولوجيا المعلومات",
+"علوم وتقنيات المعلومات",
+"المعلومات والاتصالات",
+"تكنولوجيا المعلومات والاتصالات"
+],
+"possible_jobs": [
+"Software developer",
+"Data analyst",
+"IT support",
+"Systems administrator",
+"Web developer"
+],
+"required_skills": {
+"technical_skills": [
+"Programming (Python, JavaScript, Java, PHP)",
+"Databases and SQL",
+"Web development fundamentals",
+"Operating systems and networking",
+"Basic cybersecurity principles"
+],
+"soft_skills": [
+"Problem solving",
+"Analytical thinking",
+"Communication",
+"Teamwork",
+"Adaptability"
+],
+"tools_and_technologies": [
+"Git",
+"Linux",
+"VS Code",
+"MySQL",
+"Docker"
+]
+},
+"demand_in_tunisia": "Very high",
+"future_outlook": "Strong",
+"unemployment_risk": "Low to moderate",
+"recommended": true,
+"reason": "Strongest field in Tunisia with high demand locally and internationally."
+},
+{
+"field": "Engineering",
+"programs": [
+"الهندسة المدنية",
+"الهندسة الميكانيكية",
+"الهندسة الكهربائية",
+"الهندسة الصناعية",
+"الهندسة الطاقية",
+"الإلكتروميكانيك",
+"الهندسة اللوجستية",
+"هندسة النسيج",
+"الهندسة الحرارية",
+"الإلكترونيك والكهرتقنية"
+],
+"possible_jobs": [
+"Civil engineer",
+"Mechanical engineer",
+"Electrical engineer",
+"Industrial engineer",
+"Logistics engineer"
+],
+"required_skills": {
+"technical_skills": [
+"Applied mathematics",
+"Physics",
+"Technical analysis",
+"Engineering design",
+"Quality control"
+],
+"soft_skills": [
+"Problem solving",
+"Analytical thinking",
+"Teamwork",
+"Communication",
+"Project management"
+],
+"tools_and_technologies": [
+"AutoCAD",
+"SolidWorks",
+"MATLAB",
+"Excel",
+"Project management tools"
+]
+},
+"demand_in_tunisia": "High",
+"future_outlook": "Moderate to strong",
+"unemployment_risk": "Moderate",
+"recommended": true,
+"reason": "Engineering is linked to industry and infrastructure with stable demand."
+},
+{
+"field": "Medical / Health",
+"programs": [
+"الطب",
+"الصيدلة",
+"طب الأسنان",
+"التبنيج والإنعاش",
+"التصوير الطبي",
+"البيولوجيا الطبية",
+"العلاج الطبيعي",
+"التغذية البشرية",
+"علوم التمريض",
+"علوم التوليد"
+],
+"possible_jobs": [
+"Doctor",
+"Nurse",
+"Pharmacist",
+"Midwife",
+"Radiology technician"
+],
+"required_skills": {
+"technical_skills": [
+"Medical knowledge",
+"Anatomy and physiology",
+"Clinical procedures",
+"Patient care",
+"Medical ethics"
+],
+"soft_skills": [
+"Communication with patients",
+"Empathy",
+"Stress management",
+"Attention to detail",
+"Teamwork"
+],
+"tools_and_technologies": [
+"Medical equipment",
+"Hospital systems",
+"Electronic health records",
+"Lab tools",
+"Diagnostic tools"
+]
+},
+"demand_in_tunisia": "High",
+"future_outlook": "Strong",
+"unemployment_risk": "Low",
+"recommended": true,
+"reason": "Healthcare sector is essential and offers stable employment."
+},
+{
+"field": "Business / Management",
+"programs": [
+"إدارة الأعمال",
+"المحاسبة والمالية",
+"التجارة والتوزيع",
+"العلوم الاقتصادية",
+"علوم التصرف",
+"التجارة",
+"التسيير",
+"الاقتصاد",
+"الإدارة",
+"المحاسبة",
+"المالية",
+"إعلامية التصرف"
+],
+"possible_jobs": [
+"Accountant",
+"Financial analyst",
+"Sales representative",
+"Business developer",
+"Administrative officer"
+],
+"required_skills": {
+"technical_skills": [
+"Accounting",
+"Financial analysis",
+"Business management",
+"Sales strategies",
+"Marketing basics"
+],
+"soft_skills": [
+"Communication",
+"Negotiation",
+"Organization",
+"Problem solving",
+"Customer management"
+],
+"tools_and_technologies": [
+"Excel",
+"ERP systems",
+"CRM software",
+"PowerPoint",
+"Accounting software"
+]
+},
+"demand_in_tunisia": "High",
+"future_outlook": "Moderate",
+"unemployment_risk": "Moderate",
+"recommended": true,
+"reason": "Wide field with many job opportunities but high competition."
+},
+{
+"field": "Science",
+"programs": [
+"الكيمياء",
+"الفيزياء",
+"الرياضيات",
+"علوم الأحياء",
+"علوم الأرض"
+],
+"possible_jobs": [
+"Laboratory technician",
+"Research assistant",
+"Quality controller",
+"Teacher"
+],
+"required_skills": {
+"technical_skills": [
+"Mathematics",
+"Scientific analysis",
+"Laboratory techniques",
+"Research methods",
+"Data analysis"
+],
+"soft_skills": [
+"Critical thinking",
+"Attention to detail",
+"Problem solving",
+"Patience",
+"Analytical thinking"
+],
+"tools_and_technologies": [
+"Lab equipment",
+"Excel",
+"Statistical software",
+"Data tools",
+"Scientific software"
+]
+},
+"demand_in_tunisia": "Low",
+"future_outlook": "Average",
+"unemployment_risk": "High",
+"recommended": false,
+"reason": "Requires further specialization to access good opportunities."
+},
+{
+"field": "Languages",
+"programs": [
+"العربية",
+"الإنجليزية",
+"الفرنسية",
+"الإسبانية",
+"الإيطالية",
+"الألمانية",
+"الترجمة"
+],
+"possible_jobs": [
+"Translator",
+"Teacher",
+"Interpreter",
+"Content editor"
+],
+"required_skills": {
+"technical_skills": [
+"Translation",
+"Writing",
+"Grammar mastery",
+"Linguistics",
+"Content creation"
+],
+"soft_skills": [
+"Communication",
+"Listening",
+"Cultural awareness",
+"Public speaking",
+"Adaptability"
+],
+"tools_and_technologies": [
+"CAT tools",
+"MS Word",
+"Google Docs",
+"Translation software",
+"Content platforms"
+]
+},
+"demand_in_tunisia": "Moderate",
+"future_outlook": "Moderate",
+"unemployment_risk": "Moderate to high",
+"recommended": false,
+"reason": "Useful but less demanded compared to technical fields."
+},
+{
+"field": "Law",
+"programs": [
+"القانون",
+"القانون الاجتماعي"
+],
+"possible_jobs": [
+"Lawyer",
+"Legal advisor",
+"Compliance officer",
+"Public officer"
+],
+"required_skills": {
+"technical_skills": [
+"Legal research",
+"Law knowledge",
+"Case analysis",
+"Legal writing",
+"Regulation understanding"
+],
+"soft_skills": [
+"Argumentation",
+"Communication",
+"Negotiation",
+"Critical thinking",
+"Attention to detail"
+],
+"tools_and_technologies": [
+"Legal databases",
+"MS Word",
+"Documentation systems",
+"Case management tools",
+"Office tools"
+]
+},
+"demand_in_tunisia": "Moderate",
+"future_outlook": "Average",
+"unemployment_risk": "Moderate to high",
+"recommended": false,
+"reason": "Competitive field requiring specialization."
+},
+{
+"field": "Arts & Design",
+"programs": [
+"الفنون التشكيلية",
+"تصميم الفضاء",
+"تصميم المنتوج",
+"تصميم الصورة",
+"السينما والسمعي البصري",
+"الموسيقى",
+"المسرح"
+],
+"possible_jobs": [
+"Graphic designer",
+"Artist",
+"Video editor",
+"Interior designer"
+],
+"required_skills": {
+"technical_skills": [
+"Design principles",
+"Visual communication",
+"Multimedia production",
+"Creative design",
+"Art techniques"
+],
+"soft_skills": [
+"Creativity",
+"Presentation",
+"Time management",
+"Teamwork",
+"Adaptability"
+],
+"tools_and_technologies": [
+"Photoshop",
+"Illustrator",
+"Premiere Pro",
+"After Effects",
+"Figma"
+]
+},
+"demand_in_tunisia": "Low",
+"future_outlook": "Weak",
+"unemployment_risk": "High",
+"recommended": false,
+"reason": "Creative field with limited structured job opportunities."
+},
+{
+"field": "Social Sciences",
+"programs": [
+"علم الاجتماع",
+"علم النفس",
+"التاريخ",
+"الجغرافيا",
+"الأنثروبولوجيا"
+],
+"possible_jobs": [
+"Social worker",
+"Researcher",
+"Journalist",
+"Counselor"
+],
+"required_skills": {
+"technical_skills": [
+"Research methods",
+"Data analysis",
+"Social analysis",
+"Report writing",
+"Survey design"
+],
+"soft_skills": [
+"Empathy",
+"Communication",
+"Listening",
+"Critical thinking",
+"Problem solving"
+],
+"tools_and_technologies": [
+"SPSS",
+"Excel",
+"Survey tools",
+"Documentation tools",
+"Office tools"
+]
+},
+"demand_in_tunisia": "Low",
+"future_outlook": "Weak",
+"unemployment_risk": "High",
+"recommended": false,
+"reason": "Limited job opportunities mostly in public sector."
+}
+],
+"ranking": [
+{ "rank": 1, "field": "IT" },
+{ "rank": 2, "field": "Engineering" },
+{ "rank": 3, "field": "Medical / Health" },
+{ "rank": 4, "field": "Business / Management" },
+{ "rank": 5, "field": "Science" },
+{ "rank": 6, "field": "Languages" },
+{ "rank": 7, "field": "Law" },
+{ "rank": 8, "field": "Social Sciences" },
+{ "rank": 9, "field": "Arts & Design" }
+]
+}
