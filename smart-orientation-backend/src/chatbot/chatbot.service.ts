@@ -3,6 +3,9 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { OllamaConfigService } from '../common/services/ollama-config.service';
+import { AiService } from './ai.service';
+import { IntentDetectorService } from './intent-detector.service';
+import { SafetyRulesService } from './safety-rules.service';
 import fieldsJson from '../../lib/data/fields.json';
 
 type ConversationMessage = {
@@ -404,7 +407,12 @@ export class ChatbotService {
     ],
   };
 
-  constructor(private readonly ollamaConfig: OllamaConfigService) {
+  constructor(
+    private readonly ollamaConfig: OllamaConfigService,
+    private readonly aiService: AiService,
+    private readonly intentDetector: IntentDetectorService,
+    private readonly safetyRules: SafetyRulesService,
+  ) {
     this.loadLocalData();
   }
 
@@ -416,12 +424,28 @@ export class ChatbotService {
     const userMessage = message?.trim();
     if (!userMessage) return 'Message non valide';
 
-    console.log('studentData:', studentData);
+    // Extract any fresh student info from the incoming message (score, bacType, etc.)
+    const parsed = this.extractStudentDataFromMessage(userMessage);
 
+    // Merge parsed values into studentData, parsed values take precedence
+    studentData = {
+      ...(studentData || {}),
+      ...(parsed || {}),
+    };
+
+    // Log merged studentData for debugging; keep concise
+    this.logger.debug(`studentData (merged): score=${studentData.score} bacType=${studentData.bacType} parsed=${JSON.stringify(parsed)}`);
+
+    const routeIntent = this.intentDetector.detectIntent(userMessage);
     const intent = this.detectQueryIntent(userMessage);
     const effectiveScore =
       studentData?.score ?? studentData?.FG ?? studentData?.bacAverage;
     const lang = studentData?.language || detectLanguage(userMessage);
+    const memory = this.getRecentConversationMemory(conversationHistory);
+
+    if (routeIntent === 'general') {
+      return this.processGeneralMessage(userMessage, lang, memory);
+    }
 
     if (effectiveScore === undefined && intent === 'best_chances') {
       return lang === 'ar'
@@ -434,8 +458,6 @@ export class ChatbotService {
       ...(effectiveScore !== undefined ? { score: Number(effectiveScore) } : {}),
     };
 
-    void conversationHistory;
-
     try {
       const ragData = this.filterRagData(userMessage, studentData);
 
@@ -447,7 +469,12 @@ export class ChatbotService {
         userMessage,
         studentData,
       );
-      const prompt = this.buildFullPrompt(userMessage, ragContext, lang);
+      const prompt = this.buildFullPrompt(
+        userMessage,
+        ragContext,
+        lang,
+        memory,
+      );
       const config = this.ollamaConfig.getConfig();
 
       try {
@@ -468,7 +495,7 @@ export class ChatbotService {
 
         const aiResponse = response.data?.response?.trim();
 
-        if (aiResponse) {
+        if (this.safetyRules.isSafeResponse(aiResponse)) {
           return aiResponse;
         }
       } catch (aiError) {
@@ -489,6 +516,26 @@ export class ChatbotService {
       console.error('Process message error:', error);
       return 'Server error, try again';
     }
+  }
+
+  private async processGeneralMessage(
+    userMessage: string,
+    lang: 'fr' | 'ar',
+    memory: ConversationMessage[],
+  ): Promise<string> {
+    const result = await this.aiService.generate({
+      message: userMessage,
+      language: lang,
+      history: memory,
+      systemInstruction:
+        'Tu es un assistant IA generaliste utile, precis et concis. Reponds comme ChatGPT pour les questions generales.',
+      fallback:
+        lang === 'ar'
+          ? 'تعذر الاتصال بالمساعد الذكي حاليا. حاول مرة أخرى بعد قليل.'
+          : "Je n'arrive pas a joindre l'assistant IA pour le moment. Reessaie dans quelques instants.",
+    });
+
+    return result.text;
   }
 
   private loadLocalData(): void {
@@ -852,6 +899,54 @@ export class ChatbotService {
     return this.getBacAliasKey(bac) || bac || '';
   }
 
+  private extractStudentDataFromMessage(message: string): Partial<StudentData> {
+    const result: Partial<StudentData> = {};
+    if (!message) return result;
+
+    const msg = message.toLowerCase();
+
+    // Look for explicit score patterns: "score 120", "score:120", "my score is 120"
+    const scoreMatch = msg.match(/(?:score|sc|note|score[:\s]*is)\s*[:\s-]*?(\d{1,4})/i);
+    if (scoreMatch && scoreMatch[1]) {
+      const n = Number(scoreMatch[1]);
+      if (Number.isFinite(n)) result.score = n;
+    }
+
+    // Also allow formats like "120/200" or standalone "120" preceded by 'score' keywords
+    if (result.score === undefined) {
+      const slashMatch = msg.match(/(\d{1,3})\s*\/\s*\d{1,3}/);
+      if (slashMatch && slashMatch[1]) {
+        const n = Number(slashMatch[1]);
+        if (Number.isFinite(n)) result.score = n;
+      }
+    }
+
+    // bac type: look for 'bac <type>' or 'baccalaureat <type>'
+    const bacMatch = msg.match(/\b(?:bac|baccalaureat|baccalauréat)\s*[:\s-]*([\p{L}0-9-_]+)\b/iu);
+    if (bacMatch && bacMatch[1]) {
+      const raw = bacMatch[1].toString().trim();
+      const mapped = this.getBacAliasKey(raw);
+      if (mapped) result.bacType = mapped;
+      else result.bacType = raw;
+    }
+
+    // Also try to infer bac type from common words if not explicit
+    if (!result.bacType) {
+      for (const [key, aliases] of Object.entries(this.bacTypeAliases)) {
+        for (const alias of aliases) {
+          const norm = this.normalize(alias);
+          if (msg.includes(norm)) {
+            result.bacType = key;
+            break;
+          }
+        }
+        if (result.bacType) break;
+      }
+    }
+
+    return result;
+  }
+
   private getBacAliasKey(bac?: string): string {
     const normalizedBac = this.normalize(bac || '');
     if (!normalizedBac) return '';
@@ -1137,11 +1232,13 @@ export class ChatbotService {
     );
   }
 
-  private findJobRefinement(title: string): JobData | undefined {
+  private findJobRefinement(title: string, domain?: DomainData): JobData | undefined {
     const normalizedTitle = this.normalize(title);
 
-    return this.jobsData
-      .flatMap((domain) => domain.jobs)
+    const searchSpaces = domain ? [domain] : this.jobsData;
+
+    return searchSpaces
+      .flatMap((d) => d.jobs)
       .find((job) => this.normalize(job.title).includes(normalizedTitle));
   }
 
@@ -1404,28 +1501,74 @@ export class ChatbotService {
     studentData?: StudentData,
   ): RankedJob[] {
     if (!field?.possible_jobs?.length) return [];
+    // Find the most relevant jobs domain(s) for this field
+    const domains = this.findDomainsForField(field, message);
+    const chosenDomain = domains && domains.length > 0 ? domains[0].domain : undefined;
 
-    const domainForField: DomainData = {
-      domain: field.field,
-      keywords: [
-        field.field,
-        ...field.possible_jobs,
-        ...(this.domainAliases[this.getFieldAliasKey(field.field) || ''] || []),
-      ],
-      jobs: [],
-    };
+    // If we have a matching domain from jobs.json, prefer jobs from that domain
+    if (chosenDomain) {
+      // Collect jobs from the chosen domain that are linked to the field
+      const candidateJobs = chosenDomain.jobs
+        .filter((job) => this.isJobLinkedToField(job, field))
+        .map((job) => ({
+          ...job,
+          score: this.scoreJob(job, message, studentData, chosenDomain),
+        } as RankedJob));
 
+      // If we found candidate jobs in the domain, return top ones
+      if (candidateJobs.length > 0) {
+        const ranked = candidateJobs.sort((a, b) => b.score - a.score).slice(0, 3);
+        return this.applyJobReasons(ranked, message, field, studentData);
+      }
+
+      // Fallback: match field.possible_jobs against chosen domain jobs
+      const matchedFromDomain = field.possible_jobs
+        .map((title) => {
+          const refinement = this.findJobRefinement(title, chosenDomain);
+          const job: RankedJob = {
+            title,
+            skills: refinement?.skills || this.getJobIntentTerms(title),
+            unemployment_rate: refinement?.unemployment_rate ?? 50,
+            score: this.scoreJob(
+              {
+                title,
+                skills: refinement?.skills || this.getJobIntentTerms(title),
+                unemployment_rate: refinement?.unemployment_rate ?? 50,
+              },
+              message,
+              studentData,
+              chosenDomain,
+            ),
+          };
+
+          return job;
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+
+      if (matchedFromDomain.length > 0) {
+        return this.applyJobReasons(matchedFromDomain, message, field, studentData);
+      }
+    }
+
+    // Final fallback: use field.possible_jobs and global refinements
     const rankedJobs: RankedJob[] = field.possible_jobs
       .map((title) => {
+        const refinement = this.findJobRefinement(title);
         const job: RankedJob = {
           title,
-          skills: this.getJobIntentTerms(title),
-          unemployment_rate: 50,
+          skills: refinement?.skills || this.getJobIntentTerms(title),
+          unemployment_rate: refinement?.unemployment_rate ?? 50,
           score: this.scoreJob(
-            { title, skills: this.getJobIntentTerms(title) },
+            {
+              title,
+              skills: refinement?.skills || this.getJobIntentTerms(title),
+              unemployment_rate: refinement?.unemployment_rate ?? 50,
+            },
             message,
             studentData,
-            domainForField,
+            undefined,
           ),
         };
 
@@ -1772,17 +1915,29 @@ ${jobs.join('\n') || '- Aucun métier précis trouvé, proposer une comparaison 
   userMessage: string,
   ragContext: string,
   lang?: 'fr' | 'ar',
+  memory: ConversationMessage[] = [],
 ): string {
   const languageInstruction =
     lang === 'ar'
       ? 'اجب باللغة العربية أو الدارجة التونسية بأسلوب مهني وودود.'
       : 'Réponds uniquement en français clair. N’utilise pas l’anglais dans les titres, les raisons ou les conseils.';
 
+  const conversationMemory = this.buildConversationMemory(memory);
+  const safetyInstruction = this.safetyRules.getPromptRules(
+    'orientation',
+    lang || 'fr',
+  );
+
   return `
 Tu es un conseiller tunisien expert en orientation universitaire. Ton objectif est de donner une réponse complète, personnalisée et utile à partir du score, du bac, de la question de l'étudiant, et des données locales.
 
+${safetyInstruction}
+
 DONNÉES RAG (extraites de fields.json, guide.json et jobs.json):
 ${ragContext}
+
+HISTORIQUE RECENT (5 derniers messages maximum):
+${conversationMemory || 'Aucun historique recent.'}
 
 QUESTION DE L'ÉTUDIANT:
 ${userMessage}
@@ -2059,15 +2214,25 @@ Student: Bac ${studentData?.bacType || 'unknown'}, Score ${
     }`;
   }
 
-  private buildConversationMemory(
-    conversationHistory: ConversationMessage[],
-  ): string {
+  private getRecentConversationMemory(
+    conversationHistory: ConversationMessage[] = [],
+  ): ConversationMessage[] {
     return conversationHistory
       .filter(
         (item) =>
           item?.content && (item.role === 'user' || item.role === 'assistant'),
       )
-      .slice(-2)
+      .slice(-5)
+      .map((item) => ({
+        role: item.role,
+        content: item.content.trim(),
+      }));
+  }
+
+  private buildConversationMemory(
+    conversationHistory: ConversationMessage[],
+  ): string {
+    return this.getRecentConversationMemory(conversationHistory)
       .map((item) => `${item.role}: ${item.content}`)
       .join('\n');
   }

@@ -11,6 +11,337 @@ import { ChatMessage, BacType, ProgramClassification } from '@/lib/types/ai';
 
 const BAC_TYPES: BacType[] = ['MATH', 'SVT', 'ECO', 'TECH', 'INFO', 'LETTRES', 'SPORT'];
 
+type SuggestionIntent = 'orientation' | 'requirements' | 'career' | 'location' | 'comparison' | 'general';
+
+type SuggestionStudentData = {
+  score?: number;
+  bacType?: string;
+  language?: 'fr' | 'ar';
+};
+
+const normalizeText = (value = '') =>
+  value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+const normalizeBacType = (bacType?: string) => {
+  const normalized = normalizeText(bacType);
+
+  if (['info', 'informatique'].includes(normalized)) return 'INFO';
+  if (['math', 'maths', 'mathematiques'].includes(normalized)) return 'MATH';
+  if (['svt', 'svt scientifique', 'scientifique', 'science', 'sciences'].includes(normalized)) return 'SVT';
+  if (['eco', 'economie', 'gestion'].includes(normalized)) return 'ECO';
+  if (['lettres', 'letters', 'lettre', 'adab'].includes(normalized)) return 'LETTERS';
+  if (['tech', 'technique', 'technologie', 'technicien'].includes(normalized)) return 'TECHNIQUE';
+  if (['sport', 'sprot', 'eps'].includes(normalized)) return 'SPORT';
+
+  return (normalized.toUpperCase() as string) || 'MATH';
+};
+
+// Structured mapping of bac -> domain keywords (scalable and language-aware)
+const BAC_DOMAINS: Record<string, string[]> = {
+  INFO: ['informatique', 'programmation', 'réseaux'],
+  MATH: ['ingénierie', 'mathématiques', 'data science'],
+  SCIENCE: ['biologie', 'chimie', 'recherche'],
+  SVT: ['médecine', 'pharmacie', 'biologie'],
+  ECO: ['gestion', 'commerce', 'finance'],
+  LETTERS: ['langues', 'communication', 'enseignement'],
+  TECHNIQUE: ['industriel', 'mécanique', 'électrique'],
+  SPORT: ['sport', 'kinésithérapie', 'éducation physique'],
+};
+
+const detectSuggestionIntent = (message: string): SuggestionIntent => {
+  const text = normalizeText(message);
+
+  if (!text) return 'orientation';
+  if (/\b(win|ou|where|ville|fac|faculte|universite|na9ra|naqra|nokra)\b/.test(text)) return 'location';
+  if (/\b(job|metier|travail|carriere|debouche|avenir|salaire|khedma|5edma)\b/.test(text)) return 'career';
+  if (/\b(score|condition|conditions|admission|requis|moyenne|capacite)\b/.test(text)) return 'requirements';
+  if (/\b(compare|comparaison|difference|vs|entre|meilleur entre|a7sen bin)\b/.test(text)) return 'comparison';
+  if (/\b(chnoua|chniya|c quoi|cest quoi|what is|quest ce que)\b/.test(text)) return 'general';
+
+  return 'orientation';
+};
+
+type SuggestionTopic = {
+  id: string;
+  fr: string;
+  ar: string;
+  aliases: string[];
+  careerFr: string;
+  careerAr: string;
+  easyFr: string;
+  easyAr: string;
+};
+
+const TOPICS: SuggestionTopic[] = [
+  {
+    id: 'it',
+    fr: 'informatique',
+    ar: 'الإعلامية',
+    aliases: ['info', 'informatique', 'it', 'dev', 'programmation', 'programming', 'ai', 'ia', 'data', 'cyber'],
+    careerFr: 'programmation',
+    careerAr: 'البرمجة',
+    easyFr: 'IT accessibles',
+    easyAr: 'IT السهلة',
+  },
+  {
+    id: 'medical',
+    fr: 'medecine',
+    ar: 'الطب',
+    aliases: ['medecine', 'medecin', 'medicine', 'medical', 'sante', 'pharmacie', 'biologie', 'infirmier'],
+    careerFr: 'sante',
+    careerAr: 'الصحة',
+    easyFr: 'sante accessibles',
+    easyAr: 'الصحة المناسبة',
+  },
+  {
+    id: 'engineering',
+    fr: 'ingenierie',
+    ar: 'الهندسة',
+    aliases: ['ingenieur', 'ingenierie', 'genie', 'mecanique', 'electrique', 'civil', 'technique'],
+    careerFr: 'ingenierie',
+    careerAr: 'الهندسة',
+    easyFr: 'ingenierie accessibles',
+    easyAr: 'الهندسة المناسبة',
+  },
+  {
+    id: 'business',
+    fr: 'gestion',
+    ar: 'التصرف',
+    aliases: ['gestion', 'business', 'finance', 'marketing', 'commerce', 'comptabilite', 'economie'],
+    careerFr: 'gestion',
+    careerAr: 'التصرف',
+    easyFr: 'gestion accessibles',
+    easyAr: 'التصرف المناسب',
+  },
+  {
+    id: 'law',
+    fr: 'droit',
+    ar: 'القانون',
+    aliases: ['droit', 'law', 'juridique', 'avocat'],
+    careerFr: 'droit',
+    careerAr: 'القانون',
+    easyFr: 'droit accessibles',
+    easyAr: 'القانون المناسب',
+  },
+  {
+    id: 'languages',
+    fr: 'langues',
+    ar: 'اللغات',
+    aliases: ['langue', 'langues', 'francais', 'anglais', 'traduction', 'lettres', 'communication'],
+    careerFr: 'langues',
+    careerAr: 'اللغات',
+    easyFr: 'langues accessibles',
+    easyAr: 'اللغات المناسبة',
+  },
+  {
+    id: 'design',
+    fr: 'design',
+    ar: 'التصميم',
+    aliases: ['design', 'art', 'architecture', 'graphique', 'ux', 'ui'],
+    careerFr: 'design',
+    careerAr: 'التصميم',
+    easyFr: 'design accessibles',
+    easyAr: 'التصميم المناسب',
+  },
+];
+
+// Create a mapping from BAC_DOMAINS keywords to our internal TOPICS ids.
+const mapDomainKeywordsToTopicIds = (keywords: string[]) => {
+  const ids: string[] = [];
+  for (const k of keywords) {
+    const key = normalizeText(k);
+    const found = TOPICS.find((t) =>
+      t.aliases.some((a) => normalizeText(a) === key) || normalizeText(t.fr) === key || normalizeText(t.id) === key,
+    );
+    if (found && !ids.includes(found.id)) ids.push(found.id);
+  }
+  return ids;
+};
+
+const BAC_TOPIC_IDS: Record<string, string[]> = Object.fromEntries(
+  Object.entries(BAC_DOMAINS).map(([bac, keywords]) => [bac, mapDomainKeywordsToTopicIds(keywords)]),
+) as Record<string, string[]>;
+
+let suggestionRotation = 0;
+
+const topicById = (id?: string) => TOPICS.find((topic) => topic.id === id) || TOPICS[0];
+
+const detectTopicFromMessage = (message: string) => {
+  const text = normalizeText(message);
+  if (!text) return undefined;
+
+  return TOPICS.find((topic) =>
+    topic.aliases.some((alias) => new RegExp(`(^|\\s)${alias}($|\\s)`).test(text) || text.includes(alias)),
+  );
+};
+
+const getScoreTone = (score?: number) => {
+  if (typeof score !== 'number' || !Number.isFinite(score)) return 'unknown';
+  if (score < 100) return 'careful';
+  if (score < 140) return 'balanced';
+  return 'ambitious';
+};
+
+const rotateSuggestions = (items: string[], seed: string) => {
+  const unique = Array.from(new Set(items.filter(Boolean)));
+  if (unique.length <= 4) return unique.slice(0, 4);
+
+  suggestionRotation = (suggestionRotation + 1) % 997;
+  const seedValue = Array.from(seed).reduce((total, char) => total + char.charCodeAt(0), 0);
+  const start = (seedValue + suggestionRotation + Math.floor(Date.now() / 30000)) % unique.length;
+  return [...unique.slice(start), ...unique.slice(0, start)].slice(0, 4);
+};
+
+const shuffle = <T,>(arr: T[]) => {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+export function generateSuggestions(
+  studentData: SuggestionStudentData,
+  lastMessage = '',
+  intent?: SuggestionIntent,
+): string[] {
+  const language = studentData.language || 'fr';
+  const isArabic = language === 'ar';
+  const bac = normalizeBacType(studentData.bacType);
+  const score = typeof studentData.score === 'number' && Number.isFinite(studentData.score)
+    ? studentData.score
+    : undefined;
+  const resolvedIntent = intent || detectSuggestionIntent(lastMessage);
+  const messageTopic = detectTopicFromMessage(lastMessage);
+  // Build prioritized topics list: start from bacType domains, allow user override via messageTopic
+  const bacTopicIds = BAC_TOPIC_IDS[bac] || BAC_TOPIC_IDS.MATH || [];
+  const bacTopics = bacTopicIds.map(topicById).filter(Boolean);
+
+  const userMentionedTopic = messageTopic;
+
+  // Allow IT only if bac is INFO or user explicitly mentions IT
+  const allowedIt = bac === 'INFO' || (userMentionedTopic && userMentionedTopic.id === 'it');
+
+  // Compose final prioritized topic list
+  const finalTopics: any[] = [];
+  if (userMentionedTopic) finalTopics.push(userMentionedTopic);
+  for (const t of bacTopics) {
+    if (!finalTopics.find((ft) => ft.id === t.id)) finalTopics.push(t);
+  }
+
+  // Filter out IT when not allowed to avoid IT bias
+  const filteredTopics = finalTopics.filter((t) => (t.id === 'it' ? allowedIt : true));
+
+  // fallback: if nothing matches, choose first non-it topics from TOPICS
+  const fallbackTopics = TOPICS.filter((t) => t.id !== 'it');
+  const topics = filteredTopics.length > 0 ? filteredTopics : fallbackTopics.slice(0, 3);
+
+  const primary = topics[0] || topicById(bacTopicIds[0]);
+  const secondary = topics[1] || topics[0] || topicById(bacTopicIds[1]);
+  const scoreText = score ? `${score}` : isArabic ? 'مجموعي' : 'mon score';
+  const scoreTone = getScoreTone(score);
+  const field = isArabic ? primary?.ar : primary?.fr;
+  const secondField = isArabic ? secondary?.ar : secondary?.fr;
+  const career = isArabic ? primary?.careerAr : primary?.careerFr;
+  const easyField = isArabic ? primary?.easyAr : primary?.easyFr;
+
+  const intentSuggestions: Record<SuggestionIntent, string[]> = {
+    orientation: isArabic
+      ? [`رتب لي أفضل اختيارات ${field}`, `ما الاختيار الأذكى لبكالوريا ${bac}؟`]
+      : [`Classe mes meilleurs choix en ${field}`, `Le choix le plus malin pour Bac ${bac} ?`],
+    requirements: isArabic
+      ? [`ما آخر مجموع مطلوب في ${field}؟`, `هل مجموع ${scoreText} كاف للقبول؟`]
+      : [`Quel dernier score pour ${field} ?`, `${scoreText} suffit pour etre admis ?`],
+    career: isArabic
+      ? [`ما المهارات المطلوبة في ${career}؟`, `كيف أبني مسارا مهنيا في ${field}؟`]
+      : [`Quelles competences pour ${career} ?`, `Comment construire un parcours en ${field} ?`],
+    location: isArabic
+      ? [`أين أدرس ${field} في تونس؟`, `ما المؤسسات الأقرب في ${field}؟`]
+      : [`Ou etudier ${field} en Tunisie ?`, `Quelles institutions proches en ${field} ?`],
+    comparison: isArabic
+      ? [`أي اختيار أكثر أمانا: ${field} أم ${secondField}؟`, `قارن الآفاق والقبول`]
+      : [`Quel choix est plus sur: ${field} ou ${secondField} ?`, `Compare admission et debouches`],
+    general: isArabic
+      ? [`اشرح لي ${field} ببساطة`, `هل هذا المجال مناسب لشخصيتي؟`]
+      : [`Explique ${field} simplement`, `Ce domaine colle a mon profil ?`],
+  };
+
+  const scoreAware = isArabic
+    ? {
+        careful: [`ما الاختيارات الآمنة لمجموع ${scoreText}؟`, `هل توجد بدائل أسهل من ${field}؟`],
+        balanced: [`ما الاختيارات الممكنة لمجموع ${scoreText}؟`, `كيف أوازن بين الأمان والطموح؟`],
+        ambitious: [`ما الاختيارات القوية التي أستطيع استهدافها؟`, `هل أضع ${field} كاختيار أول؟`],
+        unknown: [`ما المعلومات التي تحتاجها لتوجيهي؟`, `كيف أختار حسب نوع البكالوريا؟`],
+      }
+    : {
+        careful: [`Quels choix surs avec ${scoreText} ?`, `Des alternatives plus faciles que ${field} ?`],
+        balanced: [`Quels choix jouables avec ${scoreText} ?`, `Comment equilibrer securite et ambition ?`],
+        ambitious: [`Quels choix ambitieux viser ?`, `${field} en premier choix ?`],
+        unknown: [`Quelles infos te donner pour m orienter ?`, `Comment choisir selon mon bac ?`],
+      };
+
+  // Build concise, personalized suggestions (3-4) following priority: bac -> user intent -> score
+  const suggestionsOut: string[] = [];
+
+  // 1) Intent-focused personalized prompt (primary domain)
+  if (resolvedIntent && field) {
+    if (isArabic) suggestionsOut.push(`هل ${field} مناسبة لمعدلك ${scoreText}؟`);
+    else suggestionsOut.push(`${field} me convient avec ${scoreText} ?`);
+  }
+
+  // 2) User override mention — only if different from primary
+  if (userMentionedTopic && userMentionedTopic.id !== primary.id) {
+    const t = userMentionedTopic;
+    suggestionsOut.push(isArabic ? `ماذا عن ${t.ar} لمجل ${scoreText}؟` : `What about ${t.fr} with ${scoreText} ?`);
+  }
+
+  // 3) Score-aware recommendations (limit 2)
+  const toneSamples = scoreAware[scoreTone as keyof typeof scoreAware] || [];
+  suggestionsOut.push(...toneSamples.slice(0, 2));
+
+  // 4) Comparison: only if primary and secondary domains are meaningfully different
+  const normPrimary = normalizeText(field || '');
+  const normSecond = normalizeText(secondField || '');
+  if (field && secondField && normPrimary && normSecond && normPrimary !== normSecond) {
+    suggestionsOut.push(isArabic ? `قارن ${field} و${secondField}` : `Compare ${field} and ${secondField}`);
+  }
+
+  // 5) Post-process: clean, validate, dedupe, and limit
+  const cleaned = suggestionsOut
+    .map((s) => (s || '').trim())
+    .filter((s) => s.length > 3)
+    .filter((s) => !/^\s*$/.test(s));
+
+  // remove suggestions that are trivial repeats like "medecine medecine"
+  const meaningful = cleaned.filter((s) => {
+    const words = s.split(/\s+/).map((w) => normalizeText(w.replace(/[^\p{L}\p{N}]+/gu, ''))).filter(Boolean);
+    const uniqueWords = new Set(words);
+    return uniqueWords.size > 1 || words.join(' ').length > 8;
+  });
+
+  // deduplicate normalized strings while preserving order
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const s of meaningful) {
+    const key = normalizeText(s);
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(s);
+    }
+  }
+
+  // shuffle a bit for variety, then rotate using existing mechanism
+  const shuffled = rotateSuggestions(shuffle(unique), `${lastMessage}-${bac}-${scoreText}-${resolvedIntent}-${language}`);
+
+  // final cap to 4 (UI expects 3-4)
+  return shuffled.slice(0, 4);
+}
+
 interface MessageWithPrograms extends ChatMessage {
   programs?: ProgramClassification;
 }
@@ -27,11 +358,29 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const [bac, setBac] = useState<BacType>('MATH');
   const [language, setLanguage] = useState<'fr' | 'ar'>('fr');
   const [t, setT] = useState<Record<string, string> | null>(null);
-  const [suggestedQuestions, setSuggestedQuestions] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chatStarted, setChatStarted] = useState(false);
+  const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastUserMessage = [...messages].reverse().find((msg) => msg.role === 'user')?.content || '';
+  const suggestionContext = chatStarted ? lastUserMessage : inputMessage;
+  const suggestionIntent = detectSuggestionIntent(suggestionContext);
+
+  useEffect(() => {
+    const result = generateSuggestions(
+      {
+        score: parseFloat(score),
+        bacType: bac,
+        language,
+      },
+      suggestionContext,
+      suggestionIntent,
+    );
+
+    setSuggestions(result);
+  }, [bac, language, score, suggestionContext, suggestionIntent, suggestionRefreshKey]);
 
   useEffect(() => {
     const savedMessages = localStorage.getItem('chatHistory');
@@ -81,6 +430,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    setSuggestionRefreshKey((prev) => prev + 1);
     setInputMessage('');
     setIsLoading(true);
 
@@ -177,33 +527,14 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const isArabic = language === 'ar';
 
   useEffect(() => {
-    // fetch questions and i18n strings for quick questions from backend
+    // fetch i18n strings from backend; suggestions are generated locally
     const lang = language || 'fr';
 
-    // fetch a dedicated questions endpoint if available
     (async () => {
-      try {
-        const qRes = await fetch(`http://localhost:3001/chatbot/questions`);
-        if (qRes.ok) {
-          const qJson = await qRes.json();
-          // expect { questions: string[] } or an array
-          if (Array.isArray(qJson)) {
-            setSuggestedQuestions(qJson as string[]);
-          } else if (Array.isArray(qJson.questions)) {
-            setSuggestedQuestions(qJson.questions as string[]);
-          }
-        }
-      } catch (err) {
-        // ignore, we'll fallback to i18n
-      }
-
       try {
         const r = await fetch(`http://localhost:3001/chatbot/i18n/${lang}`);
         const json = await r.json();
         setT(json);
-        if (!suggestedQuestions && json?.suggestedQuestions && Array.isArray(json.suggestedQuestions)) {
-          setSuggestedQuestions(json.suggestedQuestions as string[]);
-        }
       } catch (e) {
         setT(null);
       }
@@ -323,24 +654,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
                 {t?.empty_intro || '💬 No messages yet. Fill in your details and ask a question to get started!'}
               </p>
               <div className="space-y-3" dir={isArabic ? 'rtl' : 'ltr'}>
-                {(suggestedQuestions && Array.isArray(suggestedQuestions)
-                  ? suggestedQuestions
-                  : (
-                      t?.suggestedQuestions && Array.isArray(t.suggestedQuestions)
-                        ? t.suggestedQuestions
-                        : [
-                            language === 'ar'
-                              ? 'ما هي أفضل الاختصاصات المناسبة لي؟'
-                              : 'Quels programmes me conviennent le mieux ?',
-                            language === 'ar'
-                              ? 'ما هي فرص قبولي الحقيقية؟'
-                              : 'Quelles sont mes meilleures chances ?',
-                            language === 'ar'
-                              ? 'ماذا يجب أن أفعل لتحسين اختياري؟'
-                              : 'Que dois-je améliorer ?',
-                          ]
-                    )
-                ).map((q, idx) => (
+                {suggestions.map((q, idx) => (
                   <button
                     key={idx}
                     type="button"
@@ -425,6 +739,23 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
           {chatStarted && !score && (
             <div className="text-xs text-red-600 dark:text-red-400">
               ⚠️ Please fill in your score above before sending a message
+            </div>
+          )}
+          {chatStarted && !isLoading && (
+            <div className="flex flex-wrap gap-2" dir={isArabic ? 'rtl' : 'ltr'}>
+              {suggestions.map((q, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setInputMessage(q);
+                    setTimeout(() => inputRef.current?.focus(), 100);
+                  }}
+                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 dark:hover:border-indigo-500 dark:hover:bg-gray-600"
+                >
+                  {q}
+                </button>
+              ))}
             </div>
           )}
           <div className="flex gap-2">
