@@ -17,7 +17,16 @@ type SuggestionStudentData = {
   score?: number;
   bacType?: string;
   language?: 'fr' | 'ar';
+  interest?: string;
 };
+
+const INTEREST_OPTIONS = [
+  { id: 'tech', label: 'Tech', icon: '💻', arLabel: 'تكنولوجيا' },
+  { id: 'health', label: 'Santé', icon: '🏥', arLabel: 'صحة' },
+  { id: 'business', label: 'Business', icon: '💼', arLabel: 'أعمال' },
+  { id: 'sport', label: 'Sport', icon: '⚽', arLabel: 'رياضة' },
+  { id: 'art', label: 'Art', icon: '🎨', arLabel: 'فن' },
+] as const;
 
 const normalizeText = (value = '') =>
   value
@@ -208,138 +217,128 @@ const shuffle = <T,>(arr: T[]) => {
 export function generateSuggestions(
   studentData: SuggestionStudentData,
   lastMessage = '',
-  intent?: SuggestionIntent,
+  _intent?: SuggestionIntent,
 ): string[] {
   const language = studentData.language || 'fr';
   const isArabic = language === 'ar';
-  const bac = normalizeBacType(studentData.bacType);
-  const score = typeof studentData.score === 'number' && Number.isFinite(studentData.score)
-    ? studentData.score
-    : undefined;
-  const resolvedIntent = intent || detectSuggestionIntent(lastMessage);
-  const messageTopic = detectTopicFromMessage(lastMessage);
-  // Build prioritized topics list: start from bacType domains, allow user override via messageTopic
-  const bacTopicIds = BAC_TOPIC_IDS[bac] || BAC_TOPIC_IDS.MATH || [];
-  const bacTopics = bacTopicIds.map(topicById).filter(Boolean);
+  const bac = studentData.bacType || 'MATH';
+  const score = studentData.score;
 
-  const userMentionedTopic = messageTopic;
-
-  // Allow IT only if bac is INFO or user explicitly mentions IT
-  const allowedIt = bac === 'INFO' || (userMentionedTopic && userMentionedTopic.id === 'it');
-
-  // Compose final prioritized topic list
-  const finalTopics: any[] = [];
-  if (userMentionedTopic) finalTopics.push(userMentionedTopic);
-  for (const t of bacTopics) {
-    if (!finalTopics.find((ft) => ft.id === t.id)) finalTopics.push(t);
-  }
-
-  // Filter out IT when not allowed to avoid IT bias
-  const filteredTopics = finalTopics.filter((t) => (t.id === 'it' ? allowedIt : true));
-
-  // fallback: if nothing matches, choose first non-it topics from TOPICS
-  const fallbackTopics = TOPICS.filter((t) => t.id !== 'it');
-  const topics = filteredTopics.length > 0 ? filteredTopics : fallbackTopics.slice(0, 3);
-
-  const primary = topics[0] || topicById(bacTopicIds[0]);
-  const secondary = topics[1] || topics[0] || topicById(bacTopicIds[1]);
-  const scoreText = score ? `${score}` : isArabic ? 'مجموعي' : 'mon score';
-  const scoreTone = getScoreTone(score);
-  const field = isArabic ? primary?.ar : primary?.fr;
-  const secondField = isArabic ? secondary?.ar : secondary?.fr;
-  const career = isArabic ? primary?.careerAr : primary?.careerFr;
-  const easyField = isArabic ? primary?.easyAr : primary?.easyFr;
-
-  const intentSuggestions: Record<SuggestionIntent, string[]> = {
-    orientation: isArabic
-      ? [`رتب لي أفضل اختيارات ${field}`, `ما الاختيار الأذكى لبكالوريا ${bac}؟`]
-      : [`Classe mes meilleurs choix en ${field}`, `Le choix le plus malin pour Bac ${bac} ?`],
-    requirements: isArabic
-      ? [`ما آخر مجموع مطلوب في ${field}؟`, `هل مجموع ${scoreText} كاف للقبول؟`]
-      : [`Quel dernier score pour ${field} ?`, `${scoreText} suffit pour etre admis ?`],
-    career: isArabic
-      ? [`ما المهارات المطلوبة في ${career}؟`, `كيف أبني مسارا مهنيا في ${field}؟`]
-      : [`Quelles competences pour ${career} ?`, `Comment construire un parcours en ${field} ?`],
-    location: isArabic
-      ? [`أين أدرس ${field} في تونس؟`, `ما المؤسسات الأقرب في ${field}؟`]
-      : [`Ou etudier ${field} en Tunisie ?`, `Quelles institutions proches en ${field} ?`],
-    comparison: isArabic
-      ? [`أي اختيار أكثر أمانا: ${field} أم ${secondField}؟`, `قارن الآفاق والقبول`]
-      : [`Quel choix est plus sur: ${field} ou ${secondField} ?`, `Compare admission et debouches`],
-    general: isArabic
-      ? [`اشرح لي ${field} ببساطة`, `هل هذا المجال مناسب لشخصيتي؟`]
-      : [`Explique ${field} simplement`, `Ce domaine colle a mon profil ?`],
+  // SMART interest-based suggestion database
+  const SMART_SUGGESTIONS: Record<string, Record<string, { fr: string[]; ar: string[] }>> = {
+    // PRIMARY: Interest-based suggestions
+    sport: {
+      default: {
+        fr: ['Quelles sont les meilleures filières sport ?', 'Est-ce que kiné est adapté pour moi ?', 'Quelles opportunités de travail en sport ?'],
+        ar: ['ما هي أفضل تخصصات الرياضة؟', 'هل kiné مناسبة لي؟', 'ما فرص العمل في sport؟'],
+      },
+    },
+    tech: {
+      default: {
+        fr: ['Comment entrer en informatique ?', "Quelle est la filière IT la plus accessible ?", 'Est-ce que programmation me convient ?'],
+        ar: ['كيفاش ندخل informatique؟', 'شنوّا أسهل تخصص IT؟', 'هل programmation مناسبة لي؟'],
+      },
+    },
+    health: {
+      default: {
+        fr: ['Quelle filière santé avec mon score ?', 'Médecine ou pharmacie ?', 'Quels débouchés en santé ?'],
+        ar: ['أي تخصص صحة مع مجموعي؟', 'طب أو صيدلة؟', 'ما فرص العمل في الصحة؟'],
+      },
+    },
+    business: {
+      default: {
+        fr: ['Quelle école de commerce choisir ?', 'Gestion ou finance ?', 'Carrière en business ?'],
+        ar: ['أي مدرسة تجارة نختار؟', 'تصرف أو مالية؟', 'مسار مهني في الأعمال؟'],
+      },
+    },
+    art: {
+      default: {
+        fr: ['Quelles études artistiques ?', 'Design ou architecture ?', 'Carrière dans les arts ?'],
+        ar: ['أي دراسات فنية؟', 'تصميم أو عمارة؟', 'مهنة في الفنون؟'],
+      },
+    },
+    // SECONDARY: BacType-based suggestions (when no interest)
+    SVT: {
+      default: {
+        fr: ['Quelle filière médicale avec mon score ?', 'Médecine ou pharmacie ?', 'Quels débouchés en santé ?'],
+        ar: ['أي تخصص طبي مع مجموعي؟', 'طب أو صيدلة؟', 'ما فرص العمل في الصحة؟'],
+      },
+    },
+    MATH: {
+      default: {
+        fr: ['Quelle école d ingénieur avec mon score ?', 'Math ou informatique ?', 'Quels débouchés en ingénierie ?'],
+        ar: ['أي مدرسة مهندسين مع مجموعي؟', 'رياضيات أو إعلامية؟', 'ما فرص العمل في الهندسة؟'],
+      },
+    },
+    ECO: {
+      default: {
+        fr: ['Quelle école de commerce choisir ?', 'Gestion ou finance ?', 'Carrière en économie ?'],
+        ar: ['أي مدرسة تجارة نختار؟', 'تصرف أو مالية؟', 'مسار مهني في الاقتصاد؟'],
+      },
+    },
+    INFO: {
+      default: {
+        fr: ['Quelle filière informatique choisir ?', 'Développement ou réseaux ?', 'Carrière dans la tech ?'],
+        ar: ['أي تخصص إعلامية نختار؟', 'تطوير أو شبكات؟', 'مسار مهني في التقنية؟'],
+      },
+    },
+    TECH: {
+      default: {
+        fr: ['Quelle école d ingénieur choisir ?', 'Génie civil ou mécanique ?', 'Carrière en technologie ?'],
+        ar: ['أي مدرسة مهندسين نختار؟', 'هندسة مدنية أو ميكانيك؟', 'مسار مهني في التكنولوجيا؟'],
+      },
+    },
+    LETTRES: {
+      default: {
+        fr: ['Quelles études littéraires choisir ?', 'Langues ou droit ?', 'Carrière dans les lettres ?'],
+        ar: ['أي دراسات أدبية نختار؟', 'لغات أو قانون؟', 'مسار مهني في الآداب؟'],
+      },
+    },
+    SPORT: {
+      default: {
+        fr: ['Quelles filières sportives choisir ?', 'Kiné ou éducation physique ?', 'Carrière dans le sport ?'],
+        ar: ['أي تخصصات رياضية نختار؟', 'kiné أو تربية بدنية؟', 'مسار مهني في الرياضة؟'],
+      },
+    },
   };
 
-  const scoreAware = isArabic
-    ? {
-        careful: [`ما الاختيارات الآمنة لمجموع ${scoreText}؟`, `هل توجد بدائل أسهل من ${field}؟`],
-        balanced: [`ما الاختيارات الممكنة لمجموع ${scoreText}؟`, `كيف أوازن بين الأمان والطموح؟`],
-        ambitious: [`ما الاختيارات القوية التي أستطيع استهدافها؟`, `هل أضع ${field} كاختيار أول؟`],
-        unknown: [`ما المعلومات التي تحتاجها لتوجيهي؟`, `كيف أختار حسب نوع البكالوريا؟`],
-      }
-    : {
-        careful: [`Quels choix surs avec ${scoreText} ?`, `Des alternatives plus faciles que ${field} ?`],
-        balanced: [`Quels choix jouables avec ${scoreText} ?`, `Comment equilibrer securite et ambition ?`],
-        ambitious: [`Quels choix ambitieux viser ?`, `${field} en premier choix ?`],
-        unknown: [`Quelles infos te donner pour m orienter ?`, `Comment choisir selon mon bac ?`],
-      };
+  // Get suggestions: PRIMARY = interest, SECONDARY = bacType
+  let suggestions: string[] = [];
 
-  // Build concise, personalized suggestions (3-4) following priority: bac -> user intent -> score
-  const suggestionsOut: string[] = [];
-
-  // 1) Intent-focused personalized prompt (primary domain)
-  if (resolvedIntent && field) {
-    if (isArabic) suggestionsOut.push(`هل ${field} مناسبة لمعدلك ${scoreText}؟`);
-    else suggestionsOut.push(`${field} me convient avec ${scoreText} ?`);
+  if (studentData.interest && SMART_SUGGESTIONS[studentData.interest]) {
+    // Use interest-based suggestions (PRIMARY)
+    const suggs = isArabic
+      ? SMART_SUGGESTIONS[studentData.interest].default.ar
+      : SMART_SUGGESTIONS[studentData.interest].default.fr;
+    suggestions = [...suggs];
+  } else if (bac && SMART_SUGGESTIONS[bac]) {
+    // Fallback to bacType-based suggestions (SECONDARY)
+    const suggs = isArabic
+      ? SMART_SUGGESTIONS[bac].default.ar
+      : SMART_SUGGESTIONS[bac].default.fr;
+    suggestions = [...suggs];
+  } else {
+    // Generic fallback
+    suggestions = isArabic
+      ? ['ما هي أفضل الاختيارات لي؟', 'شنوّا المناسب لمعدلي؟', 'ما فرص العمل في تونس؟']
+      : ['Quels sont mes meilleurs choix ?', 'Quelle filière pour mon score ?', 'Quelles opportunités en Tunisie ?'];
   }
 
-  // 2) User override mention — only if different from primary
-  if (userMentionedTopic && userMentionedTopic.id !== primary.id) {
-    const t = userMentionedTopic;
-    suggestionsOut.push(isArabic ? `ماذا عن ${t.ar} لمجل ${scoreText}؟` : `What about ${t.fr} with ${scoreText} ?`);
+  // Add score context if available
+  if (score && score > 0) {
+    const scoreSuffix = isArabic
+      ? ` (معدلي: ${score})`
+      : ` (mon score: ${score})`;
+    suggestions = suggestions.map(s => s + scoreSuffix);
   }
 
-  // 3) Score-aware recommendations (limit 2)
-  const toneSamples = scoreAware[scoreTone as keyof typeof scoreAware] || [];
-  suggestionsOut.push(...toneSamples.slice(0, 2));
+  // Clean: remove duplicates, empty, limit to 3
+  const cleaned = suggestions
+    .filter((s, i, arr) => arr.indexOf(s) === i) // dedupe
+    .filter((s) => s.trim().length > 0) // no empty
+    .slice(0, 3); // max 3
 
-  // 4) Comparison: only if primary and secondary domains are meaningfully different
-  const normPrimary = normalizeText(field || '');
-  const normSecond = normalizeText(secondField || '');
-  if (field && secondField && normPrimary && normSecond && normPrimary !== normSecond) {
-    suggestionsOut.push(isArabic ? `قارن ${field} و${secondField}` : `Compare ${field} and ${secondField}`);
-  }
-
-  // 5) Post-process: clean, validate, dedupe, and limit
-  const cleaned = suggestionsOut
-    .map((s) => (s || '').trim())
-    .filter((s) => s.length > 3)
-    .filter((s) => !/^\s*$/.test(s));
-
-  // remove suggestions that are trivial repeats like "medecine medecine"
-  const meaningful = cleaned.filter((s) => {
-    const words = s.split(/\s+/).map((w) => normalizeText(w.replace(/[^\p{L}\p{N}]+/gu, ''))).filter(Boolean);
-    const uniqueWords = new Set(words);
-    return uniqueWords.size > 1 || words.join(' ').length > 8;
-  });
-
-  // deduplicate normalized strings while preserving order
-  const seen = new Set<string>();
-  const unique: string[] = [];
-  for (const s of meaningful) {
-    const key = normalizeText(s);
-    if (!seen.has(key)) {
-      seen.add(key);
-      unique.push(s);
-    }
-  }
-
-  // shuffle a bit for variety, then rotate using existing mechanism
-  const shuffled = rotateSuggestions(shuffle(unique), `${lastMessage}-${bac}-${scoreText}-${resolvedIntent}-${language}`);
-
-  // final cap to 4 (UI expects 3-4)
-  return shuffled.slice(0, 4);
+  return cleaned;
 }
 
 interface MessageWithPrograms extends ChatMessage {
@@ -357,6 +356,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const [score, setScore] = useState<string>('');
   const [bac, setBac] = useState<BacType>('MATH');
   const [language, setLanguage] = useState<'fr' | 'ar'>('fr');
+  const [interest, setInterest] = useState<string>('');
   const [t, setT] = useState<Record<string, string> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chatStarted, setChatStarted] = useState(false);
@@ -374,16 +374,23 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         score: parseFloat(score),
         bacType: bac,
         language,
+        interest,
       },
       suggestionContext,
       suggestionIntent,
     );
 
     setSuggestions(result);
-  }, [bac, language, score, suggestionContext, suggestionIntent, suggestionRefreshKey]);
+  }, [bac, language, score, interest, suggestionContext, suggestionIntent, suggestionRefreshKey]);
 
   useEffect(() => {
     const savedMessages = localStorage.getItem('chatHistory');
+    const savedInterest = localStorage.getItem('chatInterest');
+
+    if (savedInterest) {
+      setInterest(savedInterest);
+    }
+
     if (savedMessages) {
       try {
         const parsed = JSON.parse(savedMessages) as MessageWithPrograms[];
@@ -448,6 +455,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
             score: numScore,
             bacType: bac,
             language,
+            interest, // Update component
           },
         }),
       });
@@ -487,10 +495,18 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     }
   };
 
+  useEffect(() => {
+    if (interest) {
+      localStorage.setItem('chatInterest', interest);
+    }
+  }, [interest]);
+
   const clearChat = () => {
     setMessages([]);
     localStorage.removeItem('chatHistory');
+    localStorage.removeItem('chatInterest');
     setChatStarted(false);
+    setInterest('');
   };
 
   const renderProgramCategory = (
@@ -630,6 +646,39 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
                   </Select>
                 </div>
               </div>
+
+              {/* Interest Selector */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Label className="font-semibold block mb-3">
+                  {isArabic ? 'ما هي اهتماماتك؟ (اختياري)' : 'What are your interests? (optional)'}
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {INTEREST_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setInterest(interest === option.id ? '' : option.id)}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all duration-200 ${
+                        interest === option.id
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-indigo-300 hover:bg-indigo-50/50'
+                      }`}
+                    >
+                      <span className="text-2xl">{option.icon}</span>
+                      <span className="text-sm font-medium">
+                        {isArabic ? option.arLabel : option.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {interest && (
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2">
+                    {isArabic
+                      ? `تم اختيار: ${INTEREST_OPTIONS.find((o) => o.id === interest)?.arLabel}`
+                      : `Selected: ${INTEREST_OPTIONS.find((o) => o.id === interest)?.label}`}
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
@@ -638,7 +687,9 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
           <div className="flex gap-2 items-end bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex-1">
               <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                Score: {score} • Bac: {bac} • {language === 'ar' ? '🇹🇳' : '🇫🇷'}
+                Score: {score} • Bac: {bac}
+                {interest && ` • Interest: ${INTEREST_OPTIONS.find((o) => o.id === interest)?.label || interest}`}
+                {' • '} {language === 'ar' ? '🇹🇳' : '🇫🇷'}
               </Label>
             </div>
             <Button variant="outline" size="sm" onClick={clearChat}>

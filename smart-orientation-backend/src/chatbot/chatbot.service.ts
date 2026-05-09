@@ -1,421 +1,411 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
+import { OllamaConfigService } from '../common/services/ollama-config.service';
+import { AiMemory, AiService } from './ai.service';
+import { IntentDetectorService, AdvisorIntent } from './intent-detector.service';
+import { SafetyRulesService } from './safety-rules.service';
+import { ResponseBuilderService } from './response-builder.service';
+import { FIELD_ALIASES, RagService, FieldData, JobData, RankedProgram, detectField, normalizeText } from './rag.service';
+import { MemoryService, ConversationMemory } from './memory.service';
+import { FollowupGenerator } from '../ai/generators/followup.generator';
 import * as fs from 'fs';
 import * as path from 'path';
-import { OllamaConfigService } from '../common/services/ollama-config.service';
-import { AiService } from './ai.service';
-import { IntentDetectorService } from './intent-detector.service';
-import { SafetyRulesService } from './safety-rules.service';
-import fieldsJson from '../../lib/data/fields.json';
 
-type ConversationMessage = {
-  role: 'user' | 'assistant';
-  content: string;
-};
+type ConversationMessage = { role: 'user' | 'assistant'; content: string };
 
 type StudentData = {
   name?: string;
   bacType?: string;
+  score?: number;
   bacAverage?: number;
   FG?: number;
-  score?: number;
   selectedFiliere?: string;
   language?: 'fr' | 'ar';
+  interest?: string;
+  difficulty?: 'easy' | 'challenge';
+  preferredDomain?: string;
+  refinedDomain?: string;
+  journeyStep?: 'identify_interest' | 'refine_domain' | 'suggest_options' | 'give_decision';
+  rejectedDomains?: string[];
+  lastQuestionsAsked?: string[];
 };
 
-type JobData = {
-  title: string;
-  skills: string[];
-  unemployment_rate?: number;
-};
-
-type DomainData = {
-  domain: string;
-  keywords: string[];
-  jobs: JobData[];
-};
-
-type GuideBacType = {
-  type: string;
-  capacity?: number;
-  lastScore?: number | null;
-};
-
-type GuideProgram = {
-  code: string;
-  name?: string;
-  program: string;
-  institution: string;
-  domain?: string;
-  formula?: string;
-  bacTypes?: GuideBacType[];
-};
-
-type RankedJob = JobData & {
-  score: number;
-  reason?: string;
-};
-
-type RankedGuideProgram = GuideProgram & {
-  score: number;
-  matchingBac?: GuideBacType;
-};
-
-type RankedDomain = {
-  domain: DomainData;
-  score: number;
-  matchedTerms: string[];
-};
-
-type FilteredRagData = {
-  domain?: RankedDomain;
-  field?: FieldData;
-  jobs: RankedJob[];
-  programs: RankedGuideProgram[];
-  difficulty?: 'safe' | 'risky' | 'hard';
-  intent?: QueryIntent;
-};
-
-type QueryIntent =
-  | 'best_chances'
-  | 'location'
-  | 'field_explanation'
-  | 'requirements'
-  | 'best_choice'
-  | 'career'
-  | 'general';
-
-type FieldData = {
+type FullFieldData = {
   field: string;
+  keywords?: string[];
   programs: string[];
   possible_jobs: string[];
-  required_skills?: {
-    technical_skills?: string[];
-    soft_skills?: string[];
-    tools_and_technologies?: string[];
-  };
-  demand_in_tunisia?: string;
-  future_outlook?: string;
-  unemployment_risk?: string;
-  recommended?: boolean;
-  reason?: string;
-};
-
-type RankingData = {
-  rank: number;
-  field: string;
-};
-
-type FieldsJsonData = {
-  fields: FieldData[];
-  ranking: RankingData[];
+  required_skills: { technical_skills: string[]; soft_skills: string[]; tools_and_technologies: string[]; };
+  demand_in_tunisia: string;
+  future_outlook: string;
+  unemployment_risk: string;
+  recommended: boolean;
+  reason: string;
 };
 
 function detectLanguage(message: string): 'fr' | 'ar' {
-  if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(message)) {
-    return 'ar';
-  }
-  return 'fr';
+  return /[\u0600-\u06FF]/.test(message) ? 'ar' : 'fr';
 }
+
+// ============================================================
+// PART 1 — cleanMessage()
+// Removes: (mon score: xxx), question marks, punctuation,
+// extra whitespace
+// IMPORTANT: DOES NOT strip accents (preserves é, è, ê, etc.)
+// ============================================================
+function cleanMessage(raw: string): string {
+  let m = raw
+    // Remove complete (mon score: XXX) / (score:xxx) etc
+    .replace(/\([^)]*(?:score|note|moyenne|معدل)[^)]*\)/gi, '')
+    // Remove incomplete score parens: (mon sc...), (mon scor... etc
+    .replace(/\([^)]*mon\s+sc[^)]*/gi, ' ')
+    .replace(/\([^)]*sc[^)]*/gi, ' ')
+    // Remove standalone score/number patterns
+    .replace(/(?:score|note|moyenne|معدل)\s*[:\\-]*\s*\d*/gi, '')
+    // Remove question marks
+    .replace(/[؟?]+/g, '')
+    // Remove punctuation but KEEP accented letters (Unicode letters)
+    .replace(/[^\p{L}\p{N}\s\/\\-]/gu, ' ')
+    // Normalize whitespace
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+  // NOTE: Do NOT strip accents — keep génie, mécanique, ingénieur intact
+
+  return m;
+}
+
+// ============================================================
+// DOMAIN KEYWORDS — clean, non-overlapping, priority-ready
+// HEALTH keywords are comprehensive to prevent falling through
+// LETTRES/LANGUAGES are separate from ART
+// ENGINEERING has BOTH accented and unaccented forms
+// ============================================================
+const DOMAIN_KEYWORDS: Record<string, string[]> = {
+  HEALTH: [
+    'medecine', 'médecine', 'médecin', 'medical', 'sante', 'santé',
+    'pharmacie', 'pharmacien', 'infirmier', 'infirmiere', 'soignant',
+    'biologie', 'biologiste', 'paramedical', 'paramédical',
+    'dentaire', 'dentiste', 'veterinaire', 'vétérinaire',
+    'hopital', 'hôpital', 'clinique', 'diagnostic', 'chirurgie',
+    'anesthesie', 'radiologie', 'laboratoire medical',
+    'kine', 'kiné', 'kinésithérapeute', 'kinesitherapeute', 'kinésithérapie',
+    'soins', 'patient', 'urgences', 'sang', 'traitement',
+    'طب', 'صحة', 'صيدلة', 'تمريض', 'بيولوجيا', 'علاج', 'مستشفى',
+    'ممرض', 'طبيب', 'صيدلي', 'مخبر', 'تشخيص',
+  ],
+  ENGINEERING: [
+    'ingenieur', 'ingénieur', 'ingenierie', 'ingénierie',
+    'genie', 'génie',
+    'mecanique', 'mécanique',
+    'electrique', 'électrique', 'electronique', 'électronique',
+    'civil', 'industriel', 'production', 'maintenance',
+    'electromecanique', 'électromécanique',
+    'mines', 'ponts', 'geophysique', 'géophysique',
+    'petrole', 'pétrole', 'energie', 'énergie',
+    'automatique', 'robotique',
+    'technologie', 'technology',
+    'هندسة', 'مهندس', 'مدني', 'ميكانيك', 'كهرباء',
+    'إلكترونيك', 'طاقة', 'إنتاج', 'صناعي',
+  ],
+  SPORT: [
+    'sport', 'sportif', 'sportive', 'coaching', 'coach',
+    'fitness', 'activite physique', 'activité physique',
+    'eps', 'education physique', 'éducation physique',
+    'entrainement', 'entraînement', 'performance sportive',
+    'athlete', 'athlète', 'football', 'basket', 'tennis',
+    'رياضة', 'الرياضة', 'بدنية', 'تربية بدنية', 'تدريب', 'مدرب',
+    'علاج طبيعي', 'لياقة',
+  ],
+  LAW: [
+    'droit', 'avocat', 'juridique', 'justice', 'notaire',
+    'magistrat', 'juge', 'tribunal', 'juriste', 'legal',
+    'contentieux', 'loi', 'reglementation', 'réglementation',
+    'compliance', 'قانون', 'عدالة', 'محامي', 'قاضي', 'محكمة',
+    'قضاء', 'موثق', 'عدلي',
+  ],
+  LANGUAGES: [
+    'lettres', 'lettre', 'litterature', 'littérature',
+    'langues', 'langue', 'traduction', 'traducteur',
+    'communication', 'journalisme', 'journaliste',
+    'redacteur', 'rédacteur', 'redaction', 'rédaction',
+    'enseignement', 'enseignant', 'professeur',
+    'anglais', 'francais', 'français', 'arabe',
+    'espagnol', 'allemand', 'italien',
+    'adab', 'litteraire', 'littéraire',
+    'ترجمة', 'لغات', 'لغة', 'أدب', 'آداب', 'كتابة', 'تحرير',
+    'إعلام', 'صحافة', 'اتصال',
+  ],
+  BUSINESS: [
+    'business', 'gestion', 'commerce', 'finance', 'marketing',
+    'economie', 'économie', 'comptabilité', 'comptabilite',
+    'management', 'administration', 'ressources humaines', 'rh',
+    'logistique', 'supply chain', 'audit', 'banque', 'assurance',
+    'bourse', 'trading', 'entrepreneur', 'startup', 'investissement',
+    'إدارة', 'تجارة', 'أعمال', 'محاسبة', 'مالية', 'تصرف',
+    'اقتصاد', 'تسويق', 'استثمار', 'بنوك',
+  ],
+  ART: [
+    'art', 'arts', 'design', 'architecture', 'architecte',
+    'musique', 'theatre', 'theâtre', 'cinema', 'cinéma',
+    'arts plastiques', 'dessin', 'graphisme', 'graphique',
+    'mode', 'fashion', 'decoration', 'décoration',
+    'création', 'creation', 'artistique',
+    'فن', 'فنون', 'تصميم', 'عمارة', 'موسيقى',
+    'سينما', 'مسرح', 'جرافيك', 'أزياء',
+  ],
+  IT: [
+    'informatique', 'informatia', 'dev', 'développement',
+    'programmation', 'software', 'logiciel',
+    'reseau', 'réseau', 'reseaux', 'réseaux',
+    'cyber', 'cybersecurite', 'cybersécurité',
+    'data', 'ia', 'ai', 'intelligence artificielle',
+    'web', 'mobile', 'cloud', 'devops', 'fullstack',
+    'frontend', 'backend', 'back-end', 'front-end',
+    'code', 'coding', 'programmeur', 'developer',
+    'it', 'tech',
+    'برمجة', 'اعلامية', 'معلوماتية', 'شبكات',
+    'أمن معلومات', 'تطوير', 'حاسوب', 'تكنولوجيا',
+    'ذكاء اصطناعي', 'بيانات',
+  ],
+};
+
+// ============================================================
+// PART 4 — detectDomain() with PRIORITY ORDER
+// Priority: HEALTH > ENGINEERING > SPORT > LAW > LANGUAGES
+//           > BUSINESS > ART > IT
+// ENGINEERING is BEFORE SPORT to fix "école d'ingénieur" bug
+// First match wins (stop on first found)
+// ============================================================
+function detectDomain(message?: string): string | null {
+  if (!message) return null;
+  const aliasField = detectField(message);
+  if (aliasField) {
+    const map: Record<string, string> = {
+      engineering: 'ENGINEERING',
+      it: 'IT',
+      health: 'HEALTH',
+      sport: 'SPORT',
+      art: 'ART',
+      business: 'BUSINESS',
+    };
+    return map[aliasField];
+  }
+
+  const cleaned = cleanMessage(message);
+  if (!cleaned) return null;
+
+  const normalized = cleaned;
+
+  const PRIORITY_ORDER = [
+    'HEALTH', 'ENGINEERING', 'SPORT', 'LAW', 'LANGUAGES',
+    'BUSINESS', 'ART', 'IT',
+  ];
+
+  for (const domain of PRIORITY_ORDER) {
+    const keywords = DOMAIN_KEYWORDS[domain] || [];
+    for (const kw of keywords) {
+      const normalizedKw = kw
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '');
+      // Also normalize the message for comparison to handle mixed accented/unaccented
+      const normalizedMsg = normalized
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '');
+      if (normalizedMsg.includes(normalizedKw)) {
+        return domain;
+      }
+    }
+  }
+
+  return null;
+}
+
+/** Map domain key to interest string — FIXED so LANGUAGES ≠ 'art' */
+function domainToInterest(domain: string | null): string | undefined {
+  if (!domain) return undefined;
+  const map: Record<string, string> = {
+    HEALTH: 'health',
+    SPORT: 'sport',
+    LAW: 'law',
+    LANGUAGES: 'languages',
+    BUSINESS: 'business',
+    ENGINEERING: 'engineering',
+    ART: 'art',
+    IT: 'tech',
+    SCIENCE: 'science',
+    EDUCATION: 'education',
+    MEDIA: 'media',
+    ECONOMY: 'business',
+  };
+  return map[domain];
+}
+
+/** Map domain key to human-readable label */
+function domainLabel(domain: string | null, lang: 'fr' | 'ar'): string {
+  if (!domain) return '';
+  const fr: Record<string, string> = {
+    HEALTH: 'Santé / Médical',
+    SPORT: 'Sport',
+    LAW: 'Droit',
+    LANGUAGES: 'Lettres / Langues',
+    BUSINESS: 'Business / Gestion',
+    ENGINEERING: 'Génie / Ingénierie',
+    ART: 'Arts & Design',
+    IT: 'Informatique / Tech',
+    SCIENCE: 'Sciences',
+    EDUCATION: 'Éducation',
+    MEDIA: 'Média',
+    ECONOMY: 'Économie',
+  };
+  const ar: Record<string, string> = {
+    HEALTH: 'صحة / طب',
+    SPORT: 'رياضة',
+    LAW: 'قانون',
+    LANGUAGES: 'آداب / لغات',
+    BUSINESS: 'إدارة / أعمال',
+    ENGINEERING: 'هندسة',
+    ART: 'فنون / تصميم',
+    IT: 'إعلامية / تكنولوجيا',
+    SCIENCE: 'علوم',
+    EDUCATION: 'تربية / تعليم',
+    MEDIA: 'إعلام',
+    ECONOMY: 'اقتصاد',
+  };
+  return lang === 'ar' ? (ar[domain] || domain) : (fr[domain] || domain);
+}
+
+/** Domain-specific follow-up questions */
+const DOMAIN_FOLLOWUPS: Record<string, { ar: string[]; fr: string[] }> = {
+  ART: {
+    ar: ['تحب design graphique ولا architecture؟', 'تحب création ولا multimédia؟', 'تحب رسم ولا تصميم رقمي؟'],
+    fr: ['Tu préfères design graphique ou architecture ?', 'Création ou multimédia ?', 'Dessin ou design numérique ?'],
+  },
+  SPORT: {
+    ar: ['تحب coaching ولا rééducation؟', 'تحب منافسة ولا fitness؟', 'تدريب فردي ولا جماعي؟'],
+    fr: ['Tu préfères coaching ou rééducation ?', 'Compétition ou fitness ?', 'Entraînement individuel ou collectif ?'],
+  },
+  HEALTH: {
+    ar: ['تحب contact مع المرضى ولا مختبر؟', 'تحب médecine ولا paramédical؟', 'مستشفى ولا عيادة خاصة؟'],
+    fr: ['Tu préfères contact patients ou laboratoire ?', 'Médecine ou médical ?', 'Hôpital ou clinique privée ?'],
+  },
+  IT: {
+    ar: ['تحب web ولا data؟', 'تحب frontend ولا backend؟', 'تطوير ولا أمن معلومات؟'],
+    fr: ['Tu préfères web ou data ?', 'Frontend ou backend ?', 'Développement ou cybersécurité ?'],
+  },
+  LAW: {
+    ar: ['تحب avocat ولا مستشار قانوني؟', 'تحب قانون خاص ولا عام؟', 'محامي ولا موثق؟'],
+    fr: ['Tu préfères avocat ou conseiller juridique ?', 'Droit privé ou public ?', 'Avocat ou notaire ?'],
+  },
+  LANGUAGES: {
+    ar: ['تحب ترجمة ولا تدريس؟', 'تحب صحافة ولا تحرير؟', 'كتابة ولا تواصل؟'],
+    fr: ['Tu préfères traduction ou enseignement ?', 'Journalisme ou rédaction ?', 'Communication ou littérature ?'],
+  },
+  BUSINESS: {
+    ar: ['تحب finance ولا marketing؟', 'تحب محاسبة ولا إدارة؟', 'شركة خاصة ولا بنك؟'],
+    fr: ['Tu préfères finance ou marketing ?', 'Comptabilité ou gestion ?', 'Entreprise privée ou banque ?'],
+  },
+  ENGINEERING: {
+    ar: ['تحب mécanique ولا électrique؟', 'تحب مدني ولا صناعي؟', 'تصميم ولا صيانة؟'],
+    fr: ['Tu préfères mécanique ou électrique ?', 'Civil ou industriel ?', 'Conception ou maintenance ?'],
+  },
+  EDUCATION: {
+    ar: ['تحب تدريس أساسي ولا ثانوي؟', 'تكوين مهني ولا أكاديمي؟', 'تعليم عمومي ولا خصوصي؟'],
+    fr: ['Tu préfères enseignement primaire ou secondaire ?', 'Formation pro ou académique ?', 'Public ou privé ?'],
+  },
+  SCIENCE: {
+    ar: ['تحب كيمياء ولا بيولوجيا؟', 'تحب بحث ولا تطبيق؟', 'مخبر ولا ميدان؟'],
+    fr: ['Tu préfères chimie ou biologie ?', 'Recherche ou application ?', 'Laboratoire ou terrain ?'],
+  },
+  MEDIA: {
+    ar: ['تحب صحافة ولا إعلام سمعي بصري؟', 'إذاعة ولا تلفزة؟', 'كتابة ولا إنتاج؟'],
+    fr: ['Tu préfères journalisme ou audiovisuel ?', 'Radio ou télévision ?', 'Écriture ou production ?'],
+  },
+  ECONOMY: {
+    ar: ['تحب بنوك ولا أسواق مالية؟', 'تحب اقتصاد كلي ولا جزئي؟', 'تحليل ولا استثمار؟'],
+    fr: ['Tu préfères banque ou marchés financiers ?', 'Macroéconomie ou microéconomie ?', 'Analyse ou investissement ?'],
+  },
+};
+
+// ============================================================
+// SANTIZED JOBS per domain (hardcoded fallbacks)
+// LETTRES jobs MUST be: traducteur, enseignant, journaliste, etc.
+// HEALTH jobs MUST be medical only
+// ENGINEERING jobs MUST be civil, mécanique, électrique, industriel
+// ============================================================
+const DOMAIN_JOBS: Record<string, { title: string; description: string; skills: string[]; demand: string; unemployment_rate: number }[]> = {
+  LANGUAGES: [
+    { title: 'Traducteur', description: 'Traduction de textes entre plusieurs langues', skills: ['Maîtrise linguistique', 'Rédaction', 'Recherche terminologique'], demand: 'Medium', unemployment_rate: 8 },
+    { title: 'Enseignant', description: 'Enseignement des langues dans des établissements scolaires ou centres', skills: ['Pédagogie', 'Communication', 'Patience'], demand: 'High', unemployment_rate: 5 },
+    { title: 'Journaliste', description: 'Rédaction d\'articles, reportages et enquêtes pour médias', skills: ['Rédaction', 'Investigation', 'Communication'], demand: 'Medium', unemployment_rate: 10 },
+    { title: 'Rédacteur', description: 'Création de contenu écrit pour divers supports', skills: ['Écriture', 'Synthèse', 'Créativité'], demand: 'Medium', unemployment_rate: 7 },
+    { title: 'Chargé de communication', description: 'Gestion de la communication interne et externe', skills: ['Communication', 'Rédaction', 'Relation publique'], demand: 'High', unemployment_rate: 6 },
+  ],
+  HEALTH: [
+    { title: 'Médecin', description: 'Soins médicaux et diagnostic des patients', skills: ['Diagnostic', 'Soins cliniques', 'Empathie'], demand: 'High', unemployment_rate: 2 },
+    { title: 'Pharmacien', description: 'Délivrance de médicaments et conseil pharmaceutique', skills: ['Pharmacologie', 'Conseil', 'Gestion'], demand: 'High', unemployment_rate: 3 },
+    { title: 'Infirmier', description: 'Soins infirmiers et suivi des patients', skills: ['Soins', 'Suivi patient', 'Travail d\'équipe'], demand: 'High', unemployment_rate: 4 },
+    { title: 'Biologiste médical', description: 'Analyses biologiques en laboratoire', skills: ['Analyse', 'Biologie', 'Précision'], demand: 'Medium', unemployment_rate: 5 },
+    { title: 'Kinésithérapeute', description: 'Rééducation fonctionnelle des patients', skills: ['Rééducation', 'Anatomie', 'Suivi'], demand: 'High', unemployment_rate: 4 },
+  ],
+  ENGINEERING: [
+    { title: 'Ingénieur mécanique', description: 'Conception et maintenance de systèmes mécaniques', skills: ['Mécanique', 'CAO/DAO', 'Résistance des matériaux'], demand: 'High', unemployment_rate: 3 },
+    { title: 'Ingénieur civil', description: 'Conception et réalisation d\'infrastructures (ponts, routes, bâtiments)', skills: ['Génie civil', 'BTP', 'Calcul de structures'], demand: 'High', unemployment_rate: 3 },
+    { title: 'Ingénieur électrique', description: 'Conception de systèmes électriques et électroniques', skills: ['Électrotechnique', 'Automatisme', 'Schémas électriques'], demand: 'High', unemployment_rate: 4 },
+    { title: 'Ingénieur industriel', description: 'Optimisation des processus de production en industrie', skills: ['Gestion de production', 'Lean manufacturing', 'Supply chain'], demand: 'High', unemployment_rate: 4 },
+    { title: 'Ingénieur en maintenance', description: 'Gestion et optimisation de la maintenance industrielle', skills: ['Maintenance', 'GMAO', 'Fiabilité'], demand: 'Medium', unemployment_rate: 5 },
+  ],
+};
 
 @Injectable()
 export class ChatbotService {
   private readonly logger = new Logger(ChatbotService.name);
-  private jobsData: DomainData[] = [];
-  private guideData: GuideProgram[] = [];
-  private fieldsData = (fieldsJson as FieldsJsonData).fields;
-  private ranking = (fieldsJson as FieldsJsonData).ranking;
-
-  private readonly domainAliases: Record<string, string[]> = {
-    informatique: [
-      'dev',
-      'developpement',
-      'developpeur',
-      'developer',
-      'coding',
-      'code',
-      'programming',
-      'programmation',
-      'informatique',
-      'info',
-      'software',
-      'full stack',
-      'frontend',
-      'backend',
-      'web',
-      'mobile',
-      'data',
-      'ia',
-      'ai',
-      'cyber',
-      'reseau',
-      'systeme',
-      'cloud',
-      'database',
-      'base de donnees',
-      'برمجة',
-      'مطور',
-      'اعلامية',
-      'إعلامية',
-    ],
-    gestion: [
-      'gestion',
-      'comptabilite',
-      'finance',
-      'audit',
-      'rh',
-      'business',
-      'management',
-      'economie',
-      'تصرف',
-      'محاسبة',
-      'مالية',
-      'اقتصاد',
-    ],
-    ingenierie: [
-      'ingenieur',
-      'ingenierie',
-      'mecanique',
-      'genie civil',
-      'electrique',
-      'production',
-      'chimie',
-      'هندسة',
-      'مهندس',
-      'ميكانيك',
-      'كهرباء',
-    ],
-    commerce: [
-      'commerce',
-      'marketing',
-      'vente',
-      'communication',
-      'publicite',
-      'brand',
-      'تجارة',
-      'تسويق',
-      'اتصال',
-      'بيع',
-    ],
-    sante: [
-      'sante',
-      'medecin',
-      'medecine',
-      'medicine',
-      'health',
-      'infirmier',
-      'pharmacie',
-      'biologie',
-      'medical',
-      'طب',
-      'صيدلة',
-      'تمريض',
-      'صحة',
-      'بيولوجيا',
-    ],
-    education: [
-      'education',
-      'enseignement',
-      'professeur',
-      'formation',
-      'pedagogie',
-      'تعليم',
-      'تربية',
-      'استاذ',
-    ],
-    tourisme: [
-      'tourisme',
-      'hotel',
-      'restauration',
-      'guide',
-      'accueil',
-      'سياحة',
-      'فندقة',
-      'مطاعم',
-    ],
-    droit: [
-      'droit',
-      'justice',
-      'avocat',
-      'notaire',
-      'administration',
-      'legal',
-      'قانون',
-      'حقوق',
-      'محاماة',
-      'ادارة',
-    ],
-    energie: [
-      'energie',
-      'electricite',
-      'environnement',
-      'ecologie',
-      'renouvelable',
-      'eau',
-      'طاقة',
-      'بيئة',
-      'مياه',
-    ],
-    logistique: [
-      'logistique',
-      'transport',
-      'supply chain',
-      'distribution',
-      'douane',
-      'import',
-      'export',
-      'نقل',
-      'لوجستيك',
-      'توريد',
-    ],
-    arts: [
-      'art',
-      'design',
-      'graphique',
-      'architecture',
-      'creation',
-      'mode',
-      'ux',
-      'ui',
-      'فنون',
-      'تصميم',
-      'معمار',
-    ],
-    languages: [
-      'langue',
-      'langues',
-      'francais',
-      'anglais',
-      'traduction',
-      'translator',
-      'interpreter',
-      'philosophie',
-      'histoire',
-      'lettres',
-      'آداب',
-      'لغات',
-      'ترجمة',
-      'فلسفة',
-      'تاريخ',
-    ],
-  };
-
-  private readonly guideHints: Record<string, string[]> = {
-    informatique: [
-      'informatique',
-      'info',
-      'اعلامية',
-      'إعلامية',
-      'تكنولوجيا',
-      'اتصالات',
-      'شبكات',
-      'برمجيات',
-    ],
-    gestion: ['gestion', 'comptabilite', 'تصرف', 'اقتصاد', 'محاسبة', 'مالية'],
-    ingenierie: [
-      'ingenierie',
-      'genie',
-      'هندسة',
-      'مهندس',
-      'تقنيات',
-      'ميكانيك',
-      'كهرباء',
-    ],
-    commerce: ['commerce', 'marketing', 'تجارة', 'تسويق', 'اتصال'],
-    sante: ['sante', 'pharmacie', 'طب', 'صيدلة', 'صحة', 'تمريض', 'بيولوجيا'],
-    education: ['education', 'enseignement', 'تربية', 'تعليم', 'اساتذة'],
-    tourisme: ['tourisme', 'hotel', 'سياحة', 'فندقة'],
-    droit: ['droit', 'administration', 'حقوق', 'قانون', 'ادارة'],
-    energie: ['energie', 'environnement', 'طاقة', 'بيئة', 'مياه'],
-    logistique: ['logistique', 'transport', 'نقل', 'لوجستيك'],
-    arts: ['art', 'design', 'فنون', 'تصميم', 'معمار'],
-    languages: [
-      'langues',
-      'language',
-      'francais',
-      'anglais',
-      'traduction',
-      'translation',
-      'philosophie',
-      'histoire',
-      'آداب',
-      'لغات',
-      'ترجمة',
-    ],
-  };
-
-  private readonly bacTypeAliases: Record<string, string[]> = {
-    math: [
-      'math',
-      'maths',
-      'mathematique',
-      'mathematiques',
-      'رياضيات',
-      'Ų±ŁŲ§Ų¶ŁŲ§ŲŖ',
-      'ļŗ­ļ»³ļŗˇļŗæļ»´ļŗˇļŗ•',
-    ],
-    svt: [
-      'svt',
-      'science',
-      'sciences',
-      'sc',
-      'علوم تجريبية',
-      'Ų¹Ł„ŁŁ… ŲŖŲ¬Ų±ŁŲØŁŲ©',
-      'ļ»‹ļ» ļ»®ļ» ļŗ—ļŗ ļŗ®ļ»³ļŗ’ļ»´ļŗ”',
-    ],
-    eco: [
-      'eco',
-      'economie',
-      'economiques',
-      'gestion',
-      'اقتصاد وتصرف',
-      'Ų§Ł‚ŲŖŲµŲ§ŲÆ ŁŲŖŲµŲ±Ł',
-      'ļŗ‡ļ»—ļŗļŗ¼ļŗˇļŗ© ļ»­ļŗ—ļŗ¼ļŗ®ļ»‘',
-    ],
-    tech: [
-      'tech',
-      'technique',
-      'techniques',
-      'علوم تقنية',
-      'Ų¹Ł„ŁŁ… ŲŖŁ‚Ł†ŁŲ©',
-      'ļŗ¨ļ»ļ»ļ» ļ»®ļ» ļŗ¨ļ»ļŗļ»ļ»Øļ»´ļŗ”',
-    ],
-    info: [
-      'info',
-      'informatique',
-      'علوم الاعلامية',
-      'علوم الإعلامية',
-      'Ų¹Ł„ŁŁ… Ų§Ł„ŲŲ¹Ł„Ų§Ł…ŁŲ©',
-      'ļ»‹ļ» ļ»®ļ» ļŗ¨ļ»¹ļ»‹ļ»¼ļ»£ļ»´ļŗ”',
-    ],
-    lettres: [
-      'lettres',
-      'lettre',
-      'litteraire',
-      'adab',
-      'آداب',
-      'Ų¢ŲÆŲ§ŲØ',
-      'ļŗļŗ©ļŗ¨ļŗ‘',
-      'ļŗļŗ©ļŗ¨ļŗ¸',
-    ],
-    sport: [
-      'sport',
-      'sportif',
-      'رياضة',
-      'Ų±ŁŲ§Ų¶Ų©',
-      'ļŗ¨ļ»ļŗ®ļ»³ļŗˇļŗæļŗ”',
-    ],
-  };
+  private sessionStudentData: Partial<StudentData> = {};
+  private conversationMemory: ConversationMemory;
+  private fullFieldsData: FullFieldData[] = [];
 
   constructor(
     private readonly ollamaConfig: OllamaConfigService,
     private readonly aiService: AiService,
     private readonly intentDetector: IntentDetectorService,
     private readonly safetyRules: SafetyRulesService,
+    private readonly responseBuilder: ResponseBuilderService,
+    private readonly ragService: RagService,
+    private readonly memoryService: MemoryService,
+    private readonly followupGenerator: FollowupGenerator,
   ) {
-    this.loadLocalData();
+    this.conversationMemory = this.memoryService.initializeMemory();
+    this.loadFullFieldsData();
   }
 
+  private loadFullFieldsData(): void {
+    for (const p of [
+      path.join(process.cwd(), 'lib', 'data', 'fields.json'),
+      path.join(__dirname, '..', '..', '..', 'lib', 'data', 'fields.json'),
+    ]) {
+      try {
+        if (fs.existsSync(p)) {
+          const parsed = JSON.parse(fs.readFileSync(p, 'utf-8'));
+          this.fullFieldsData = parsed.fields || [];
+          this.logger.log(`Loaded ${this.fullFieldsData.length} fields`);
+          return;
+        }
+      } catch { /* next */ }
+    }
+  }
+
+  private getFieldByInterest(interest: string): FullFieldData | undefined {
+    const map: Record<string, string> = {
+      tech: 'IT', sport: 'Sport', health: 'Medical / Health',
+      business: 'Business / Management', art: 'Arts & Design',
+    };
+    const name = map[interest];
+    return name ? this.fullFieldsData.find(f => f.field === name) : undefined;
+  }
+
+  // ============================================================
+  // 🧠 MAIN ENTRY POINT
+  // ============================================================
   async processMessage(
     message: string,
     studentData?: StudentData,
@@ -424,2502 +414,953 @@ export class ChatbotService {
     const userMessage = message?.trim();
     if (!userMessage) return 'Message non valide';
 
-    // Extract any fresh student info from the incoming message (score, bacType, etc.)
+    this.mergeSessionStudentData(studentData);
     const parsed = this.extractStudentDataFromMessage(userMessage);
+    this.mergeSessionStudentData(parsed);
+    this.syncMemoryToSessionData();
 
-    // Merge parsed values into studentData, parsed values take precedence
-    studentData = {
-      ...(studentData || {}),
-      ...(parsed || {}),
-    };
-
-    // Log merged studentData for debugging; keep concise
-    this.logger.debug(`studentData (merged): score=${studentData.score} bacType=${studentData.bacType} parsed=${JSON.stringify(parsed)}`);
-
-    const routeIntent = this.intentDetector.detectIntent(userMessage);
-    const intent = this.detectQueryIntent(userMessage);
-    const effectiveScore =
-      studentData?.score ?? studentData?.FG ?? studentData?.bacAverage;
     const lang = studentData?.language || detectLanguage(userMessage);
-    const memory = this.getRecentConversationMemory(conversationHistory);
 
-    if (routeIntent === 'general') {
-      return this.processGeneralMessage(userMessage, lang, memory);
-    }
+    // ⚠️ DETECT DOMAIN FIRST using priority-ordered detectDomain()
+    const rawCleaned = cleanMessage(userMessage);
+    const detectedDomain = detectDomain(rawCleaned || userMessage);
+    const advisorIntent = this.intentDetector.detectIntent(userMessage);
 
-    if (effectiveScore === undefined && intent === 'best_chances') {
-      return lang === 'ar'
-        ? 'عطيني score متاعك باش نحسبلك فرص القبول بدقة.'
-        : "Donne-moi ton score pour que je puisse calculer tes chances d'admission.";
-    }
-
-    studentData = {
-      ...(studentData || {}),
-      ...(effectiveScore !== undefined ? { score: Number(effectiveScore) } : {}),
-    };
-
-    try {
-      const ragData = this.filterRagData(userMessage, studentData);
-
-      // ALWAYS proceed with recommendations - no early returns
-      // Even if field or programs seem empty, we continue to provide guidance
-
-      const ragContext = this.buildRagContext(
-        ragData,
-        userMessage,
-        studentData,
-      );
-      const prompt = this.buildFullPrompt(
-        userMessage,
-        ragContext,
-        lang,
-        memory,
-      );
-      const config = this.ollamaConfig.getConfig();
-
-      try {
-        const response = await axios.post(
-          config.url,
-          {
-            model: config.model,
-            prompt,
-            stream: false,
-            options: {
-              num_predict: Math.max(config.num_predict, 900),
-              temperature: config.temperature,
-              top_p: 0.9,
-            },
-          },
-          { timeout: config.timeout },
-        );
-
-        const aiResponse = response.data?.response?.trim();
-
-        if (this.safetyRules.isSafeResponse(aiResponse)) {
-          return aiResponse;
+    // Store domain in memory (only if not rejected)
+    if (detectedDomain) {
+      const rejected = this.getMemory().rejectedDomains || [];
+      if (!rejected.includes(detectedDomain)) {
+        const interestValue = domainToInterest(detectedDomain);
+        if (interestValue && this.sessionStudentData.interest !== interestValue) {
+          this.sessionStudentData.interest = interestValue;
         }
-      } catch (aiError) {
-        this.logger.warn(
-          `AI call failed, using deterministic RAG response: ${
-            aiError instanceof Error ? aiError.message : String(aiError)
-          }`,
-        );
+        this.sessionStudentData.preferredDomain = detectedDomain;
       }
+    }
 
-      return this.getDeterministicResponse(
-        ragData,
-        lang,
-        studentData,
-        userMessage,
-      );
-    } catch (error) {
-      console.error('Process message error:', error);
-      return 'Server error, try again';
+    // Extract from memory
+    const extractedIntent = this.memoryService.extractFromMessage(userMessage, this.conversationMemory);
+    this.conversationMemory = this.memoryService.updateMemory(this.conversationMemory, extractedIntent, userMessage);
+
+    console.log('INTENT:', advisorIntent);
+    console.log('DOMAIN:', detectedDomain || 'none');
+
+    // Rejection
+    if (advisorIntent === 'rejection') {
+      return this.handleRejection(userMessage, lang);
+    }
+
+    // Greeting
+    if (advisorIntent === 'greeting') {
+      return lang === 'ar'
+        ? 'سلام 👋 أنا مساعد التوجيه.\nتقدر تسأل على: برامج دراسة، خدمات، مهارات، مقارنات، رواتب، roadmap'
+        : 'Salut 👋 Je suis ton assistant.\nTu peux demander: programmes, métiers, compétences, comparaisons, salaires, roadmap';
+    }
+
+    // If no domain detected, ask user
+    if (!detectedDomain && !this.sessionStudentData.interest) {
+      return lang === 'ar'
+        ? '❌ لم أفهم المجال المطلوب.\nحدد المجال اللي تحب: مثلاً "informatique" أو "sport" أو "طب"'
+        : '❌ Je n\'ai pas compris le domaine.\nPrécise le domaine: ex: "informatique", "sport", "médecine"';
+    }
+
+    // DYNAMIC ROUTING — each intent has its own generator
+    switch (advisorIntent) {
+      case 'ask_programs':
+        return this.recommendationGenerator(userMessage, lang, detectedDomain);
+      case 'ask_jobs':
+        return this.jobsGenerator(userMessage, lang, detectedDomain);
+      case 'ask_skills':
+        return this.skillsGenerator(userMessage, lang, detectedDomain);
+      case 'ask_comparison':
+        return this.comparisonGenerator(userMessage, lang, detectedDomain);
+      case 'ask_roadmap':
+        return this.roadmapGenerator(userMessage, lang, detectedDomain);
+      case 'ask_salary':
+        return this.salaryGenerator(userMessage, lang, detectedDomain);
+      default:
+        return lang === 'ar'
+          ? 'تقصد برامج دراسة ولا خدمات ولا مهارات؟'
+          : 'Tu cherches des programmes, des métiers ou des compétences ?';
     }
   }
 
-  private async processGeneralMessage(
-    userMessage: string,
-    lang: 'fr' | 'ar',
-    memory: ConversationMessage[],
-  ): Promise<string> {
-    const result = await this.aiService.generate({
-      message: userMessage,
-      language: lang,
-      history: memory,
-      systemInstruction:
-        'Tu es un assistant IA generaliste utile, precis et concis. Reponds comme ChatGPT pour les questions generales.',
-      fallback:
-        lang === 'ar'
-          ? 'تعذر الاتصال بالمساعد الذكي حاليا. حاول مرة أخرى بعد قليل.'
-          : "Je n'arrive pas a joindre l'assistant IA pour le moment. Reessaie dans quelques instants.",
+  // ============================================================
+  // 🚨 REJECTION HANDLER
+  // ============================================================
+  private handleRejection(message: string, lang: 'fr' | 'ar'): string {
+    const normalized = message.toLowerCase().trim();
+    const rejectedDomains: string[] = [];
+    const map: Record<string, string> = {
+      réseaux: 'tech', reseau: 'tech', network: 'tech', cyber: 'tech',
+      informatique: 'tech', dev: 'tech', sport: 'sport',
+      kine: 'sport', kiné: 'sport', médecine: 'health', medecine: 'health',
+      santé: 'health', sante: 'health', business: 'business', commerce: 'business',
+      art: 'art', design: 'art', برمجة: 'tech', رياضة: 'sport', طب: 'health',
+    };
+    for (const [term, domain] of Object.entries(map)) {
+      if (normalized.includes(term) && !rejectedDomains.includes(domain)) {
+        rejectedDomains.push(domain);
+      }
+    }
+    if (rejectedDomains.length > 0) {
+      const existing = new Set(this.sessionStudentData.rejectedDomains || []);
+      rejectedDomains.forEach(d => existing.add(d));
+      this.sessionStudentData.rejectedDomains = Array.from(existing);
+      rejectedDomains.forEach(d => {
+        if (this.sessionStudentData.interest === d) {
+          this.sessionStudentData.interest = undefined;
+          this.sessionStudentData.preferredDomain = undefined;
+        }
+      });
+      return lang === 'ar'
+        ? `تمام، نحّينا ${rejectedDomains.join('، ')} من الاختيارات 👍`
+        : `D'accord, j'ai retiré ${rejectedDomains.join(', ')} des options 👍`;
+    }
+    return lang === 'ar' ? 'تمام 👍' : 'D\'accord 👍';
+  }
+
+  // ============================================================
+  // PART 6 — FIX HEALTH PROGRAM FILTERING
+  // Ensures HEALTH queries NEVER return IT programs
+  // ============================================================
+  private enforceDomainPrograms(
+    programs: RankedProgram[],
+    domain: string | null | undefined,
+  ): RankedProgram[] {
+    if (!domain) return programs;
+    if (programs.length === 0) return programs;
+
+    const domainKey = domain.toUpperCase();
+    const aliasField = detectField(domain) || (
+      domainKey === 'ENGINEERING' ? 'engineering' :
+      domainKey === 'IT' || domainKey === 'TECH' ? 'it' :
+      domainKey === 'HEALTH' ? 'health' :
+      domainKey === 'SPORT' ? 'sport' :
+      domainKey === 'ART' || domainKey === 'DESIGN' ? 'art' :
+      domainKey === 'BUSINESS' ? 'business' :
+      null
+    );
+
+    if (aliasField) {
+      const aliases = FIELD_ALIASES[aliasField];
+      const filtered = programs.filter((program) => {
+        const searchableText = normalizeText(`
+          ${program.program || ''}
+          ${program.name || ''}
+          ${program.institution || ''}
+          ${program.formula || ''}
+          ${program.domain || ''}
+        `);
+
+        return aliases.some((alias) => searchableText.includes(normalizeText(alias))) ||
+          normalizeText(program.domain || '') === normalizeText(aliasField);
+      });
+
+      if (filtered.length > 0) return filtered;
+    }
+
+    // HEALTH domain: ONLY health/biomedical programs
+    if (domainKey === 'HEALTH') {
+      return programs.filter(p => {
+        const haystack = [p.name, p.program, p.formula, p.domain]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '');
+        // MUST contain health keywords
+        const healthMatch = /\b(biologie|sante|medical|medecine|pharmacie|dentaire|infirmier|soins|paramedical|veterinaire|anesthesie|radiologie|chirurgie|laboratoire|kin[eé]|clinique|hopital|patient|diagnostic|traitement)\b/i.test(haystack);
+        // MUST NOT contain IT keywords
+        const itMatch = /\b(informatique|developpement|programmation|reseau|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|dev|code)\b/i.test(haystack);
+        return healthMatch && !itMatch;
+      });
+    }
+
+    // LANGUAGES domain: ONLY language/literature/communication programs
+    if (domainKey === 'LANGUAGES') {
+      return programs.filter(p => {
+        const haystack = [p.name, p.program, p.formula, p.domain]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '');
+        const langMatch = /\b(langues|traduction|lettres|litterature|journalisme|communication|enseignement|anglais|francais|arabe|redaction|traducteur|enseignant)\b/i.test(haystack);
+        const artMatch = /\b(design|architecture|graphisme|mode|cinema|musique|theatre)\b/i.test(haystack);
+        return langMatch && !artMatch;
+      });
+    }
+
+    // ART domain: ONLY art/design programs
+    if (domainKey === 'ART') {
+      return programs.filter(p => {
+        const haystack = [p.name, p.program, p.formula, p.domain]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '');
+        return /\b(art|design|architecture|graphisme|graphique|mode|cinema|audiovisuel|musique|theatre|beaux-arts|decoration|creation)\b/i.test(haystack);
+      });
+    }
+
+    // ENGINEERING domain: ONLY engineering programs
+    if (domainKey === 'ENGINEERING') {
+      return programs.filter(p => {
+        const haystack = [p.name, p.program, p.formula, p.domain]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '');
+        const engMatch = /\b(genie|génie|ingenieur|ingénieur|mecanique|mécanique|electrique|électrique|civil|industriel|production|maintenance|electromecanique|robotique|automatique|energie)\b/i.test(haystack);
+        const sportMatch = /\b(sport|coaching|fitness|eps|football|basket|tennis|entrainement)\b/i.test(haystack);
+        return engMatch && !sportMatch;
+      });
+    }
+
+    return programs;
+  }
+
+  // ============================================================
+  // 🏫 RECOMMENDATION GENERATOR — programs ONLY (domain-filtered)
+  // ============================================================
+  private recommendationGenerator(message: string, lang: 'fr' | 'ar', detectedDomain: string | null): string {
+    const interest = this.resolveEffectiveInterest(message);
+    const rejected = this.getMemory().rejectedDomains || [];
+    const bacType = this.sessionStudentData.bacType;
+    const score = this.sessionStudentData.score;
+
+    // For LANGUAGES/LETTRES domain, DO NOT map to 'art' interest
+    let effectiveInterest = interest;
+    if (detectedDomain === 'LANGUAGES') {
+      effectiveInterest = undefined; // Don't use interest to avoid art mapping
+    }
+
+    const recs = this.ragService.getRecommendations({
+      message,
+      bacType,
+      score,
+      interest: effectiveInterest || undefined,
+      limit: 5,
     });
 
-    return result.text;
-  }
+    // Filter out rejected and non-matching domains
+    let programs = (recs.programs || []).filter(p => {
+      if (p.domain && rejected.includes(p.domain)) return false;
+      const pInterest = effectiveInterest;
+      if (pInterest && p.domain && p.domain !== pInterest) return false;
+      return true;
+    });
 
-  private loadLocalData(): void {
-    this.jobsData = this.loadJsonFile<DomainData[]>(
-      '../../lib/data/jobs.json',
-      [],
-    );
-    this.guideData = this.loadJsonFile<GuideProgram[]>(
-      '../../data/guide.json',
-      [],
-    );
+    // PART 6 — Enforce HEALTH domain filter (strip IT programs)
+    programs = this.enforceDomainPrograms(programs, detectedDomain || this.sessionStudentData.preferredDomain);
 
-    this.logger.log(
-      `Loaded ${this.jobsData.length} job domains from jobs.json`,
-    );
-    this.logger.log(`Loaded ${this.guideData.length} programs from guide.json`);
-  }
+    const field = recs.field;
+    const blocks: string[] = [];
 
-  private loadJsonFile<T>(relativePath: string, fallback: T): T {
-    const appRelativePath = relativePath.replace(/^(\.\.\/)+/, '');
-    const candidatePaths = [
-      path.join(__dirname, relativePath),
-      path.join(process.cwd(), appRelativePath),
-      path.join(process.cwd(), 'dist', appRelativePath),
-    ];
-
-    try {
-      const filePath = candidatePaths.find((candidate) =>
-        fs.existsSync(candidate),
-      );
-
-      if (!filePath) {
-        throw new Error(`No local data file found for ${relativePath}`);
+    // If no programs match, return clear message
+    if (programs.length === 0) {
+      const domainName = domainLabel(detectedDomain || this.sessionStudentData.preferredDomain || null, lang);
+      if (!domainName) {
+        return lang === 'ar'
+          ? '❌ لا توجد بيانات كافية لهذا المجال حالياً.'
+          : '❌ Pas assez de données pour ce domaine actuellement.';
       }
-
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
-      return JSON.parse(fileContent) as T;
-    } catch (error) {
-      this.logger.error(`Failed to load ${relativePath}`, error);
-      return fallback;
+      return lang === 'ar'
+        ? `❌ لا توجد برامج متاحة لمجال ${domainName} حالياً.`
+        : `❌ Aucun programme disponible pour ${domainName} actuellement.`;
     }
+
+    // 👤 Student info summary
+    if (bacType || score) {
+      const infoParts: string[] = [];
+      if (bacType) infoParts.push(lang === 'ar' ? `باك ${bacType}` : `Bac ${bacType}`);
+      if (score) infoParts.push(lang === 'ar' ? `معدل ${score}` : `score ${score}`);
+      blocks.push(`👤 ${infoParts.join(' - ')}`);
+    }
+
+    // 🏫 Programs
+    if (programs.length > 0) {
+      const progLines = programs.slice(0, 4).map(p => {
+        const lastScore = p.matchingBac?.lastScore;
+        let level = 'Medium';
+        let emoji = '⚡';
+        if (score && lastScore) {
+          const gap = score - lastScore;
+          if (gap >= 10) { level = 'Safe'; emoji = '✅'; }
+          else if (gap < -5) { level = 'Difficult'; emoji = '🚀'; }
+        }
+        const name = p.name || p.program || '';
+        const inst = p.institution ? `@ ${p.institution}` : '';
+        if (lang === 'ar') {
+          return `${emoji} ${name}\n   🏛 ${inst}\n   📊 آخر score: ${lastScore || '?'} — ${level === 'Safe' ? 'آمن' : level === 'Medium' ? 'متوسط' : 'صعب'}`;
+        }
+        return `${emoji} ${name}\n   🏛 ${inst}\n   📊 Dernier score: ${lastScore || '?'} — ${level}`;
+      });
+      blocks.push(progLines.join('\n\n'));
+    }
+
+    // ✅ Score compatibility
+    if (score && programs.length > 0) {
+      const safeCount = programs.filter(p => {
+        const ls = p.matchingBac?.lastScore;
+        return typeof ls === 'number' && (score - ls) >= 10;
+      }).length;
+      if (safeCount > 0) {
+        blocks.push(lang === 'ar' ? `✅ **التوافق:** معدلك يضمن ${safeCount} برامج` : `✅ **Compatibilité:** ton score sécurise ${safeCount} programme(s)`);
+      }
+    }
+
+    // 🔮 Future (use domain-specific field data if available)
+    if (field) {
+      blocks.push(lang === 'ar'
+        ? `🔮 **المستقبل:** ${field.future_outlook}\n📈 **الطلب:** ${field.demand_in_tunisia}\n⚠️ **البطالة:** ${field.unemployment_risk}`
+        : `🔮 **Perspectives:** ${field.future_outlook}\n📈 **Demande:** ${field.demand_in_tunisia}\n⚠️ **Chômage:** ${field.unemployment_risk}`);
+    }
+
+    // Follow-up (domain-aware)
+    const followUp = this.buildDomainFollowUp(detectedDomain || interest, lang);
+    return blocks.join('\n\n') + '\n\n' + followUp;
   }
 
-  private detectFieldFromKeywords(userMessage: string): string | null {
-    const msg = this.normalize(userMessage);
-    const tokens = this.tokenize(msg);
-    const hasAny = (keywords: string[]) =>
-      keywords.some((keyword) => this.matchesSearchTerm(msg, keyword, tokens));
+  /** Get the effective domain (from whichever source) */
+  private getEffectiveDomain(message: string, detectedDomain?: string | null): string | null {
+    if (detectedDomain) {
+      const interest = domainToInterest(detectedDomain);
+      return interest || detectedDomain;
+    }
+    return this.sessionStudentData.interest || null;
+  }
 
-    // IT keywords
-    const itKeywords = ['dev', 'code', 'coding', 'informatique', 'info', 'developer', 'programming', 'software', 'web', 'app', 'tech', 'ai', 'ia', 'data', 'cloud', 'cyber'];
-    if (hasAny(itKeywords)) return 'IT';
+  // ============================================================
+  // 💼 JOBS GENERATOR — PART 5: FIX CAREERS
+  // LETTRES/LANGUAGES returns: traducteur, enseignant, journaliste,
+  // rédacteur, communication — NEVER designer, UX/UI, architecte
+  // ENGINEERING returns: ingénieur mécanique, civil, électrique, etc.
+  // ============================================================
+  private jobsGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+    const domainKey = this.resolveJobsDomain(message, effectiveDomain);
 
-    // Medical keywords
-    const medicalKeywords = ['med', 'medecin', 'medicine', 'medical', 'santé', 'sante', 'doctor', 'pharmacie', 'infirmier', 'nurse', 'health', 'dentaire', 'veterinaire'];
-    if (hasAny(medicalKeywords)) return 'Medical';
+    // LANGUAGES / LETTRES: Use hardcoded jobs to avoid art fallback
+    if (domainKey === 'LANGUAGES' || domainKey === 'LETTERS') {
+      return this.formatDomainJobs('LANGUAGES', lang);
+    }
 
-    // Business keywords
-    const businessKeywords = ['gestion', 'business', 'commerce', 'marketing', 'finance', 'comptabilite', 'accounting', 'economie', 'management', 'administration'];
-    if (hasAny(businessKeywords)) return 'Business';
+    // HEALTH: Use hardcoded medical jobs
+    if (domainKey === 'HEALTH') {
+      return this.formatDomainJobs('HEALTH', lang);
+    }
 
-    // Engineering keywords
-    const engineeringKeywords = ['ingenierie', 'engineering', 'genie', 'mecanique', 'electrique', 'civil', 'industriel'];
-    if (hasAny(engineeringKeywords)) return 'Engineering';
+    // ENGINEERING: Use hardcoded engineering jobs
+    if (domainKey === 'ENGINEERING') {
+      return this.formatDomainJobs('ENGINEERING', lang);
+    }
 
-    // Law keywords
-    const lawKeywords = ['droit', 'law', 'legal', 'avocat', 'justice', 'juridique'];
-    if (hasAny(lawKeywords)) return 'Law';
+    const interest = this.resolveEffectiveInterest(message);
+    const domain = this.getEffectiveDomain(message, effectiveDomain);
 
-    // Languages and humanities keywords
-    const humanitiesKeywords = [
-      'francais',
-      'français',
-      'anglais',
-      'traduction',
-      'traducteur',
-      'translation',
-      'langue',
-      'langues',
-      'humanities',
-      'lettres',
-      'philosophie',
-      'histoire',
-      'آداب',
-      'لغات',
-      'ترجمة',
-      'فلسفة',
-      'تاريخ',
-    ];
-    if (hasAny(humanitiesKeywords)) return 'Humanities';
+    const jobs = this.ragService.getJobsByField(domainKey);
 
-    // Arts keywords
-    const artsKeywords = ['art', 'design', 'graphic', 'architecture', 'mode', 'fashion'];
-    if (hasAny(artsKeywords)) return 'Arts';
+    // Fallback via recommendations
+    const fallbackJobs: JobData[] = jobs.length > 0 ? jobs : (this.ragService.getRecommendations({
+      message,
+      bacType: this.sessionStudentData.bacType,
+      score: this.sessionStudentData.score,
+      interest: interest || undefined,
+      limit: 5,
+    }).jobs || []);
 
+    if (fallbackJobs.length === 0) {
+      return lang === 'ar'
+        ? '❌ لا توجد خدمات مطابقة لهذا المجال حالياً.'
+        : '❌ Aucun métier trouvé pour ce domaine actuellement.';
+    }
+
+    const blocks: string[] = [];
+    const jobsToShow = fallbackJobs.slice(0, 3);
+
+    if (jobsToShow.length > 0) {
+      const jobBlocks = jobsToShow.map(j => {
+        const salary = j.salary_level
+          ? (lang === 'ar' ? `💰 **الراتب:** ${this.salaryLabel(j.salary_level, lang)}` : `💰 **Salaire:** ${this.salaryLabel(j.salary_level, lang)}`)
+          : '';
+        if (lang === 'ar') {
+          return `🛡️ **${j.title}**\n📌 ${j.description || ''}\n📈 **الطلب:** ${j.demand || 'Medium'}\n⚠️ **البطالة:** ${j.unemployment_rate !== undefined ? `${j.unemployment_rate}%` : '?'}\n🛠 **المهارات:** ${j.skills?.slice(0, 5).join(', ') || ''}\n${salary}`;
+        }
+        return `🛡️ **${j.title}**\n📌 ${j.description || ''}\n📈 **Demande:** ${j.demand || 'Medium'}\n⚠️ **Chômage:** ${j.unemployment_rate !== undefined ? `${j.unemployment_rate}%` : '?'}\n🛠 **Compétences:** ${j.skills?.slice(0, 5).join(', ') || ''}\n${salary}`;
+      });
+      blocks.push(jobBlocks.join('\n\n---\n\n'));
+    }
+
+    return blocks.join('\n\n');
+  }
+
+  /**
+   * Resolve the domain for jobs queries.
+   * Special case: "carrière en technologie" → ENGINEERING
+   */
+  private resolveJobsDomain(message: string, effectiveDomain?: string | null): string {
+    const domainKey = (effectiveDomain || this.sessionStudentData.preferredDomain || '').toUpperCase();
+
+    // PART 4: Career + technology → engineering jobs
+    const careerTerms = /carrière|carriere|débouchés|debouches|métiers|metiers|opportunités|opportunites|travail/i;
+    const techTerms = /technologie|technology/i;
+    if (careerTerms.test(message) && techTerms.test(message)) {
+      return 'ENGINEERING';
+    }
+
+    return domainKey;
+  }
+
+  /** Format hardcoded domain jobs (for LANGUAGES, HEALTH, ENGINEERING, etc.) */
+  private formatDomainJobs(domainKey: string, lang: 'fr' | 'ar'): string {
+    const jobs = DOMAIN_JOBS[domainKey];
+    if (!jobs || jobs.length === 0) {
+      return lang === 'ar'
+        ? '❌ لا توجد خدمات مطابقة لهذا المجال حالياً.'
+        : '❌ Aucun métier trouvé pour ce domaine actuellement.';
+    }
+
+    const blocks: string[] = [];
+    const domainName = domainLabel(domainKey, lang);
+    if (lang === 'ar') {
+      blocks.push(`💼 **خدمات ${domainName}**\n`);
+    } else {
+      blocks.push(`💼 **Métiers ${domainName}**\n`);
+    }
+
+    const jobBlocks = jobs.slice(0, 4).map(j => {
+      if (lang === 'ar') {
+        return `🛡️ **${j.title}**\n📌 ${j.description || ''}\n📈 **الطلب:** ${j.demand || 'Medium'}\n⚠️ **البطالة:** ${j.unemployment_rate !== undefined ? `${j.unemployment_rate}%` : '?'}\n🛠 **المهارات:** ${j.skills?.slice(0, 5).join(', ') || ''}`;
+      }
+      return `🛡️ **${j.title}**\n📌 ${j.description || ''}\n📈 **Demande:** ${j.demand || 'Medium'}\n⚠️ **Chômage:** ${j.unemployment_rate !== undefined ? `${j.unemployment_rate}%` : '?'}\n🛠 **Compétences:** ${j.skills?.slice(0, 5).join(', ') || ''}`;
+    });
+    blocks.push(jobBlocks.join('\n\n---\n\n'));
+
+    return blocks.join('\n');
+  }
+
+  // ============================================================
+  // 🛠 SKILLS GENERATOR
+  // ============================================================
+  private readonly frontendSkills = {
+    tech: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Tailwind CSS', 'Git/GitHub'],
+    tools: ['VSCode', 'Figma basics', 'Chrome DevTools'],
+    projects: ['Landing page', 'Dashboard', 'Portfolio'],
+    nextStep: 'freelance or internship',
+  };
+
+  private readonly backendSkills = {
+    tech: ['Node.js', 'Python', 'SQL', 'APIs', 'Databases', 'Docker'],
+    tools: ['Postman', 'VSCode', 'Terminal'],
+    projects: ['REST API', 'CRUD app', 'Auth system'],
+    nextStep: 'backend internship',
+  };
+
+  private detectSkillsSubDomain(message: string): string | null {
+    const m = message.toLowerCase();
+    if (/(frontend|front-end|front|react|ui|ux|html|css)/i.test(m)) return 'frontend';
+    if (/(backend|back-end|back|node|express|api|sql)/i.test(m)) return 'backend';
+    if (/(cyber|sécurité|security|hack|pentest)/i.test(m)) return 'cyber';
+    if (/(data|machine learning|ai|analyse)/i.test(m)) return 'data';
+    if (/(mobile|ios|android|app)/i.test(m)) return 'mobile';
+    if (/(réseau|reseau|network|admin sys)/i.test(m)) return 'reseau';
     return null;
   }
 
-  private detectQueryIntent(message: string): QueryIntent {
-    const msg = this.normalize(message);
-
-    if (
-      [
-        'في اي ولاية',
-        'في اي ولايه',
-        'في أي ولاية',
-        'وين نقراها',
-        'وين نقرى',
-        'win naqraha',
-        'win nokraha',
-        'win na9raha',
-        'faculte 9riba',
-        'faculte qriba',
-        'faculté 9riba',
-        '9riba',
-        'قريبة',
-        'ولاية',
-        'localisation',
-        'location',
-        'ville',
-        'gouvernorat',
-        'ou se trouve',
-        'où se trouve',
-        'where',
-      ].some((term) => msg.includes(this.normalize(term)))
-    ) {
-      return 'location';
+  private skillsGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+    const domain = this.getEffectiveDomain(message, effectiveDomain);
+    const subDomain = this.detectSkillsSubDomain(message);
+    if (subDomain && domain === 'tech') {
+      if (subDomain === 'frontend') {
+        return this.formatSkillsResponse('Frontend Developer', this.frontendSkills, lang);
+      }
+      if (subDomain === 'backend') {
+        return this.formatSkillsResponse('Backend Developer', this.backendSkills, lang);
+      }
     }
 
-    if (
-      [
-        'chance',
-        'chances',
-        'meilleures chances',
-        'accessible',
-        'admission',
-        'najem',
-        'najam',
-        'chniya najem',
-      ].some((term) => msg.includes(term))
-    ) {
-      return 'best_chances';
+    const interest = this.resolveEffectiveInterest(message);
+    if (!interest && !domain) {
+      return lang === 'ar'
+        ? '❌ ما عنديش معلومات كافية. حدد المجال اللي تحب.'
+        : '❌ Pas assez d\'informations. Précise le domaine.';
     }
 
-    if (
-      [
-        'specialite',
-        'specialites',
-        'e5tisat',
-        'ekhtisas',
-        'matloub',
-        'demande',
-        'requis',
-        'conditions',
-        'skills',
-        'competence',
-        'competences',
-        'score',
-      ].some((term) => msg.includes(term))
-    ) {
-      return 'requirements';
+    const fullField = this.getFieldByInterest(interest || domain || '');
+    if (!fullField) {
+      return lang === 'ar'
+        ? '❌ معلومات المهارات غير متوفرة لهذا المجال حالياً.'
+        : '❌ Compétences non disponibles pour ce domaine.';
     }
 
-    if (
-      [
-        'fham',
-        'fasser',
-        'explique',
-        'expliquer',
-        'comprendre',
-        'c quoi',
-        'cest quoi',
-        'شنوة',
-        'اشنوة',
-      ].some((term) => msg.includes(term))
-    ) {
-      return 'field_explanation';
+    const techSkills = fullField.required_skills?.technical_skills?.slice(0, 6) || [];
+    const softSkills = fullField.required_skills?.soft_skills?.slice(0, 5) || [];
+    const tools = fullField.required_skills?.tools_and_technologies?.slice(0, 5) || [];
+    const fieldName = fullField.field;
+
+    const learningOrder = this.buildLearningOrder(interest || domain || '', lang);
+
+    const result: string[] = [];
+    if (lang === 'ar') {
+      result.push(`🛠 **مهارات ${fieldName}**\n`);
+      result.push(`**🔧 تقنية:**\n${techSkills.map(s => `• ${s}`).join('\n')}\n`);
+      result.push(`**🤝 لطيفة:**\n${softSkills.map(s => `• ${s}`).join('\n')}\n`);
+      result.push(`**⚙️ تكنولوجيات:**\n${tools.map(s => `• ${s}`).join('\n')}\n`);
+      if (learningOrder) result.push(`**📚 ترتيب التعلم:**\n${learningOrder}`);
+    } else {
+      result.push(`🛠 **Compétences ${fieldName}**\n`);
+      result.push(`**🔧 Techniques:**\n${techSkills.map(s => `• ${s}`).join('\n')}\n`);
+      result.push(`**🤝 Humaines:**\n${softSkills.map(s => `• ${s}`).join('\n')}\n`);
+      result.push(`**⚙️ Technologies:**\n${tools.map(s => `• ${s}`).join('\n')}\n`);
+      if (learningOrder) result.push(`**📚 Ordre d\'apprentissage:**\n${learningOrder}`);
     }
 
-    if (
-      ['a7sen', 'ahsen', 'meilleur', 'meilleure', 'best', 'top'].some((term) =>
-        msg.includes(term),
-      )
-    ) {
-      return 'best_choice';
-    }
-
-    if (
-      ['metier', 'job', 'travail', 'carriere', 'debouche', 'avenir'].some(
-        (term) => msg.includes(term),
-      )
-    ) {
-      return 'career';
-    }
-
-    return 'general';
+    return result.join('\n');
   }
 
-  private filterRagData(
-    message: string,
-    studentData?: StudentData,
-  ): FilteredRagData {
-    const score = Number(studentData?.score) || 0;
-    const hasScore =
-      typeof studentData?.score === 'number' && Number.isFinite(studentData.score);
-    const bacType = studentData?.bacType;
-    const normalizedBac = this.normalizeBac(bacType);
-    const intent = this.detectQueryIntent(message);
+  private formatSkillsResponse(title: string, skills: { tech: string[]; tools: string[]; projects: string[]; nextStep: string }, lang: 'fr' | 'ar'): string {
+    if (lang === 'ar') {
+      return `🎨 **${title}**\n\n` +
+        `🛠 **لازم تتعلم:**\n${skills.tech.map(s => `• ${s}`).join('\n')}\n\n` +
+        `⚙️ **أدوات:**\n${skills.tools.map(s => `• ${s}`).join('\n')}\n\n` +
+        `📁 **مشاريع:**\n${skills.projects.map(s => `• ${s}`).join('\n')}\n\n` +
+        `🚀 **الخطوة الجاية:**\n${skills.nextStep}`;
+    }
+    return `🎨 **${title}**\n\n` +
+      `🛠 **Skills:**\n${skills.tech.map(s => `• ${s}`).join('\n')}\n\n` +
+      `⚙️ **Tools:**\n${skills.tools.map(s => `• ${s}`).join('\n')}\n\n` +
+      `📁 **Projects:**\n${skills.projects.map(s => `• ${s}`).join('\n')}\n\n` +
+      `🚀 **Next step:**\n${skills.nextStep}`;
+  }
 
-    console.log('Using score:', score, 'bacType:', bacType, 'normalized:', normalizedBac);
+  private buildLearningOrder(interestOrDomain: string, lang: 'fr' | 'ar'): string {
+    const interest = domainToInterest(interestOrDomain) || interestOrDomain;
+    const orders: Record<string, string[]> = {
+      tech: ['1. أساسيات البرمجة', '2. تطوير ويب (HTML, CSS, JS)', '3. إطار عمل (React, Angular)', '4. Backend + قاعدة بيانات', '5. مشاريع شخصية'],
+      sport: ['1. علوم الرياضة', '2. تشريح وفسيولوجيا', '3. تدريب عملي', '4. شهادة تخصص', '5. تطبيق مع أندية'],
+      health: ['1. علوم أساسية (بيولوجيا، كيمياء)', '2. دراسة طبية', '3. تخصص', '4. تربص عملي', '5. ممارسة'],
+      business: ['1. أساسيات الإدارة', '2. محاسبة / تمويل', '3. تسويق', '4. خبرة ميدانية', '5. تخصص (MBA...)'],
+      art: ['1. أساسيات التصميم', '2. أدوات (Photoshop, Figma)', '3. مشاريع', '4. معرض أعمال (Portfolio)', '5. تخصص'],
+      languages: ['1. إتقان لغة أجنبية', '2. دراسة لغوية معمقة', '3. تخصص (ترجمة / صحافة / تدريس)', '4. تطبيق عملي', '5. شهادة مهنية'],
+      engineering: ['1. أساسيات الرياضيات والفيزياء', '2. تخصص هندسي', '3. مشاريع تطبيقية', '4. تربص ميداني', '5. شهادة مهنية'],
+    };
+    const order = orders[interest];
+    if (!order) return '';
+    if (lang !== 'ar') {
+      const en: Record<string, string[]> = {
+        tech: ['1. Programming basics', '2. Web dev (HTML, CSS, JS)', '3. Framework (React, Angular)', '4. Backend + DB', '5. Personal projects'],
+        sport: ['1. Sport science', '2. Anatomy/physiology', '3. Practical training', '4. Certification', '5. Apply with clubs'],
+        health: ['1. Basic sciences', '2. Medical study', '3. Specialization', '4. Internship', '5. Practice'],
+        business: ['1. Management basics', '2. Accounting/finance', '3. Marketing', '4. Field experience', '5. Specialization (MBA...)'],
+        art: ['1. Design basics', '2. Tools (Photoshop, Figma)', '3. Projects', '4. Portfolio', '5. Specialization'],
+        languages: ['1. Master a foreign language', '2. Advanced language study', '3. Specialize (translation/journalism/teaching)', '4. Practical application', '5. Professional certification'],
+        engineering: ['1. Math and physics basics', '2. Engineering specialization', '3. Applied projects', '4. Field internship', '5. Professional certification'],
+      };
+      return (en[interest] || []).join('\n');
+    }
+    return order.join('\n');
+  }
 
-    // Get allowed programs based on score
-    const filteredGuides = hasScore
-      ? this.getFilteredGuides(score, normalizedBac)
-      : [];
+  // ============================================================
+  // PART 3 — FIX comparisonGenerator()
+  // For EACH entity: search separately, compute independently
+  // NEVER reuse first entity values
+  // ============================================================
+  private comparisonGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+    const score = this.sessionStudentData.score;
 
-    // FALLBACK: If no programs match, get closest ones
-    const closestPrograms = hasScore
-      ? this.getClosestPrograms(score, normalizedBac)
-      : [];
+    // PART 2 — Use clean comparison entities
+    const items = this.extractComparisonEntities(message);
+    const item1 = items[0] || 'option A';
+    const item2 = items[1] || 'option B';
 
-    // SMART FIELD DETECTION from user message (CRITICAL - recalculated every time)
-    const detectedField = this.detectFieldFromKeywords(message);
+    // INDEPENDENT queries — each entity gets its OWN results
+    // No shared interest override — detect each entity's domain separately
+    const e1Domain = detectDomain(item1);
+    const e2Domain = detectDomain(item2);
 
-    // Find field from fields.json using detection
-    let field: FieldData | undefined = detectedField
-      ? this.findFieldByDetectedName(detectedField)
-      : undefined;
+    // Map domain to interest for RAG queries (but bypass session interest)
+    const e1Interest = domainToInterest(e1Domain);
+    const e2Interest = domainToInterest(e2Domain);
 
-    const candidatePrograms =
-      filteredGuides.length > 0 ? filteredGuides : closestPrograms;
+    // Build entity-specific messages that include domain keywords
+    // This prevents interest override in RAG by using entity-specific interest
+    const recs1 = this.ragService.getRecommendations({
+      message: item1,
+      bacType: this.sessionStudentData.bacType,
+      score,
+      interest: e1Interest,  // Entity-specific interest, NOT session interest
+      limit: 3,
+    });
+    const recs2 = this.ragService.getRecommendations({
+      message: item2,
+      bacType: this.sessionStudentData.bacType,
+      score,
+      interest: e2Interest,  // Entity-specific interest, NOT session interest
+      limit: 3,
+    });
 
-    const fieldPrograms = field
-      ? this.rankAllowedProgramsForField(
-          candidatePrograms,
-          field,
-          message,
-          studentData,
-        )
-      : [];
-    const fieldFallbackPrograms =
-      field && fieldPrograms.length === 0
-        ? this.rankGuideProgramsForField(field, message, studentData)
-            .filter((program) => !normalizedBac || !!program.matchingBac)
-            .slice(0, 5)
-        : [];
+    // Apply domain enforcement for each entity
+    let prog1Entities = (recs1.programs || []);
+    if (e1Domain) {
+      prog1Entities = this.enforceDomainPrograms(prog1Entities, e1Domain);
+    }
+    let prog2Entities = (recs2.programs || []);
+    if (e2Domain) {
+      prog2Entities = this.enforceDomainPrograms(prog2Entities, e2Domain);
+    }
 
-    // Final programs:
-    // - if the student names a domain, prioritize programs related to that domain
-    // - if the question is general, show the best accessible programs by score
-    const selectedPrograms =
-      field && fieldPrograms.length > 0
-        ? fieldPrograms.slice(0, 5)
-        : field && fieldFallbackPrograms.length > 0
-          ? fieldFallbackPrograms
-        : candidatePrograms.slice(0, 5);
+    const field1 = recs1.field;
+    const field2 = recs2.field;
+    // Use first matching program from each entity's independent results
+    const prog1 = (prog1Entities.filter(p => p.domain !== 'other')[0] || prog1Entities[0]);
+    const prog2 = (prog2Entities.filter(p => p.domain !== 'other')[0] || prog2Entities[0]);
 
-    // SMART LABEL: difficulty
-    const difficulty = selectedPrograms[0]
-      ? this.calculateDifficultyForGuide(score, selectedPrograms[0])
-      : 'hard';
+    const score1 = prog1?.matchingBac?.lastScore;
+    const score2 = prog2?.matchingBac?.lastScore;
 
-    // JOBS from fields.json (primary source) with ranked reasons
-    const jobs = field
-      ? this.rankFieldJobs(field, message, studentData).slice(0, 3)
-      : this.rankGeneralJobs(message, studentData).slice(0, 3);
+    const blocks: string[] = [];
 
+    if (lang === 'ar') {
+      blocks.push(`⚖️ **مقارنة بين ${item1} و ${item2}**\n`);
+
+      blocks.push(`**1️⃣ ${item1}**`);
+      if (score1 !== undefined) blocks.push(`📊 **آخر score:** ${score1}`);
+      if (prog1?.name) blocks.push(`🏫 ${prog1.name}@${prog1.institution}`);
+      if (field1?.future_outlook) blocks.push(`📈 **المستقبل:** ${field1.future_outlook}`);
+      if (field1?.demand_in_tunisia) blocks.push(`📈 **الطلب:** ${field1.demand_in_tunisia}`);
+      if (field1?.unemployment_risk) blocks.push(`⚠️ **البطالة:** ${field1.unemployment_risk}`);
+
+      blocks.push(`\n**2️⃣ ${item2}**`);
+      if (score2 !== undefined) blocks.push(`📊 **آخر score:** ${score2}`);
+      if (prog2?.name) blocks.push(`🏫 ${prog2.name}@${prog2.institution}`);
+      if (field2?.future_outlook) blocks.push(`📈 **المستقبل:** ${field2.future_outlook}`);
+      if (field2?.demand_in_tunisia) blocks.push(`📈 **الطلب:** ${field2.demand_in_tunisia}`);
+      if (field2?.unemployment_risk) blocks.push(`⚠️ **البطالة:** ${field2.unemployment_risk}`);
+
+      // INDEPENDENT comparison logic:
+      if (score !== undefined && score1 != null && score2 != null) {
+        const gap1 = score - score1;
+        const gap2 = score - score2;
+        if (gap1 >= 0 && gap2 >= 0) {
+          blocks.push(`\n🎯 **الخلاصة:** بمعدل ${score}، التخصصين متاحين لك.`);
+        } else if (gap1 >= 0 && gap2 < 0) {
+          blocks.push(`\n🎯 **الخلاصة:** بمعدل ${score}، ${item1} أضمن من ${item2}.`);
+        } else if (gap2 >= 0 && gap1 < 0) {
+          blocks.push(`\n🎯 **الخلاصة:** بمعدل ${score}، ${item2} أضمن من ${item1}.`);
+        } else {
+          const closer = gap1 > gap2 ? item1 : item2;
+          blocks.push(`\n🎯 **الخلاصة:** ${closer} أقرب لمعدلك (فرق ${Math.abs(Math.min(gap1, gap2))} نقطة).`);
+        }
+      }
+    } else {
+      blocks.push(`⚖️ **Comparaison: ${item1} vs ${item2}**\n`);
+
+      blocks.push(`**1️⃣ ${item1}**`);
+      if (score1 !== undefined) blocks.push(`📊 **Dernier score:** ${score1}`);
+      if (prog1?.name) blocks.push(`🏫 ${prog1.name}@${prog1.institution}`);
+      if (field1?.future_outlook) blocks.push(`📈 **Avenir:** ${field1.future_outlook}`);
+      if (field1?.demand_in_tunisia) blocks.push(`📈 **Demande:** ${field1.demand_in_tunisia}`);
+      if (field1?.unemployment_risk) blocks.push(`⚠️ **Chômage:** ${field1.unemployment_risk}`);
+
+      blocks.push(`\n**2️⃣ ${item2}**`);
+      if (score2 !== undefined) blocks.push(`📊 **Dernier score:** ${score2}`);
+      if (prog2?.name) blocks.push(`🏫 ${prog2.name}@${prog2.institution}`);
+      if (field2?.future_outlook) blocks.push(`📈 **Avenir:** ${field2.future_outlook}`);
+      if (field2?.demand_in_tunisia) blocks.push(`📈 **Demande:** ${field2.demand_in_tunisia}`);
+      if (field2?.unemployment_risk) blocks.push(`⚠️ **Chômage:** ${field2.unemployment_risk}`);
+
+      if (score != null && score1 != null && score2 != null) {
+        const gap1 = score - score1;
+        const gap2 = score - score2;
+        if (gap1 >= 0 && gap2 >= 0) {
+          blocks.push(`\n🎯 **Conclusion:** Avec ${score}, les deux sont accessibles.`);
+        } else if (gap1 >= 0 && gap2 < 0) {
+          blocks.push(`\n🎯 **Conclusion:** Avec ${score}, ${item1} est plus sûr que ${item2}.`);
+        } else if (gap2 >= 0 && gap1 < 0) {
+          blocks.push(`\n🎯 **Conclusion:** Avec ${score}, ${item2} est plus sûr que ${item1}.`);
+        } else {
+          const closer = gap1 > gap2 ? item1 : item2;
+          blocks.push(`\n🎯 **Conclusion:** ${closer} est plus proche de ton score (écart ${Math.abs(Math.min(gap1, gap2))} pts).`);
+        }
+      }
+    }
+
+    return blocks.join('\n');
+  }
+
+  // ============================================================
+  // PART 2 — extractComparisonEntities()
+  // Clean the message FIRST, then split ONLY on separators
+  // NEVER keep "(mon score", "?", extra fragments
+  // ============================================================
+  private extractComparisonEntities(message: string): string[] {
+    // Step 1: Clean the message thoroughly
+    const cleaned = cleanMessage(message);
+    if (!cleaned) return ['option 1', 'option 2'];
+
+    // Step 2: Remove comparison verbs
+    let m = cleaned;
+    const comparisonVerbs = [
+      'قارن', 'قارن بين', 'مقارنة', 'comparer', 'compare',
+      'comparaison', 'فرق بين', 'difference', 'différence',
+      'خير بين', 'أفضل', 'افضل', 'الفرق',
+    ];
+    for (const verb of comparisonVerbs) {
+      m = m.replace(verb, '');
+    }
+
+    // Step 3: Split ONLY using separators
+    const separators = /(?:ou|ou bien|vs|versus|\/|ولا|walou|أو|او|or|\|)/i;
+    let parts = m.split(separators)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    // Step 4: Remove stop words
+    const stopWords = [
+      'entre', 'between', 'et', 'and', 'و', 'مع', 'بين',
+      'comparer', 'compare', 'مقارنة', 'قارن',
+      'الفرق', 'difference', 'فرق',
+    ];
+    parts = parts.filter(p => !stopWords.includes(p));
+
+    // Step 5: If we still don't have 2 items, try to find known entities
+    if (parts.length < 2) {
+      const knownItems = [
+        'medecine', 'médecine', 'pharmacie', 'infirmier',
+        'informatique', 'web', 'data', 'dev', 'reseaux', 'réseaux', 'cyber',
+        'sport', 'kine', 'kiné', 'coaching',
+        'business', 'commerce', 'gestion', 'finance', 'marketing',
+        'art', 'design', 'architecture',
+        'droit', 'avocat', 'notaire',
+        'lettres', 'traduction', 'journalisme',
+        'genie civil', 'génie civil', 'mecanique', 'mécanique',
+        'industriel', 'electrique', 'électrique',
+        'math', 'physique', 'chimie', 'biologie',
+        'frontend', 'backend', 'mobile',
+      ];
+      const found = knownItems.filter(i => {
+        return cleaned.includes(i);
+      });
+      if (found.length >= 2) return found.slice(0, 2);
+      if (found.length === 1) return [found[0], parts[0] || 'option 2'];
+    }
+
+    return parts.length >= 2 ? parts.slice(0, 2) : ['option 1', 'option 2'];
+  }
+
+  // ============================================================
+  // 🗺️ ROADMAP GENERATOR
+  // ============================================================
+  private roadmapGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+    const domain = this.getEffectiveDomain(message, effectiveDomain);
+    const interest = domainToInterest(domain) || domain;
+
+    if (!interest) {
+      return lang === 'ar'
+        ? '🗺️ **الroadmap:** حدد المجال اللي تحب (مثلاً: "roadmap cyber")'
+        : '🗺️ **Roadmap:** Précise le domaine (ex: "roadmap dev web")';
+    }
+
+    const fullField = this.getFieldByInterest(interest);
+    const fieldName = fullField?.field || domainLabel(effectiveDomain || null, lang) || interest;
+
+    if (lang === 'ar') {
+      return `🗺️ **Roadmap ${fieldName}**\n\n`
+        + `**١. الأساسيات 📚**\n${this.buildLearningOrder(interest, lang)}\n\n`
+        + `**٢. المشاريع 🔨**\n• ابنِ ٢-٣ مشاريع شخصية\n• انشرها على GitHub / منصات\n\n`
+        + `**٣. الشهادات 📜**\n• شهادات مهنية معترف بها\n• منصات: Coursera, Udemy, Google\n\n`
+        + `**٤. التربص 🏢**\n• ابحث عن تربص في شركة\n• تطبيق عملي للمهارات\n\n`
+        + `**٥. التوظيف 🚀**\n• صمم CV محترف\n• قدم على LinkedIn / مواقع توظيف`;
+    }
+
+    return `🗺️ **Roadmap ${fieldName}**\n\n`
+      + `**1. Basics 📚**\n${this.buildLearningOrder(interest, lang)}\n\n`
+      + `**2. Projects 🔨**\n• Build 2-3 personal projects\n• Publish on GitHub/portfolios\n\n`
+      + `**3. Certifications 📜**\n• Get recognized professional certs\n• Platforms: Coursera, Udemy, Google\n\n`
+      + `**4. Internship 🏢**\n• Find an internship/entry position\n• Apply skills in real projects\n\n`
+      + `**5. Job Search 🚀**\n• Build a strong CV\n• Apply on LinkedIn / job platforms`;
+  }
+
+  // ============================================================
+  // 💰 SALARY GENERATOR
+  // ============================================================
+  private salaryGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+    const domain = this.getEffectiveDomain(message, effectiveDomain);
+
+    const jobs = this.ragService.getJobsByField(domain || null);
+    
+    if (jobs.length === 0) {
+      return lang === 'ar'
+        ? '💰 ما عنديش معلومات رواتب لهذا المجال.'
+        : '💰 Pas d\'infos salaires pour ce domaine.';
+    }
+
+    const blocks: string[] = [];
+    if (lang === 'ar') blocks.push('💰 **الرواتب في هذا المجال:**\n');
+    else blocks.push('💰 **Salaires dans ce domaine:**\n');
+
+    jobs.slice(0, 3).forEach(j => {
+      const salary = j.salary_level
+        ? this.salaryLabel(j.salary_level, lang)
+        : lang === 'ar' ? '800 - 1500 دينار' : '800 - 1500 DT';
+      const senior = j.senior_salary || (lang === 'ar' ? '2000+ دينار' : '2000+ DT');
+      if (lang === 'ar') {
+        blocks.push(`**${j.title}**\n• مبتدئ: ${salary}\n• خبير: ${senior}\n`);
+      } else {
+        blocks.push(`**${j.title}**\n• Junior: ${salary}\n• Senior: ${senior}\n`);
+      }
+    });
+
+    return blocks.join('\n');
+  }
+
+  private salaryLabel(level: string, lang: 'fr' | 'ar'): string {
+    const labels: Record<string, Record<string, string>> = {
+      Low: { ar: '800 - 1200 دينار', fr: '800 - 1200 DT' },
+      Medium: { ar: '1500 - 2500 دينار', fr: '1500 - 2500 DT' },
+      High: { ar: '2500 - 4000 دينار', fr: '2500 - 4000 DT' },
+    };
+    return labels[level]?.[lang] || level;
+  }
+
+  // ============================================================
+  // 🧠 DOMAIN-AWARE FOLLOW-UP
+  // ============================================================
+  private buildDomainFollowUp(domainOrInterest: string | null | undefined, lang: 'fr' | 'ar'): string {
+    if (!domainOrInterest) {
+      return lang === 'ar' ? 'شنو المجال اللي تحب؟' : 'Quel domaine veux-tu ?';
+    }
+
+    const memory = this.getMemory();
+    const asked = memory.lastQuestionsAsked || [];
+
+    // Map interest back to domain key for followups
+    const interestToDomain: Record<string, string> = {
+      tech: 'IT',
+      sport: 'SPORT',
+      health: 'HEALTH',
+      business: 'BUSINESS',
+      art: 'ART',
+      languages: 'LANGUAGES',
+      engineering: 'ENGINEERING',
+    };
+    
+    const domainKey = interestToDomain[domainOrInterest] || domainOrInterest.toUpperCase();
+    const followups = DOMAIN_FOLLOWUPS[domainKey] || {
+      ar: ['تحب نشوفلك برامج ولا خدمات؟'],
+      fr: ['Tu veux voir des programmes ou des métiers ?'],
+    };
+
+    const questions = followups[lang === 'ar' ? 'ar' : 'fr'];
+    const fresh = questions.filter(q => !asked.includes(q));
+    const chosen = fresh.length > 0 ? fresh[Math.floor(Math.random() * fresh.length)] : questions[0];
+    this.trackAskedQuestion(chosen);
+
+    return `👉 ${chosen}`;
+  }
+
+  // ============================================================
+  // 🧠 MEMORY HELPERS
+  // ============================================================
+
+  private trackAskedQuestion(question: string): void {
+    const e = this.sessionStudentData.lastQuestionsAsked || [];
+    this.sessionStudentData.lastQuestionsAsked = [...e, question].slice(-6);
+  }
+
+  private getMemory(): AiMemory {
     return {
-      domain: undefined,
-      field,
-      difficulty,
-      jobs,
-      programs: selectedPrograms,
-      intent,
+      interest: this.sessionStudentData.interest,
+      difficulty: this.sessionStudentData.difficulty,
+      preferredDomain: this.sessionStudentData.preferredDomain,
+      refinedDomain: this.sessionStudentData.refinedDomain,
+      journeyStep: this.getJourneyStep(),
+      rejectedDomains: this.sessionStudentData.rejectedDomains || [],
+      lastQuestionsAsked: this.sessionStudentData.lastQuestionsAsked || [],
     };
   }
 
-  private getFilteredGuides(
-    score: number,
-    normalizedBac: string,
-  ): RankedGuideProgram[] {
-    if (!normalizedBac) return [];
-
-    return this.guideData
-      .map((guide) => {
-        const matchingBac = this.findMatchingBacType(guide, normalizedBac);
-        return { guide, matchingBac };
-      })
-      .filter(({ matchingBac }) => {
-        if (!matchingBac || !matchingBac.lastScore) return false;
-        return score >= matchingBac.lastScore;
-      })
-      .map(({ guide, matchingBac }) => ({
-        ...guide,
-        matchingBac: matchingBac!,
-        score: matchingBac!.lastScore || 0,
-      }))
-      .sort((a, b) => (b.score || 0) - (a.score || 0));
+  private getJourneyStep(): AiMemory['journeyStep'] {
+    if (!this.sessionStudentData.interest && !this.sessionStudentData.preferredDomain) return 'identify_interest';
+    if (!this.sessionStudentData.refinedDomain) return 'refine_domain';
+    if (!this.sessionStudentData.difficulty) return 'suggest_options';
+    return 'give_decision';
   }
 
-  private getClosestPrograms(
-    score: number,
-    normalizedBac: string,
-  ): RankedGuideProgram[] {
-    if (!normalizedBac) return [];
-
-    return this.guideData
-      .map((guide) => {
-        const bac = this.findMatchingBacType(guide, normalizedBac);
-        if (!bac) return null;
-        const lastScore = bac.lastScore || 0;
-        return {
-          guide,
-          bac,
-          diff: score - lastScore,
-          distance: Math.abs(score - lastScore),
-        };
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null)
-      .sort((a, b) => b.diff - a.diff || a.distance - b.distance)
-      .slice(0, 3)
-      .map((item) => ({
-        ...item.guide,
-        matchingBac: item.bac,
-        score: item.bac.lastScore || 0,
-      }));
+  private resolveEffectiveInterest(message: string): string | undefined {
+    const rejected = this.getMemory().rejectedDomains || [];
+    const explicitInterest = this.detectDynamicIntent(message);
+    if (explicitInterest) return rejected.includes(explicitInterest) ? undefined : explicitInterest;
+    const memInterest = this.sessionStudentData.interest || this.sessionStudentData.preferredDomain;
+    return (memInterest && !rejected.includes(memInterest)) ? memInterest : undefined;
   }
 
-  private calculateDifficultyForGuide(
-    score: number,
-    selectedGuide: RankedGuideProgram,
-  ): 'safe' | 'risky' | 'hard' {
-    const lastScore = selectedGuide?.matchingBac?.lastScore || 0;
+  private detectDynamicIntent(message: string): string | null {
+    if (!message) return null;
+    const field = detectField(message);
+    if (field) return field === 'it' ? 'tech' : field;
 
-    if (score > lastScore + 20) return 'safe';
-    if (score >= lastScore) return 'risky';
-    return 'hard';
+    const m = normalizeText(message);
+    const h = (k: string[]) => k.some(kw => m.includes(normalizeText(kw)));
+    if (h(['informatique', 'informatia', 'dev', 'développement', 'programmation', 'software', 'réseau', 'reseau', 'cyber', 'data', 'ia', 'ai', 'it', 'tech', 'coding', 'برمجة', 'تكنولوجيا', 'ديف', 'اعلامية', 'معلوماتية', 'frontend', 'backend', 'fullstack', 'web', 'mobile'])) return 'tech';
+    if (h(['sport', 'kiné', 'kine', 'football', 'basket', 'tennis', 'رياضة', 'سبور', 'تدريب'])) return 'sport';
+    if (h(['médecine', 'medecine', 'santé', 'sante', 'pharmacie', 'infirmier', 'طب', 'صحة', 'تمريض'])) return 'health';
+    if (h(['business', 'gestion', 'commerce', 'finance', 'marketing', 'économie', 'economie', 'comptabilité', 'comptabilite', 'تجارة', 'أعمال', 'محاسبة'])) return 'business';
+    if (h(['art', 'design', 'architecture', 'graphisme', 'mode', 'فن', 'تصميم', 'عمارة'])) return 'art';
+    return null;
   }
 
-
-  private getAllowedGuidePrograms(
-    studentData?: StudentData,
-  ): RankedGuideProgram[] {
-    const score = Number(studentData?.score) || 0;
-    const normalizedBac = this.normalizeBac(studentData?.bacType);
-
-    if (!normalizedBac) return [];
-
-    // Filter guides where score >= lastScore
-    const filteredGuides = this.getFilteredGuides(score, normalizedBac);
-
-    if (filteredGuides.length > 0) {
-      return filteredGuides;
-    }
-
-    // Fallback: closest programs
-    return this.getClosestPrograms(score, normalizedBac);
+  private isGreeting(message: string): boolean {
+    return /^(salut|bonjour|hello|hi|hey|صباح|مساء|سلام|bienvenue|اهلا)/i.test(message.toLowerCase().trim());
   }
 
-  private normalizeBac(bac?: string): string {
-    return this.getBacAliasKey(bac) || bac || '';
-  }
+  // ============================================================
+  // 🧠 LEGACY HELPERS
+  // ============================================================
 
   private extractStudentDataFromMessage(message: string): Partial<StudentData> {
-    const result: Partial<StudentData> = {};
-    if (!message) return result;
-
-    const msg = message.toLowerCase();
-
-    // Look for explicit score patterns: "score 120", "score:120", "my score is 120"
-    const scoreMatch = msg.match(/(?:score|sc|note|score[:\s]*is)\s*[:\s-]*?(\d{1,4})/i);
-    if (scoreMatch && scoreMatch[1]) {
-      const n = Number(scoreMatch[1]);
-      if (Number.isFinite(n)) result.score = n;
-    }
-
-    // Also allow formats like "120/200" or standalone "120" preceded by 'score' keywords
-    if (result.score === undefined) {
-      const slashMatch = msg.match(/(\d{1,3})\s*\/\s*\d{1,3}/);
-      if (slashMatch && slashMatch[1]) {
-        const n = Number(slashMatch[1]);
-        if (Number.isFinite(n)) result.score = n;
-      }
-    }
-
-    // bac type: look for 'bac <type>' or 'baccalaureat <type>'
-    const bacMatch = msg.match(/\b(?:bac|baccalaureat|baccalauréat)\s*[:\s-]*([\p{L}0-9-_]+)\b/iu);
-    if (bacMatch && bacMatch[1]) {
-      const raw = bacMatch[1].toString().trim();
-      const mapped = this.getBacAliasKey(raw);
-      if (mapped) result.bacType = mapped;
-      else result.bacType = raw;
-    }
-
-    // Also try to infer bac type from common words if not explicit
-    if (!result.bacType) {
-      for (const [key, aliases] of Object.entries(this.bacTypeAliases)) {
-        for (const alias of aliases) {
-          const norm = this.normalize(alias);
-          if (msg.includes(norm)) {
-            result.bacType = key;
-            break;
-          }
-        }
-        if (result.bacType) break;
-      }
-    }
-
-    return result;
+    const r: Partial<StudentData> = {};
+    const m = message.toLowerCase();
+    const sc = m.match(/(?:score|note|moyenne|معدل)\s*[:\\-]*\s*(\d+)/i);
+    if (sc) { const n = Number(sc[1]); if (n > 0 && n < 1000) r.score = n; }
+    const bc = m.match(/\b(?:bac|baccalaureat)\s*[:\\-]*\s*([\w\-]+)/i);
+    if (bc) r.bacType = bc[1].trim();
+    return r;
   }
 
-  private getBacAliasKey(bac?: string): string {
-    const normalizedBac = this.normalize(bac || '');
-    if (!normalizedBac) return '';
-
-    for (const [key, aliases] of Object.entries(this.bacTypeAliases)) {
-      if (
-        aliases.some((alias) => {
-          const normalizedAlias = this.normalize(alias);
-          return (
-            normalizedBac === normalizedAlias ||
-            normalizedBac.includes(normalizedAlias) ||
-            normalizedAlias.includes(normalizedBac)
-          );
-        })
-      ) {
-        return key;
-      }
-    }
-
-    return normalizedBac;
+  private mergeSessionStudentData(incoming?: Partial<StudentData>): void {
+    if (!incoming) return;
+    if (typeof incoming.score === 'number' && Number.isFinite(incoming.score)) this.sessionStudentData.score = incoming.score;
+    if (incoming.bacType?.trim()) this.sessionStudentData.bacType = incoming.bacType.trim();
+    if (incoming.interest?.trim()) this.sessionStudentData.interest = incoming.interest.trim();
+    if (incoming.difficulty) this.sessionStudentData.difficulty = incoming.difficulty;
+    if (incoming.refinedDomain?.trim()) this.sessionStudentData.refinedDomain = incoming.refinedDomain.trim();
+    if (incoming.journeyStep) this.sessionStudentData.journeyStep = incoming.journeyStep;
+    if (incoming.preferredDomain?.trim()) { this.sessionStudentData.preferredDomain = incoming.preferredDomain.trim(); this.sessionStudentData.interest = incoming.preferredDomain.trim(); }
+    if (incoming.rejectedDomains?.length) { const es = new Set(this.sessionStudentData.rejectedDomains || []); incoming.rejectedDomains.forEach(d => { if (d.trim()) es.add(d.trim()); }); this.sessionStudentData.rejectedDomains = Array.from(es); }
+    if (incoming.name?.trim()) this.sessionStudentData.name = incoming.name.trim();
+    if (incoming.selectedFiliere?.trim()) this.sessionStudentData.selectedFiliere = incoming.selectedFiliere.trim();
+    if (incoming.language) this.sessionStudentData.language = incoming.language;
   }
 
-  private findMatchingBacType(
-    guide: GuideProgram,
-    studentBac?: string,
-  ): GuideBacType | undefined {
-    const bacKey = this.getBacAliasKey(studentBac);
-    const aliases = bacKey
-      ? [bacKey, ...(this.bacTypeAliases[bacKey] || [])]
-      : [studentBac || ''];
-
-    return guide.bacTypes?.find((bac) => {
-      const normalizedType = this.normalize(bac.type);
-
-      return aliases.some((alias) => {
-        const normalizedAlias = this.normalize(alias);
-        return (
-          normalizedType === normalizedAlias ||
-          normalizedType.includes(normalizedAlias) ||
-          normalizedAlias.includes(normalizedType)
-        );
-      });
-    });
+  private syncMemoryToSessionData(): void {
+    const m = this.conversationMemory;
+    if (m.interest && !this.sessionStudentData.interest) { this.sessionStudentData.interest = m.interest; this.sessionStudentData.preferredDomain = m.interest; }
+    if ((m.difficulty === 'easy' || m.difficulty === 'challenge') && !this.sessionStudentData.difficulty) this.sessionStudentData.difficulty = m.difficulty;
+    if (m.preferredTrack && !this.sessionStudentData.refinedDomain) this.sessionStudentData.refinedDomain = m.preferredTrack;
+    if (m.rejectedTracks.length > 0) { const cr = this.sessionStudentData.rejectedDomains || []; const nr = m.rejectedTracks.filter(r => !cr.includes(r)); if (nr.length > 0) this.sessionStudentData.rejectedDomains = [...cr, ...nr]; }
   }
 
-  private getMatchingBacType(
-    guide: GuideProgram,
-    studentData?: StudentData,
-  ): GuideBacType | undefined {
-    const normalizedBac = this.normalizeBac(studentData?.bacType);
-    if (!normalizedBac) return undefined;
-
-    return this.findMatchingBacType(guide, normalizedBac);
+  resetMemory(): void {
+    this.conversationMemory = this.memoryService.initializeMemory();
+    this.sessionStudentData = {};
   }
 
-  private findFieldFromAllowedGuides(
-    allowedPrograms: RankedGuideProgram[],
-  ): FieldData | undefined {
-    if (!allowedPrograms.length) return undefined;
-
-    return this.findFieldForGuide(allowedPrograms[0]);
-  }
-
-  private findFieldByDetectedName(detectedField: string): FieldData | undefined {
-    const fieldAliases: Record<string, string[]> = {
-      IT: ['IT'],
-      Medical: ['Medical / Health'],
-      Business: ['Business / Management'],
-      Engineering: ['Engineering'],
-      Law: ['Law'],
-      Arts: ['Arts & Design'],
-      Humanities: ['Languages', 'Social Sciences'],
-    };
-    const candidates = fieldAliases[detectedField] || [detectedField];
-
-    const exactMatch = this.fieldsData.find((field) =>
-      candidates.some(
-        (candidate) => this.normalize(field.field) === this.normalize(candidate),
-      ),
-    );
-
-    if (exactMatch) return exactMatch;
-
-    return this.fieldsData.find((field) =>
-      candidates.some((candidate) => {
-        const fieldName = this.normalize(field.field);
-        const candidateName = this.normalize(candidate);
-
-        return fieldName.includes(candidateName);
-      }),
-    );
-  }
-
-  private findFieldForGuide(guide: GuideProgram): FieldData | undefined {
-    const guideDomain = this.normalize(guide.domain || '');
-
-    if (guideDomain) {
-      const directField = this.fieldsData.find((field) => {
-        const fieldName = this.normalize(field.field);
-
-        return (
-          fieldName.includes(guideDomain) || guideDomain.includes(fieldName)
-        );
-      });
-
-      if (directField) return directField;
-    }
-
-    const guideText = this.normalize(
-      [guide.name, guide.program, guide.institution, guide.formula]
-        .filter(Boolean)
-        .join(' '),
-    );
-
-    return this.fieldsData
-      .map((field) => {
-        const terms = this.getFieldSearchTerms(field);
-        const guideMatches = this.getMatchedTerms(guideText, terms).length;
-
-        return {
-          field,
-          score: guideMatches,
-        };
-      })
-      .filter((result) => result.score > 0)
-      .sort((a, b) => b.score - a.score)[0]?.field;
-  }
-
-  private rankAllowedProgramsForField(
-    allowedPrograms: RankedGuideProgram[],
-    field: FieldData,
-    message: string,
-    studentData?: StudentData,
-  ): RankedGuideProgram[] {
-    const normalizedMessage = this.normalize(message);
-    const messageTokens = this.tokenize(normalizedMessage);
-    const fieldTerms = this.getFieldSearchTerms(field);
-
-    return allowedPrograms
-      .map((guide) => {
-        const haystack = this.normalize(
-          [guide.name, guide.program, guide.institution, guide.domain]
-            .filter(Boolean)
-            .join(' '),
-        );
-        const fieldMatch =
-          this.getMatchedTerms(haystack, fieldTerms).length * 8;
-        const messageMatch =
-          messageTokens.filter((token) => haystack.includes(token)).length * 4;
-        const bacScore = guide.matchingBac ? 8 : 0;
-
-        return {
-          ...guide,
-          score: fieldMatch + messageMatch + bacScore,
-        };
-      })
-      .filter((guide) => guide.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
-  }
-
-  private getGuideName(guide: GuideProgram): string {
-    return guide.name || guide.program;
-  }
-
-  private detectField(
-    message: string,
-    studentData?: StudentData,
-  ): FieldData | undefined {
-    const normalizedMessage = this.normalize(
-      `${message} ${studentData?.selectedFiliere || ''}`,
-    );
-    const messageTokens = this.tokenize(normalizedMessage);
-
-    const fields = this.fieldsData
-      .map((field) => {
-        const aliasKey = this.getFieldAliasKey(field.field);
-        const terms = this.getFieldSearchTerms(field);
-        const matchedTerms = terms.filter((term) =>
-          this.matchesSearchTerm(normalizedMessage, term, messageTokens),
-        );
-        const tokenOverlap = terms
-          .flatMap((term) => this.tokenize(term))
-          .filter((term) => messageTokens.includes(term)).length;
-        const bacScore = matchedTerms.length
-          ? this.scoreBacFit(aliasKey, studentData)
-          : 0;
-        const rankBoost = matchedTerms.length
-          ? this.getFieldRankBoost(field)
-          : 0;
-
-        return {
-          field,
-          matchedTerms,
-          score:
-            matchedTerms.length * 12 + tokenOverlap * 2 + bacScore + rankBoost,
-        };
-      })
-      .filter((result) => result.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    return fields[0]?.field;
-  }
-
-  private findDomainsForField(
-    field: FieldData,
-    message: string,
-  ): RankedDomain[] {
-    const fieldAliasKey = this.getFieldAliasKey(field.field);
-    const normalizedMessage = this.normalize(message);
-    const fieldText = this.normalize(this.getFieldSearchTerms(field).join(' '));
-
-    return this.jobsData
-      .map((domain) => {
-        const domainAliasKey = this.getDomainAliasKey(domain.domain);
-        const terms = [
-          domain.domain,
-          ...domain.keywords,
-          ...domain.jobs.flatMap((job) => [
-            job.title,
-            ...job.skills,
-            ...this.getJobIntentTerms(job.title),
-          ]),
-        ];
-        const matchedTerms = this.getMatchedTerms(fieldText, terms);
-        const messageMatches = this.getMatchedTerms(normalizedMessage, terms);
-        const aliasScore = this.isCompatibleFieldDomain(
-          fieldAliasKey,
-          domainAliasKey,
-        )
-          ? 50
-          : 0;
-
-        return {
-          domain,
-          matchedTerms,
-          score:
-            aliasScore + matchedTerms.length * 4 + messageMatches.length * 8,
-        };
-      })
-      .filter((result) => result.score > 0)
-      .sort((a, b) => b.score - a.score);
-  }
-
-  private rankJobsFromField(
-    field: FieldData,
-    message: string,
-    studentData?: StudentData,
-  ): RankedJob[] {
-    const jobs = (field.possible_jobs || []).map((title) => {
-      const refinement = this.findJobRefinement(title);
-      const job: RankedJob = {
-        title,
-        skills: refinement?.skills || this.getJobIntentTerms(title),
-        unemployment_rate: refinement?.unemployment_rate ?? 50,
-        score: this.scoreFieldJob(
-          {
-            title,
-            skills: refinement?.skills || this.getJobIntentTerms(title),
-            unemployment_rate: refinement?.unemployment_rate ?? 50,
-          },
-          field,
-          message,
-          studentData,
-        ),
-      };
-
-      return job;
-    });
-
-    const rankedJobs = [...jobs].sort((a, b) => {
-      const unemploymentA = a.unemployment_rate ?? 99;
-      const unemploymentB = b.unemployment_rate ?? 99;
-
-      return unemploymentA - unemploymentB || b.score - a.score;
-    });
-
-    return this.applyJobReasons(
-      rankedJobs.slice(0, 3),
-      message,
-      field,
-      studentData,
-    );
-  }
-
-  private findJobRefinement(title: string, domain?: DomainData): JobData | undefined {
-    const normalizedTitle = this.normalize(title);
-
-    const searchSpaces = domain ? [domain] : this.jobsData;
-
-    return searchSpaces
-      .flatMap((d) => d.jobs)
-      .find((job) => this.normalize(job.title).includes(normalizedTitle));
-  }
-
-  private rankGuideProgramsForField(
-    field: FieldData,
-    message: string,
-    studentData?: StudentData,
-  ): RankedGuideProgram[] {
-    const aliasKey = this.getFieldAliasKey(field.field);
-    const hints = [
-      field.field,
-      ...field.programs,
-      ...field.possible_jobs,
-      ...(aliasKey ? this.guideHints[aliasKey] || [] : []),
-    ];
-    const normalizedMessage = this.normalize(message);
-    const normalizedBac = this.normalizeBac(studentData?.bacType);
-
-    return this.guideData
-      .map((program) => {
-        const haystack = this.normalize(
-          [program.program, program.institution, program.formula]
-            .filter(Boolean)
-            .join(' '),
-        );
-        const matchingBac = normalizedBac
-          ? this.findMatchingBacType(program, normalizedBac)
-          : undefined;
-        const guideMatch = this.getMatchedTerms(haystack, hints).length * 12;
-        const messageMatch =
-          this.getMatchedTerms(haystack, this.tokenize(normalizedMessage))
-            .length * 5;
-        const bacScore = matchingBac ? 12 : 0;
-        const scoreQualified =
-          matchingBac && studentData?.score && matchingBac.lastScore
-            ? studentData.score >= matchingBac.lastScore
-              ? 10
-              : -4
-            : 0;
-        const capacityScore = matchingBac?.capacity
-          ? Math.min(matchingBac.capacity / 20, 5)
-          : 0;
-
-        return {
-          ...program,
-          matchingBac,
-          score: guideMatch + messageMatch + bacScore + scoreQualified + capacityScore,
-        };
-      })
-      .filter((program) => program.score > 0)
-      .sort((a, b) => b.score - a.score);
-  }
-
-  private getFieldSearchTerms(field: FieldData): string[] {
-    const aliasKey = this.getFieldAliasKey(field.field);
-    const extraAliasKeys = aliasKey === 'gestion' ? ['commerce'] : [];
-
-    return [
-      field.field,
-      ...(field.programs || []),
-      ...(field.possible_jobs || []),
-      ...(field.possible_jobs || []).flatMap((job) =>
-        this.getJobIntentTerms(job),
-      ),
-      field.demand_in_tunisia || '',
-      field.future_outlook || '',
-      field.reason || '',
-      ...(aliasKey ? this.domainAliases[aliasKey] || [] : []),
-      ...extraAliasKeys.flatMap((key) => this.domainAliases[key] || []),
-    ].filter(Boolean);
-  }
-
-  private matchesSearchTerm(
-    normalizedText: string,
-    term: string,
-    textTokens: string[],
-  ): boolean {
-    const normalizedTerm = this.normalize(term);
-    if (normalizedTerm.length < 2) return false;
-
-    if (normalizedTerm.length <= 3) {
-      return textTokens.includes(normalizedTerm);
-    }
-
-    return normalizedText.includes(normalizedTerm);
-  }
-
-  private getFieldRankBoost(field: FieldData): number {
-    const ranking = this.ranking.find(
-      (item) => this.normalize(item.field) === this.normalize(field.field),
-    );
-
-    return ranking ? Math.max(0, 10 - ranking.rank) : 0;
-  }
-
-  private isCompatibleFieldDomain(
-    fieldAliasKey?: string,
-    domainAliasKey?: string,
-  ): boolean {
-    if (!fieldAliasKey || !domainAliasKey) return false;
-    if (fieldAliasKey === domainAliasKey) return true;
-
-    return (
-      fieldAliasKey === 'gestion' &&
-      ['gestion', 'commerce'].includes(domainAliasKey)
-    );
-  }
-
-  private scoreFieldJob(
-    job: JobData,
-    field: FieldData,
-    message: string,
-    studentData?: StudentData,
-  ): number {
-    const normalizedMessage = this.normalize(message);
-    const fieldTerms = this.getFieldSearchTerms(field);
-    const jobText = this.normalize(
-      [job.title, ...job.skills, ...this.getJobIntentTerms(job.title)].join(
-        ' ',
-      ),
-    );
-    const fieldMatch = this.getMatchedTerms(jobText, fieldTerms).length * 8;
-    const messageMatch =
-      this.getMatchedTerms(jobText, this.tokenize(normalizedMessage)).length *
-      10;
-    const unemploymentScore =
-      typeof job.unemployment_rate === 'number'
-        ? Math.max(0, 100 - job.unemployment_rate * 8)
-        : 10;
-    const bacScore = this.scoreBacFit(
-      this.getFieldAliasKey(field.field),
-      studentData,
-    );
-
-    return unemploymentScore + fieldMatch + messageMatch + bacScore;
-  }
-
-  private isJobLinkedToField(job: JobData, field: FieldData): boolean {
-    const possibleJobTerms = field.possible_jobs.flatMap((title) => [
-      title,
-      ...this.getJobIntentTerms(title),
-    ]);
-    const jobText = this.normalize(
-      [job.title, ...job.skills, ...this.getJobIntentTerms(job.title)].join(
-        ' ',
-      ),
-    );
-    const jobTokens = this.tokenize(jobText);
-
-    return possibleJobTerms.some((term) =>
-      this.matchesSearchTerm(jobText, term, jobTokens),
-    );
-  }
-
-  private uniqueJobsInOrder(jobs: RankedJob[]): RankedJob[] {
-    const seen = new Set<string>();
-    const uniqueJobs: RankedJob[] = [];
-
-    for (const job of jobs) {
-      const key = this.normalize(job.title);
-      if (seen.has(key)) continue;
-
-      seen.add(key);
-      uniqueJobs.push(job);
-    }
-
-    return uniqueJobs;
-  }
-
-  private applyJobReasons(
-    jobs: RankedJob[],
-    message: string,
-    field: FieldData,
-    studentData?: StudentData,
-  ): RankedJob[] {
-    return jobs.map((job, index) => ({
-      ...job,
-      reason: this.getJobReasonByRank(job, message, field, studentData, index),
-    }));
-  }
-
-  private getJobReasonByRank(
-    job: JobData,
-    message: string,
-    field: FieldData,
-    studentData: StudentData | undefined,
-    index: number,
-  ): string {
-    const bacType = studentData?.bacType
-      ? `Bac ${studentData.bacType}`
-      : 'ton profil';
-    const score = studentData?.FG ?? studentData?.bacAverage;
-    const scoreHint =
-      typeof score === 'number' && score >= 14 ? ' et ton bon score' : '';
-
-    if (index === 0) {
-      const skills = job.skills?.slice(0, 2).join(', ');
-      return skills
-        ? `tes compétences peuvent s'appuyer sur ${skills} avec ${bacType}${scoreHint}`
-        : this.getJobReason(job.title, message, 'skills');
-    }
-
-    if (index === 1) {
-      return `demande ${this.translateDataValue(
-        field.demand_in_tunisia || 'bonne',
-      )} en Tunisie, avec une perspective ${this.translateDataValue(
-        field.future_outlook || 'positive',
-      )}`;
-    }
-
-    return this.getJobReason(job.title, message, 'personality');
-  }
-
-  private detectDomain(message: string): RankedDomain | undefined {
-    const normalizedMessage = this.normalize(message);
-    const messageTokens = this.tokenize(normalizedMessage);
-
-    const domains = this.jobsData
-      .map((domain) => {
-        const aliasKey = this.getDomainAliasKey(domain.domain);
-        const terms = [
-          ...domain.keywords,
-          ...(aliasKey ? this.domainAliases[aliasKey] || [] : []),
-          domain.domain,
-        ];
-        const matchedTerms = this.getMatchedTerms(normalizedMessage, terms);
-        const tokenOverlap = terms
-          .flatMap((term) => this.tokenize(this.normalize(term)))
-          .filter((term) => messageTokens.includes(term)).length;
-
-        return {
-          domain,
-          matchedTerms,
-          score: matchedTerms.length * 8 + tokenOverlap * 2,
-        };
-      })
-      .filter((result) => result.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    return domains[0];
-  }
-
-  private rankJobs(
-    domain: DomainData,
-    message: string,
-    studentData?: StudentData,
-  ): RankedJob[] {
-    return domain.jobs
-      .map((job) => ({
-        ...job,
-        score: this.scoreJob(job, message, studentData, domain),
-        reason: this.getJobReason(job.title, message, 'skills'),
-      }))
-      .sort((a, b) => b.score - a.score);
-  }
-
-  private rankFieldJobs(
-    field: FieldData | undefined,
-    message: string,
-    studentData?: StudentData,
-  ): RankedJob[] {
-    if (!field?.possible_jobs?.length) return [];
-    // Find the most relevant jobs domain(s) for this field
-    const domains = this.findDomainsForField(field, message);
-    const chosenDomain = domains && domains.length > 0 ? domains[0].domain : undefined;
-
-    // If we have a matching domain from jobs.json, prefer jobs from that domain
-    if (chosenDomain) {
-      // Collect jobs from the chosen domain that are linked to the field
-      const candidateJobs = chosenDomain.jobs
-        .filter((job) => this.isJobLinkedToField(job, field))
-        .map((job) => ({
-          ...job,
-          score: this.scoreJob(job, message, studentData, chosenDomain),
-        } as RankedJob));
-
-      // If we found candidate jobs in the domain, return top ones
-      if (candidateJobs.length > 0) {
-        const ranked = candidateJobs.sort((a, b) => b.score - a.score).slice(0, 3);
-        return this.applyJobReasons(ranked, message, field, studentData);
-      }
-
-      // Fallback: match field.possible_jobs against chosen domain jobs
-      const matchedFromDomain = field.possible_jobs
-        .map((title) => {
-          const refinement = this.findJobRefinement(title, chosenDomain);
-          const job: RankedJob = {
-            title,
-            skills: refinement?.skills || this.getJobIntentTerms(title),
-            unemployment_rate: refinement?.unemployment_rate ?? 50,
-            score: this.scoreJob(
-              {
-                title,
-                skills: refinement?.skills || this.getJobIntentTerms(title),
-                unemployment_rate: refinement?.unemployment_rate ?? 50,
-              },
-              message,
-              studentData,
-              chosenDomain,
-            ),
-          };
-
-          return job;
-        })
-        .filter(Boolean)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
-
-      if (matchedFromDomain.length > 0) {
-        return this.applyJobReasons(matchedFromDomain, message, field, studentData);
-      }
-    }
-
-    // Final fallback: use field.possible_jobs and global refinements
-    const rankedJobs: RankedJob[] = field.possible_jobs
-      .map((title) => {
-        const refinement = this.findJobRefinement(title);
-        const job: RankedJob = {
-          title,
-          skills: refinement?.skills || this.getJobIntentTerms(title),
-          unemployment_rate: refinement?.unemployment_rate ?? 50,
-          score: this.scoreJob(
-            {
-              title,
-              skills: refinement?.skills || this.getJobIntentTerms(title),
-              unemployment_rate: refinement?.unemployment_rate ?? 50,
-            },
-            message,
-            studentData,
-            undefined,
-          ),
-        };
-
-        return job;
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
-
-    return this.applyJobReasons(rankedJobs, message, field, studentData);
-  }
-
-  private rankGeneralJobs(
-    message: string,
-    studentData?: StudentData,
-  ): RankedJob[] {
-    const ranked = this.fieldsData.flatMap((field) =>
-      this.rankJobsFromField(field, message, studentData).map((job) => ({
-        ...job,
-        score: job.score + this.getFieldRankBoost(field),
-        reason: `${field.field}: ${job.reason || 'option cohérente avec ton profil'}`,
-      })),
-    );
-
-    return this.uniqueJobsInOrder(ranked).sort((a, b) => b.score - a.score);
-  }
-
-  private scoreJob(
-    job: JobData,
-    message: string,
-    studentData?: StudentData,
-    domain?: DomainData,
-  ): number {
-    const normalizedMessage = this.normalize(message);
-    const aliasKey =
-      (domain ? this.getDomainAliasKey(domain.domain) : undefined) ||
-      (domain ? this.getFieldAliasKey(domain.domain) : undefined);
-    const domainTerms = [
-      domain?.domain || '',
-      ...(domain?.keywords || []),
-      ...(aliasKey ? this.domainAliases[aliasKey] || [] : []),
-    ];
-    const jobTerms = [
-      job.title,
-      ...job.skills,
-      ...this.getJobIntentTerms(job.title),
-    ];
-    const keywordScore =
-      this.getMatchedTerms(normalizedMessage, jobTerms).length * 18 +
-      this.getMatchedTerms(normalizedMessage, domainTerms).length * 8;
-    const unemploymentScore =
-      typeof job.unemployment_rate === 'number'
-        ? Math.max(0, 25 - job.unemployment_rate * 2)
-        : 8;
-    const bacScore = this.scoreBacFit(aliasKey, studentData);
-
-    return keywordScore + unemploymentScore + bacScore;
-  }
-
-  private mergeRankedJobs(
-    primaryJobs: RankedJob[],
-    fallbackJobs: RankedJob[],
-  ): RankedJob[] {
-    const jobsByTitle = new Map<string, RankedJob>();
-
-    for (const job of [...primaryJobs, ...fallbackJobs]) {
-      const key = this.normalize(job.title);
-      const current = jobsByTitle.get(key);
-
-      if (!current || job.score > current.score) {
-        jobsByTitle.set(key, job);
-      }
-    }
-
-    return [...jobsByTitle.values()].sort((a, b) => b.score - a.score);
-  }
-
-  private rankGuidePrograms(
-    domain: DomainData,
-    message: string,
-    studentData?: StudentData,
-  ): RankedGuideProgram[] {
-    const aliasKey = this.getDomainAliasKey(domain.domain);
-    const hints = aliasKey ? this.guideHints[aliasKey] || [] : [];
-    const normalizedMessage = this.normalize(message);
-    const normalizedBacType = this.normalizeBac(studentData?.bacType);
-
-    return this.guideData
-      .map((program) => {
-        const haystack = this.normalize(
-          [program.program, program.institution, program.formula]
-            .filter(Boolean)
-            .join(' '),
-        );
-        const matchingBac = normalizedBacType
-          ? this.findMatchingBacType(program, normalizedBacType)
-          : undefined;
-        const guideMatch = this.getMatchedTerms(haystack, hints).length * 12;
-        const messageMatch =
-          this.getMatchedTerms(haystack, this.tokenize(normalizedMessage))
-            .length * 5;
-        const formulaMatch =
-          aliasKey === 'informatique' && haystack.includes('info') ? 8 : 0;
-        const bacScore = matchingBac ? 12 : 0;
-        const fgScore =
-          matchingBac && studentData?.FG && matchingBac.lastScore
-            ? studentData.FG >= matchingBac.lastScore
-              ? 10
-              : -4
-            : 0;
-        const capacityScore = matchingBac?.capacity
-          ? Math.min(matchingBac.capacity / 20, 5)
-          : 0;
-
-        return {
-          ...program,
-          matchingBac,
-          score:
-            guideMatch +
-            messageMatch +
-            formulaMatch +
-            bacScore +
-            fgScore +
-            capacityScore,
-        };
-      })
-      .filter((program) => program.score > 0)
-      .sort((a, b) => b.score - a.score);
-  }
-
-  private formatProgramContext(
-    program: RankedGuideProgram,
-    studentData?: StudentData,
-  ): string {
-    const lastScore = program.matchingBac?.lastScore;
-    const capacity = program.matchingBac?.capacity;
-    const hasScore =
-      typeof studentData?.score === 'number' && Number.isFinite(studentData.score);
-    const score = hasScore ? Number(studentData?.score) : 0;
-    const gap =
-      typeof lastScore === 'number' && hasScore
-        ? `écart avec ton score: ${(score - lastScore).toFixed(2)}`
-        : typeof lastScore === 'number'
-          ? 'écart avec ton score: score non précisé'
-        : 'dernier score non disponible';
-
-    return [
-      `- ${this.getGuideName(program)}`,
-      `institution: ${program.institution}`,
-      `localisation: ${this.getInstitutionLocation(program.institution)}`,
-      program.formula ? `formule: ${program.formula}` : undefined,
-      typeof lastScore === 'number' ? `dernier score: ${lastScore}` : undefined,
-      typeof capacity === 'number' ? `capacité: ${capacity}` : undefined,
-      gap,
-      `niveau: ${
-        hasScore
-          ? this.getDifficultyLabel(this.calculateDifficultyForGuide(score, program))
-          : 'à vérifier après ajout du score'
-      }`,
-    ]
-      .filter(Boolean)
-      .join('; ');
-  }
-
-  private getInstitutionLocation(institution?: string): string {
-    const text = this.normalize(institution || '');
-    const locations: Array<[string, string[]]> = [
-      ['Tunis', ['tunis', 'تونس', 'tunisie', 'منار', 'manar']],
-      ['Sousse', ['sousse', 'سوسة']],
-      ['Sfax', ['sfax', 'صفاقس']],
-      ['Monastir', ['monastir', 'منستير']],
-      ['Nabeul', ['nabeul', 'نابل']],
-      ['Bizerte', ['bizerte', 'بنزرت']],
-      ['Gabes', ['gabes', 'قابس']],
-      ['Gafsa', ['gafsa', 'قفصة']],
-      ['Kairouan', ['kairouan', 'قيروان']],
-      ['Kasserine', ['kasserine', 'قصرين']],
-      ['Jendouba', ['jendouba', 'جندوبة']],
-      ['Medenine', ['medenine', 'مدنين']],
-      ['Mahdia', ['mahdia', 'مهدية']],
-      ['Kef', ['kef', 'الكاف']],
-      ['Siliana', ['siliana', 'سليانة']],
-      ['Tozeur', ['tozeur', 'توزر']],
-      ['Tataouine', ['tataouine', 'تطاوين']],
-      ['Beja', ['beja', 'باجة']],
-      ['Zaghouan', ['zaghouan', 'زغوان']],
-      ['Ben Arous', ['ben arous', 'بن عروس']],
-      ['Ariana', ['ariana', 'اريانة', 'أريانة']],
-      ['Manouba', ['manouba', 'منوبة']],
-      ['Carthage / Borj Cedria', ['carthage', 'قرطاج', 'borj cedria', 'برج السدرية']],
-    ];
-
-    const match = locations.find(([, aliases]) =>
-      aliases.some((alias) => text.includes(this.normalize(alias))),
-    );
-
-    return match?.[0] || 'localisation à vérifier dans le nom de l’institution';
-  }
-
-  private getDifficultyLabel(
-    difficulty?: 'safe' | 'risky' | 'hard',
-  ): string {
-    if (difficulty === 'safe') return 'sûr';
-    if (difficulty === 'risky') return 'jouable mais à comparer';
-    if (difficulty === 'hard') return 'difficile';
-    return 'à vérifier';
-  }
-
-  private translateDataValue(value?: string): string {
-    const normalizedValue = this.normalize(value || '');
-    const translations: Record<string, string> = {
-      'very high': 'très élevée',
-      high: 'élevée',
-      standard: 'standard',
-      strong: 'forte',
-      positive: 'positive',
-      moderate: 'modérée',
-      average: 'moyenne',
-      low: 'faible',
-      'low to moderate': 'faible à modéré',
-      'moderate to high': 'modérée à élevée',
-      'a comparer selon le programme': 'à comparer selon le programme',
-      'positive si les competences suivent':
-        'positive si les compétences suivent',
-      'non precise': 'non précisé',
-    };
-
-    return translations[normalizedValue] || value || 'non précisé';
-  }
-
-  private translateFieldReason(reason?: string): string {
-    const normalizedReason = this.normalize(reason || '');
-
-    if (!normalizedReason) {
-      return 'question générale sur les programmes';
-    }
-
-    if (
-      normalizedReason.includes('strongest field') &&
-      normalizedReason.includes('high demand')
-    ) {
-      return 'Domaine très porteur en Tunisie, avec une forte demande locale et internationale.';
-    }
-
-    if (
-      normalizedReason.includes('good') &&
-      normalizedReason.includes('demand')
-    ) {
-      return 'Domaine intéressant avec une demande à comparer selon la spécialité et l’établissement.';
-    }
-
-    if (
-      normalizedReason.includes('less demanded') ||
-      normalizedReason.includes('technical fields')
-    ) {
-      return 'Domaine utile pour les langues, la traduction et la communication, mais la demande est généralement plus limitée que dans les filières techniques.';
-    }
-
-    return reason || 'question générale sur les programmes';
-  }
-
-  private buildRagContext(
-  ragData: FilteredRagData,
-  userMessage: string,
-  studentData?: StudentData,
-): string {
-  const field = ragData.field;
-  const scoreText =
-    typeof studentData?.score === 'number' && Number.isFinite(studentData.score)
-      ? String(studentData.score)
-      : 'non précisé';
-
-  const programs = ragData.programs
-    .slice(0, 5)
-    .map((program) => this.formatProgramContext(program, studentData));
-  const programLocations = ragData.programs
-    .slice(0, 5)
-    .map(
-      (program) =>
-        `- ${this.getGuideName(program)}: ${this.getInstitutionLocation(
-          program.institution,
-        )} (${program.institution})`,
-    );
-
-  const jobs = ragData.jobs
-    .slice(0, 5)
-    .map((job) => {
-      const skills = job.skills?.slice(0, 4).join(', ') || 'compétences à développer';
-      const unemployment =
-        typeof job.unemployment_rate === 'number'
-          ? `risque chômage estimé: ${job.unemployment_rate}%`
-          : 'risque chômage non précisé';
-
-      return `- ${job.title}: ${skills}; ${unemployment}; raison: ${
-        job.reason || this.getJobReason(job.title, userMessage)
-      }`;
-    });
-
-  const technicalSkills =
-    field?.required_skills?.technical_skills?.slice(0, 5).join(', ') ||
-    'à adapter selon la filière';
-  const softSkills =
-    field?.required_skills?.soft_skills?.slice(0, 5).join(', ') ||
-    'communication, discipline, autonomie';
-  const tools =
-    field?.required_skills?.tools_and_technologies?.slice(0, 5).join(', ') ||
-    'outils à choisir selon le parcours';
-
-  return `
-Données profil:
-- Bac: ${studentData?.bacType || 'non précisé'}
-- Score: ${scoreText}
-- Question: ${userMessage}
-- Type de question: ${ragData.intent || 'general'}
-- Niveau du premier choix: ${this.getDifficultyLabel(ragData.difficulty)}
-
-Domaine détecté depuis fields.json:
-- Domaine: ${field?.field || 'aucun domaine précis détecté'}
-- Pourquoi: ${this.translateFieldReason(field?.reason)}
-- Demande en Tunisie: ${this.translateDataValue(
-    field?.demand_in_tunisia || 'à comparer selon le programme',
-  )}
-- Perspective future: ${this.translateDataValue(
-    field?.future_outlook || 'positive si les compétences suivent',
-  )}
-- Risque chômage: ${this.translateDataValue(
-    field?.unemployment_risk || 'non précisé',
-  )}
-- Compétences techniques: ${technicalSkills}
-- Soft skills: ${softSkills}
-- Outils/technologies: ${tools}
-
-Programmes recommandés depuis guide.json:
-${programs.join('\n') || '- Aucun programme précis trouvé pour ce bac et ce score'}
-
-Localisation des institutions:
-${programLocations.join('\n') || '- Aucune localisation disponible'}
-
-Métiers et marché depuis fields.json/jobs.json:
-${jobs.join('\n') || '- Aucun métier précis trouvé, proposer une comparaison par domaines'}
-`;
-}
-
- private buildFullPrompt(
-  userMessage: string,
-  ragContext: string,
-  lang?: 'fr' | 'ar',
-  memory: ConversationMessage[] = [],
-): string {
-  const languageInstruction =
-    lang === 'ar'
-      ? 'اجب باللغة العربية أو الدارجة التونسية بأسلوب مهني وودود.'
-      : 'Réponds uniquement en français clair. N’utilise pas l’anglais dans les titres, les raisons ou les conseils.';
-
-  const conversationMemory = this.buildConversationMemory(memory);
-  const safetyInstruction = this.safetyRules.getPromptRules(
-    'orientation',
-    lang || 'fr',
-  );
-
-  return `
-Tu es un conseiller tunisien expert en orientation universitaire. Ton objectif est de donner une réponse complète, personnalisée et utile à partir du score, du bac, de la question de l'étudiant, et des données locales.
-
-${safetyInstruction}
-
-DONNÉES RAG (extraites de fields.json, guide.json et jobs.json):
-${ragContext}
-
-HISTORIQUE RECENT (5 derniers messages maximum):
-${conversationMemory || 'Aucun historique recent.'}
-
-QUESTION DE L'ÉTUDIANT:
-${userMessage}
-
-CONSIGNES:
-1. ${languageInstruction}
-2. Analyse d'abord le profil: bac, score, objectif ou question.
-3. Recommande uniquement les programmes fournis dans le contexte. Pour chaque programme, explique le niveau: sûr, jouable/risqué, ou difficile.
-4. Utilise jobs.json et fields.json pour expliquer les métiers, la demande en Tunisie, les compétences et les perspectives.
-5. Ajoute ta propre expertise IA seulement pour enrichir les conseils, les compétences à apprendre et la feuille de route. N'invente pas de noms de programmes absents du contexte.
-6. Réponds directement à la question et varie la structure selon le type de question:
-- best_chances: classe les filières avec admission, dernier score, écart et risque.
-- location: réponds surtout sur la ville/gouvernorat des institutions, la proximité et les alternatives proches.
-- field_explanation: explique le domaine, ses spécialités, ce qu'on étudie et pour quel profil.
-- requirements: détaille les spécialités, conditions, compétences et niveau demandé.
-- best_choice: donne une recommandation tranchée avec alternatives.
-- career: parle surtout métiers, marché et roadmap.
-7. Si un domaine précis est détecté, les programmes conseillés doivent appartenir à ce domaine autant que possible.
-
-Structure demandée:
-1. Analyse du profil
-2. Programmes conseillés
-3. Débouchés et compétences
-4. Conseil personnalisé et prochaines étapes
-`;
-}
-
-  private findFieldForDomain(domain?: DomainData): FieldData | undefined {
-    const aliasKey = domain ? this.getDomainAliasKey(domain.domain) : undefined;
-    const fieldNameByAlias: Record<string, string> = {
-      informatique: 'IT',
-      ingenierie: 'Engineering',
-      sante: 'Medical / Health',
-      gestion: 'Business / Management',
-      commerce: 'Business / Management',
-      energie: 'Science',
-      droit: 'Law',
-      arts: 'Arts & Design',
-      education: 'Social Sciences',
-    };
-    const expectedField = aliasKey ? fieldNameByAlias[aliasKey] : undefined;
-
-    return this.fieldsData.find((field) => {
-      const fieldName = field.field.toLowerCase();
-      const domainName = domain?.domain?.toLowerCase() || '';
-
-      return (
-        fieldName.includes(domainName) ||
-        fieldName === expectedField?.toLowerCase() ||
-        fieldName.includes(expectedField?.toLowerCase() || '')
-      );
-    });
-  }
-
-  private getFieldAliasKey(fieldName: string): string | undefined {
-    const normalizedField = this.normalize(fieldName);
-
-    if (normalizedField.includes('it')) return 'informatique';
-    if (normalizedField.includes('engineering')) return 'ingenierie';
-    if (
-      normalizedField.includes('medical') ||
-      normalizedField.includes('health')
-    )
-      return 'sante';
-    if (
-      normalizedField.includes('business') ||
-      normalizedField.includes('management')
-    )
-      return 'gestion';
-    if (normalizedField.includes('law')) return 'droit';
-    if (
-      normalizedField.includes('languages') ||
-      normalizedField.includes('humanities')
-    )
-      return 'languages';
-    if (normalizedField.includes('arts') || normalizedField.includes('design'))
-      return 'arts';
-    if (normalizedField.includes('science')) return 'energie';
-    if (normalizedField.includes('social')) return 'education';
-
-    return undefined;
-  }
-
-  private scoreBacFit(
-    aliasKey: string | undefined,
-    studentData?: StudentData,
-  ): number {
-    const bacType = this.normalize(studentData?.bacType || '');
-    if (!aliasKey || !bacType) return 0;
-
-    const preferredBacByDomain: Record<string, string[]> = {
-      informatique: ['info', 'math', 'tech'],
-      ingenierie: ['math', 'tech'],
-      sante: ['svt', 'math'],
-      gestion: ['eco', 'math'],
-      commerce: ['eco', 'lettres'],
-      droit: ['lettres', 'eco'],
-      education: ['lettres', 'svt'],
-      arts: ['lettres'],
-      languages: ['lettres'],
-    };
-
-    return preferredBacByDomain[aliasKey]?.some((bac) => bacType.includes(bac))
-      ? 6
-      : 0;
-  }
-
-  private getPersonalizationHint(
-    message: string,
-    field: FieldData | undefined,
-    studentData?: StudentData,
-  ): string {
-    const text = this.normalize(`${message} ${field?.field || ''}`);
-    const bacType = this.normalize(studentData?.bacType || '');
-    const score = studentData?.FG ?? studentData?.bacAverage;
-    const hints: string[] = [];
-
-    if (bacType.includes('math')) {
-      hints.push('Bac Math supports logic, analysis, and technical careers.');
-    }
-
-    if (typeof score === 'number' && score >= 14) {
-      hints.push('High score can support stronger and more selective paths.');
-    }
-
-    if (
-      ['dev', 'coding', 'code', 'programming', 'developer', 'software'].some(
-        (term) => text.includes(term),
-      )
-    ) {
-      hints.push(
-        'For dev, focus on logic, coding practice, small projects, and problem solving.',
-      );
-      return hints.join(' ');
-    }
-
-    if (
-      ['medecine', 'medicine', 'medical', 'health', 'sante'].some((term) =>
-        text.includes(term),
-      )
-    ) {
-      hints.push(
-        'For medicine or health, focus on patience, strong science basics, discipline, and long studies.',
-      );
-      return hints.join(' ');
-    }
-
-    if (
-      ['business', 'gestion', 'management', 'commerce', 'marketing'].some(
-        (term) => text.includes(term),
-      )
-    ) {
-      hints.push(
-        'For business, focus on communication, analysis, organization, and decision making.',
-      );
-      return hints.join(' ');
-    }
-
-    hints.push(
-      'Match the choice with the student interests, strengths, and job demand.',
-    );
-    return hints.join(' ');
-  }
-
-  private getJobReason(
-    jobTitle: string,
-    message: string,
-    reasonType: 'skills' | 'demand' | 'personality' = 'skills',
-  ): string {
-    const text = this.normalize(`${jobTitle} ${message}`);
-
-    if (reasonType === 'demand') {
-      return 'option solide grâce à la demande locale et aux perspectives positives';
-    }
-
-    if (reasonType === 'personality') {
-      if (
-        ['dev', 'developer', 'developpeur', 'software', 'web', 'mobile'].some(
-          (term) => text.includes(term),
-        )
-      ) {
-        return 'convient à un profil qui aime la logique, la pratique et la résolution de problèmes';
-      }
-
-      if (
-        ['business', 'gestion', 'manager', 'finance', 'marketing'].some(
-          (term) => text.includes(term),
-        )
-      ) {
-        return 'convient à un profil orienté communication, analyse et prise de décision';
-      }
-
-      if (
-        ['medical', 'health', 'doctor', 'nurse', 'pharma'].some((term) =>
-          text.includes(term),
-        )
-      ) {
-        return 'convient à un profil patient, discipliné et prêt pour des études longues';
-      }
-
-      return 'correspond au profil et aux intérêts détectés dans la question';
-    }
-
-    if (
-      ['dev', 'developer', 'developpeur', 'software', 'web', 'mobile'].some(
-        (term) => text.includes(term),
-      )
-    ) {
-      return 'bon choix si tu veux coder et construire des projets réels';
-    }
-
-    if (
-      ['data', 'analyst', 'science', 'ai', 'ia'].some((term) =>
-        text.includes(term),
-      )
-    ) {
-      return 'bon choix pour l’analyse, la logique et le travail sur les données';
-    }
-
-    if (
-      ['support', 'system', 'systeme', 'admin', 'reseau'].some((term) =>
-        text.includes(term),
-      )
-    ) {
-      return 'bon choix pour le dépannage technique, les réseaux et l’infrastructure';
-    }
-
-    if (
-      ['business', 'gestion', 'manager', 'finance', 'marketing'].some((term) =>
-        text.includes(term),
-      )
-    ) {
-      return 'bon choix pour la communication, l’organisation et l’analyse';
-    }
-
-    if (
-      ['medical', 'health', 'doctor', 'nurse', 'pharma'].some((term) =>
-        text.includes(term),
-      )
-    ) {
-      return 'bon choix si tu aimes les sciences, la rigueur et l’aide aux autres';
-    }
-
-    return 'bon choix selon le domaine détecté et la demande locale';
-  }
-
-  private buildStudentProfile(studentData?: StudentData): string {
-    if (!studentData) return 'No student profile provided';
-
-    return (
-      [
-        studentData.name ? `name=${studentData.name}` : undefined,
-        studentData.bacType ? `bacType=${studentData.bacType}` : undefined,
-        studentData.bacAverage
-          ? `bacAverage=${studentData.bacAverage}`
-          : undefined,
-        studentData.FG ? `FG=${studentData.FG}` : undefined,
-        studentData.selectedFiliere
-          ? `selectedFiliere=${studentData.selectedFiliere}`
-          : undefined,
-      ]
-        .filter(Boolean)
-        .join(', ') || 'No student profile provided'
-    );
-  }
-
-  private buildEnrichedUser(
-    userMessage: string,
-    studentData?: StudentData,
-  ): string {
-    return `User message: ${userMessage}
-Student: Bac ${studentData?.bacType || 'unknown'}, Score ${
-      studentData?.FG ?? studentData?.bacAverage ?? 'unknown'
-    }`;
-  }
-
-  private getRecentConversationMemory(
-    conversationHistory: ConversationMessage[] = [],
-  ): ConversationMessage[] {
-    return conversationHistory
-      .filter(
-        (item) =>
-          item?.content && (item.role === 'user' || item.role === 'assistant'),
-      )
-      .slice(-5)
-      .map((item) => ({
-        role: item.role,
-        content: item.content.trim(),
-      }));
-  }
-
-  private buildConversationMemory(
-    conversationHistory: ConversationMessage[],
-  ): string {
-    return this.getRecentConversationMemory(conversationHistory)
-      .map((item) => `${item.role}: ${item.content}`)
-      .join('\n');
-  }
-
-  private getDeterministicResponse(
-    ragData: FilteredRagData,
-    lang: 'fr' | 'ar',
-    studentData?: StudentData,
-    userMessage = '',
-  ): string {
-    if (lang === 'ar') {
-      return this.getArabicDeterministicResponse(ragData, studentData);
-    }
-
-    const hasScore =
-      typeof studentData?.score === 'number' && Number.isFinite(studentData.score);
-    const score = hasScore ? Number(studentData?.score) : 0;
-    const scoreLabel = hasScore ? String(score) : 'non précisé';
-    const bac = studentData?.bacType || 'non précisé';
-    const field = ragData.field;
-    const fieldName = field?.field || 'orientation générale';
-    const programs = ragData.programs.slice(0, 5);
-    const jobs = ragData.jobs.slice(0, 4);
-    const programLines = programs.length
-      ? programs.map((program, index) => {
-          const lastScore = program.matchingBac?.lastScore;
-          const capacity = program.matchingBac?.capacity;
-          const difficulty = this.calculateDifficultyForGuide(score, program);
-          const scorePart =
-            typeof lastScore === 'number' && hasScore
-              ? `dernier score ${lastScore}, écart ${(score - lastScore).toFixed(2)}`
-              : typeof lastScore === 'number'
-                ? `dernier score ${lastScore}`
-              : 'dernier score non disponible';
-          const capacityPart =
-            typeof capacity === 'number' ? `, capacité ${capacity}` : '';
-          const difficultyPart = hasScore
-            ? `Niveau: ${this.getDifficultyLabel(difficulty)}.`
-            : 'Niveau: à vérifier après ajout du score.';
-
-          return `${index + 1}. ${this.getGuideName(program)} - ${program.institution}. ${scorePart}${capacityPart}. ${difficultyPart}`;
-        })
-      : [
-          'Aucun programme précis n’a été trouvé dans guide.json pour ce bac et ce score. Vérifie le type de bac envoyé par le frontend et la qualité des données guide.json.',
-        ];
-    const locationLines = programs.length
-      ? programs.map(
-          (program, index) =>
-            `${index + 1}. ${this.getGuideName(program)} - ${this.getInstitutionLocation(
-              program.institution,
-            )}. Institution: ${program.institution}.`,
-        )
-      : ['Je n’ai pas trouvé de programme précis à localiser pour cette question.'];
-
-    const jobLines = jobs.length
-      ? jobs.map((job, index) => {
-          const skills =
-            job.skills?.slice(0, 4).join(', ') || 'compétences à construire progressivement';
-          return `${index + 1}. ${job.title} - ${job.reason || this.getJobReason(job.title, userMessage)}. Compétences utiles: ${skills}.`;
-        })
-      : [
-          'Compare les domaines avec la demande locale, le dernier score d’accès et tes préférences réelles avant de choisir.',
-        ];
-
-    const technicalSkills =
-      field?.required_skills?.technical_skills?.slice(0, 4).join(', ') ||
-      'méthode de travail, logique, recherche et autonomie';
-    const softSkills =
-      field?.required_skills?.soft_skills?.slice(0, 4).join(', ') ||
-      'communication, discipline, organisation';
-    const demand = this.translateDataValue(
-      field?.demand_in_tunisia || 'à comparer selon la filière',
-    );
-    const outlook = this.translateDataValue(
-      field?.future_outlook ||
-        'positif si tu développes les bonnes compétences',
-    );
-    const fieldReason =
-      this.translateFieldReason(field?.reason) ||
-      'ta question est générale, donc la priorité est de comparer les programmes accessibles plutôt que de forcer un seul domaine.';
-
-    if (ragData.intent === 'location') {
-      return `Localisation des filières
-Voici où se trouvent les institutions les plus liées à ta question. Je te mets la ville/gouvernorat détecté depuis le nom de l’établissement.
-
-${locationLines.join('\n')}
-
-À retenir
-- Si tu veux une faculté proche, donne-moi ta ville ou ta région.
-- Si tu veux le meilleur choix malgré la distance, je compare plutôt le dernier score, la capacité et la qualité du domaine.
-- Score actuel: ${scoreLabel}, Bac: ${bac}.`;
-    }
-
-    if (ragData.intent === 'best_chances') {
-      return `Tes meilleures chances
-Avec ${scoreLabel} en Bac ${bac}, tes meilleures chances sont les filières dont le dernier score est inférieur ou très proche de ton score. Je les classe par proximité et intérêt, pas seulement par prestige.
-
-${programLines.join('\n')}
-
-Lecture rapide
-- Si l’écart est positif et large: choix plutôt sûr.
-- Si l’écart est entre 0 et 5 points: choix jouable, mais il faut prévoir une alternative.
-- Si l’écart est négatif: choix difficile, à garder seulement si tu as un plan B.
-
-Conseil
-Mets au moins 2 choix sûrs, 2 choix jouables et 1 choix ambitieux. Si tu veux, donne-moi le domaine que tu préfères, par exemple dev, médecine, ingénierie ou gestion, et je filtre les chances seulement dans ce domaine.`;
-    }
-
-    if (ragData.intent === 'field_explanation' || ragData.intent === 'requirements') {
-      const specialities =
-        field?.programs?.slice(0, 6).join('\n- ') ||
-        programs.map((program) => this.getGuideName(program)).join('\n- ') ||
-        'Les spécialités exactes dépendent des programmes disponibles.';
-      const requiredTools =
-        field?.required_skills?.tools_and_technologies?.slice(0, 4).join(', ') ||
-        'outils selon la spécialité';
-
-      return `Comprendre ${fieldName}
-${fieldReason}
-
-Spécialités possibles
-- ${specialities}
-
-Ce qui est demandé
-- Niveau académique: score ${scoreLabel}, Bac ${bac}. Pour l’admission, il faut comparer avec le dernier score de chaque programme.
-- Compétences techniques: ${technicalSkills}
-- Compétences personnelles: ${softSkills}
-- Outils utiles: ${requiredTools}
-
-Programmes liés à ce domaine
-${programLines.join('\n')}
-
-Après les études
-${jobLines.join('\n')}
-
-Conclusion
-Si tu me dis “je veux dev”, “je veux médecine”, “je veux gestion”, etc., je te donne directement les meilleurs programmes de ce domaine avec le niveau de risque.`;
-    }
-
-    if (ragData.intent === 'best_choice') {
-      const firstProgram = programs[0];
-      const firstProgramName = firstProgram
-        ? this.getGuideName(firstProgram)
-        : 'le programme le plus proche de ton score';
-
-      return `Le meilleur choix pour toi
-Si je dois choisir une piste principale avec ton profil Bac ${bac} et score ${scoreLabel}, je commencerais par: ${firstProgramName}.
-
-Pourquoi
-- Le score est compatible ou proche de ton score.
-- Le domaine détecté est ${fieldName}.
-- La demande en Tunisie est ${demand} et la perspective est ${outlook}.
-
-Alternatives à garder
-${programLines.join('\n')}
-
-Roadmap
-1. Choisis le programme le plus cohérent avec ton objectif.
-2. Renforce ces compétences: ${technicalSkills}.
-3. Vise ensuite ces débouchés: ${jobs.map((job) => job.title).join(', ') || 'à préciser selon ton domaine'}.`;
-    }
-
-    if (ragData.intent === 'career') {
-      return `Débouchés pour ${fieldName}
-Demande en Tunisie: ${demand}. Perspective: ${outlook}.
-
-Métiers possibles
-${jobLines.join('\n')}
-
-Compétences à construire
-- Techniques: ${technicalSkills}
-- Personnelles: ${softSkills}
-
-Programmes qui peuvent mener à ces métiers
-${programLines.join('\n')}
-
-Conseil
-Ne choisis pas seulement selon le nom du métier. Compare aussi la durée des études, le dernier score, la capacité et les compétences que tu es prêt à travailler pendant 3 à 5 ans.`;
-    }
-
-    if (field) {
-      return `Orientation vers ${fieldName}
-Tu as exprimé un intérêt pour ${fieldName}. Avec un score ${scoreLabel} et un Bac ${bac}, je filtre donc les programmes vers ce domaine au lieu de te donner les filières générales les plus proches du score.
-
-Programmes les plus cohérents
-${programLines.join('\n')}
-
-Pourquoi ce choix peut marcher
-- Demande en Tunisie: ${demand}
-- Perspective: ${outlook}
-- Profil adapté si tu acceptes de travailler: ${technicalSkills}
-
-Métiers possibles
-${jobLines.join('\n')}
-
-Prochaine étape
-Si ton objectif est dev, commence par Python ou JavaScript, fais 2 petits projets, puis compare les filières informatique selon dernier score, capacité et proximité géographique.`;
-    }
-
-    return `Analyse du profil
-Avec un score ${scoreLabel} et un Bac ${bac}, je vais raisonner en deux niveaux: d’abord les programmes réellement accessibles dans guide.json, puis les débouchés et compétences à partir de fields.json et jobs.json. Domaine détecté: ${fieldName}. ${fieldReason}
-
-Programmes conseillés
-${programLines.join('\n')}
-
-Débouchés et marché
-Demande en Tunisie: ${demand}. Perspective: ${outlook}.
-${jobLines.join('\n')}
-
-Compétences à renforcer
-- Techniques: ${technicalSkills}
-- Personnelles: ${softSkills}
-
-Conseil personnalisé
-Choisis d’abord 2 ou 3 programmes dont le dernier score est inférieur ou proche de ton score, puis compare l’institution, la capacité et le métier cible. Si tu hésites, donne-moi le domaine qui t’intéresse le plus, par exemple informatique, médecine, gestion, droit ou ingénierie, et je te ferai un classement plus précis.`;
-  }
-
-  private getArabicDeterministicResponse(
-    ragData: FilteredRagData,
-    studentData?: StudentData,
-  ): string {
-    const hasScore =
-      typeof studentData?.score === 'number' && Number.isFinite(studentData.score);
-    const score = hasScore ? Number(studentData?.score) : 0;
-    const scoreText = hasScore ? `${score}` : 'ما عطيتنيش السكور';
-    const name = studentData?.name?.trim();
-    const greeting = name ? `${name}،` : 'صديقي،';
-    const bac = studentData?.bacType || 'موش محدد';
-    const fieldName = ragData.field?.field || 'المجال اللي سألت عليه';
-    const programs = ragData.programs.slice(0, 3);
-    const jobs = ragData.jobs.slice(0, 3);
-    const programLines =
-      programs
-        .map((program, index) => {
-          const lastScore = program.matchingBac?.lastScore;
-          const scorePart =
-            typeof lastScore === 'number' && hasScore
-              ? `آخر score ${lastScore}، الفرق ${(score - lastScore).toFixed(2)}`
-              : typeof lastScore === 'number'
-                ? `آخر score ${lastScore}`
-                : 'آخر score موش واضح';
-
-          return `${index + 1}. ${this.getGuideName(program)} - ${program.institution} - ${scorePart}`;
-        })
-        .join('\n') || 'ما لقيتش فيليات واضحة حسب المعطيات الحالية.';
-    const jobLines =
-      jobs
-        .map(
-          (job, index) =>
-            `${index + 1}. ${job.title}: تنجم تكون مناسبة إذا تحب ${
-              index === 0
-                ? 'التطبيق والمشاريع'
-                : index === 1
-                  ? 'مجال فيه طلب في السوق'
-                  : 'تطوير مهاراتك تدريجياً'
-            }`,
-        )
-        .join('\n') || 'كان تحددلي المجال أكثر، نعطيك آفاق مهنية أدق.';
-
-    if (ragData.intent === 'location') {
-      return `${greeting} بالنسبة للبلاصة، هاذم أهم الاختيارات اللي لقيتهم:
-
-${programs
-  .map(
-    (program, index) =>
-      `${index + 1}. ${this.getGuideName(program)}: ${this.getInstitutionLocation(
-        program.institution,
-      )} - ${program.institution}`,
-  )
-  .join('\n') || 'ما لقيتش مؤسسة واضحة باش نحددلك الولاية.'}
-
-كان تحب الأقرب ليك بالضبط، قلي إنت من أي ولاية.`;
-    }
-
-    return `${greeting} نعطيك إجابة مبنية على الداتا اللي عندي.
-الباك: ${bac}
-السكور: ${scoreText}
-المجال: ${fieldName}
-
-الفيلات/الاختيارات الممكنة:
-${programLines}
-
-الآفاق المهنية:
-${jobLines}
-
-نصيحتي: كان تحب فرص قبول دقيقة، ابعثلي السكور. أما كان تحب تفهم المجال ولا المهن، نجم نعاونك حتى بلا score.`;
-  }
-
-  private isValidStructuredResponse(
-    response: string,
-    ragData: FilteredRagData,
-  ): boolean {
-    const lines = response
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    if (lines.length > 5) return false;
-    if (!/^1\.\s+.+\s+[-—]\s+.+/.test(lines[0] || '')) return false;
-    if (!/^2\.\s+.+\s+[-—]\s+.+/.test(lines[1] || '')) return false;
-    if (!/^3\.\s+.+\s+[-—]\s+.+/.test(lines[2] || '')) return false;
-    if (!/^Advice\s*:/i.test(lines[3] || '')) return false;
-
-    const responseText = this.normalize(response);
-
-    return ragData.jobs
-      .slice(0, 3)
-      .every((job) => responseText.includes(this.normalize(job.title)));
-  }
-
-  private getClarificationResponse(lang: 'fr' | 'ar'): string {
-    if (lang === 'fr') {
-      return 'Precise ton domaine: informatique, gestion, sante, droit, marketing, ingenierie...';
-    }
-
-    return 'وضحلي المجال: إعلامية، تصرف، صحة، قانون، تسويق، هندسة...';
-  }
-
-  private getNoAllowedProgramsResponse(
-    lang: 'fr' | 'ar',
-    studentData?: StudentData,
-  ): string {
-    const score = studentData?.score ?? 'inconnu';
-
-    if (lang === 'ar') {
-      return `Scorek ma ywaselch le hata filière tawa. 7awel t7assen score wala baddel domaine.`;
-    }
-
-    return `Ton score n'accede a aucune filiere actuellement. Essaie d'ameliorer ton score ou change de domaine.`;
-  }
-
-  private getFallbackResponse(
-    studentData?: StudentData,
-    lang?: 'fr' | 'ar',
-  ): string {
-    const filiere = studentData?.selectedFiliere ?? 'la filiere selectionnee';
-
-    if (lang === 'ar') {
-      return `الخدمة موش متاحة توا.
-بالنسبة لـ ${filiere}، ركز على الأساسيات وعاود جرب بعد شوية.`;
-    }
-
-    return `Service IA temporairement indisponible.
-Pour ${filiere}, continue avec les fondamentaux et reessaie dans quelques instants.`;
-  }
-
-  private getJobIntentTerms(jobTitle: string): string[] {
-    const normalizedTitle = this.normalize(jobTitle);
-
-    if (
-      normalizedTitle.includes('developpeur') ||
-      normalizedTitle.includes('developer') ||
-      normalizedTitle.includes('software') ||
-      normalizedTitle.includes('web')
-    ) {
-      return [
-        'dev',
-        'developpement',
-        'developpeur',
-        'developer',
-        'coding',
-        'code',
-        'software',
-        'full stack',
-        'frontend',
-        'backend',
-        'web',
-        'mobile',
-        'javascript',
-        'react',
-        'node',
-        'برمجة',
-      ];
-    }
-
-    if (normalizedTitle.includes('data')) {
-      return [
-        'data',
-        'ai',
-        'ia',
-        'machine learning',
-        'python',
-        'statistics',
-        'analyse',
-        'analyst',
-        'ذكاء',
-        'بيانات',
-      ];
-    }
-
-    if (normalizedTitle.includes('support')) {
-      return [
-        'support',
-        'helpdesk',
-        'technical support',
-        'troubleshooting',
-        'hardware',
-        'software',
-        'network',
-      ];
-    }
-
-    if (normalizedTitle.includes('cyber')) {
-      return [
-        'cyber',
-        'cybersecurite',
-        'security',
-        'securite',
-        'hacking',
-        'network security',
-        'linux',
-        'حماية',
-        'امن',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('systeme') ||
-      normalizedTitle.includes('systems') ||
-      normalizedTitle.includes('administrator')
-    ) {
-      return [
-        'systeme',
-        'sysadmin',
-        'administration',
-        'linux',
-        'windows server',
-        'networking',
-        'devops',
-        'cloud',
-        'reseau',
-        'نظم',
-        'شبكات',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('engineer') ||
-      normalizedTitle.includes('ingenieur') ||
-      normalizedTitle.includes('civil') ||
-      normalizedTitle.includes('mechanical') ||
-      normalizedTitle.includes('mecanique') ||
-      normalizedTitle.includes('electrical') ||
-      normalizedTitle.includes('electrique') ||
-      normalizedTitle.includes('industrial') ||
-      normalizedTitle.includes('production') ||
-      normalizedTitle.includes('logistics')
-    ) {
-      return [
-        'engineer',
-        'ingenieur',
-        'ingenierie',
-        'civil',
-        'genie civil',
-        'mechanical',
-        'mecanique',
-        'electrical',
-        'electrique',
-        'industrial',
-        'production',
-        'logistics',
-        'logistique',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('account') ||
-      normalizedTitle.includes('comptable') ||
-      normalizedTitle.includes('finance') ||
-      normalizedTitle.includes('gestion') ||
-      normalizedTitle.includes('audit') ||
-      normalizedTitle.includes('sales') ||
-      normalizedTitle.includes('commercial') ||
-      normalizedTitle.includes('business') ||
-      normalizedTitle.includes('administrative') ||
-      normalizedTitle.includes('rh')
-    ) {
-      return [
-        'accountant',
-        'comptable',
-        'accounting',
-        'finance',
-        'financial analyst',
-        'gestion',
-        'audit',
-        'sales',
-        'vente',
-        'commercial',
-        'business',
-        'business developer',
-        'administrative officer',
-        'rh',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('doctor') ||
-      normalizedTitle.includes('medecin') ||
-      normalizedTitle.includes('nurse') ||
-      normalizedTitle.includes('infirmier') ||
-      normalizedTitle.includes('pharmac') ||
-      normalizedTitle.includes('radiology') ||
-      normalizedTitle.includes('laboratoire') ||
-      normalizedTitle.includes('midwife')
-    ) {
-      return [
-        'doctor',
-        'medecin',
-        'medical',
-        'health',
-        'nurse',
-        'infirmier',
-        'pharmacist',
-        'pharmacien',
-        'pharmacie',
-        'radiology',
-        'laboratory technician',
-        'technicien laboratoire',
-        'midwife',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('teacher') ||
-      normalizedTitle.includes('enseignant') ||
-      normalizedTitle.includes('formateur') ||
-      normalizedTitle.includes('translator') ||
-      normalizedTitle.includes('interpreter') ||
-      normalizedTitle.includes('journalist') ||
-      normalizedTitle.includes('research')
-    ) {
-      return [
-        'teacher',
-        'enseignant',
-        'education',
-        'formation',
-        'translator',
-        'interpreter',
-        'languages',
-        'journalist',
-        'researcher',
-        'research assistant',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('law') ||
-      normalizedTitle.includes('lawyer') ||
-      normalizedTitle.includes('legal') ||
-      normalizedTitle.includes('avocat') ||
-      normalizedTitle.includes('juriste') ||
-      normalizedTitle.includes('notaire') ||
-      normalizedTitle.includes('compliance')
-    ) {
-      return [
-        'law',
-        'lawyer',
-        'legal',
-        'legal advisor',
-        'avocat',
-        'juriste',
-        'notaire',
-        'compliance officer',
-        'public officer',
-      ];
-    }
-
-    if (
-      normalizedTitle.includes('design') ||
-      normalizedTitle.includes('artist') ||
-      normalizedTitle.includes('graphique') ||
-      normalizedTitle.includes('video') ||
-      normalizedTitle.includes('interior') ||
-      normalizedTitle.includes('ux') ||
-      normalizedTitle.includes('ui')
-    ) {
-      return [
-        'design',
-        'designer',
-        'graphic designer',
-        'graphique',
-        'artist',
-        'video editor',
-        'interior designer',
-        'ux',
-        'ui',
-      ];
-    }
-
-    return [];
-  }
-
-  private getDomainAliasKey(domainName: string): string | undefined {
-    const normalizedDomain = this.normalize(domainName);
-
-    if (normalizedDomain.includes('informatique')) return 'informatique';
-    if (
-      normalizedDomain.includes('gestion') ||
-      normalizedDomain.includes('comptabilite')
-    )
-      return 'gestion';
-    if (
-      normalizedDomain.includes('ingenierie') ||
-      normalizedDomain.includes('mecanique')
-    )
-      return 'ingenierie';
-    if (
-      normalizedDomain.includes('commerce') ||
-      normalizedDomain.includes('marketing')
-    )
-      return 'commerce';
-    if (
-      normalizedDomain.includes('sante') ||
-      normalizedDomain.includes('pharmaceutique')
-    )
-      return 'sante';
-    if (
-      normalizedDomain.includes('education') ||
-      normalizedDomain.includes('formation')
-    )
-      return 'education';
-    if (
-      normalizedDomain.includes('tourisme') ||
-      normalizedDomain.includes('hotel')
-    )
-      return 'tourisme';
-    if (
-      normalizedDomain.includes('droit') ||
-      normalizedDomain.includes('administration')
-    )
-      return 'droit';
-    if (
-      normalizedDomain.includes('energie') ||
-      normalizedDomain.includes('environnement')
-    )
-      return 'energie';
-    if (
-      normalizedDomain.includes('logistique') ||
-      normalizedDomain.includes('transport')
-    )
-      return 'logistique';
-    if (
-      normalizedDomain.includes('arts') ||
-      normalizedDomain.includes('design')
-    )
-      return 'arts';
-
-    return undefined;
-  }
-
-  private getMatchedTerms(text: string, terms: string[]): string[] {
-    const normalizedText = this.normalize(text);
-    const matched = new Set<string>();
-
-    for (const term of terms) {
-      const normalizedTerm = this.normalize(term);
-
-      if (normalizedTerm.length < 2) continue;
-      if (normalizedText.includes(normalizedTerm)) {
-        matched.add(term);
-      }
-    }
-
-    return [...matched];
-  }
-
-  private tokenize(text: string): string[] {
-    return this.normalize(text)
-      .split(/[^a-z0-9\u0600-\u06FF]+/i)
-      .filter((token) => token.length > 1);
-  }
-
-  private normalize(value?: string): string {
-    return (value || '')
-      .normalize('NFKD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[’']/g, ' ')
-      .toLowerCase()
-      .trim();
-  }
-
-  private limitLines(text: string, maxLines: number): string {
-    return text
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .slice(0, maxLines)
-      .join('\n');
+  getConversationMemory(): ConversationMemory {
+    return { ...this.conversationMemory };
   }
 }

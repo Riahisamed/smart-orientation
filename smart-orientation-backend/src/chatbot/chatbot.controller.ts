@@ -11,11 +11,13 @@ interface ChatRequest {
   studentData?: {
     score?: number;
     bacType?: string;
+    bac?: string;
     name?: string;
     bacAverage?: number;
     FG?: number;
     selectedFiliere?: string;
     language?: 'fr' | 'ar';
+    interest?: string;
   };
 }
 
@@ -32,17 +34,26 @@ export class ChatbotController {
     const { message, conversationHistory, studentData: bodyStudentData } = body;
 
     // Priority 1: Use studentData from request body (frontend)
-    if (bodyStudentData?.score !== undefined) {
+    const hasBodyStudentData = !!bodyStudentData && (
+      bodyStudentData.score !== undefined ||
+      !!bodyStudentData.bacType ||
+      !!bodyStudentData.bac ||
+      !!bodyStudentData.interest ||
+      !!bodyStudentData.language
+    );
+
+    if (hasBodyStudentData) {
       const reply = await this.chatbotService.processMessage(
         message,
         {
           score: bodyStudentData.score,
-          bacType: bodyStudentData.bacType,
+          bacType: bodyStudentData.bacType || bodyStudentData.bac,
           name: bodyStudentData.name,
           bacAverage: bodyStudentData.bacAverage,
           FG: bodyStudentData.FG,
           selectedFiliere: bodyStudentData.selectedFiliere,
           language: bodyStudentData.language,
+          interest: bodyStudentData.interest,
         },
         conversationHistory ?? [],
       );
