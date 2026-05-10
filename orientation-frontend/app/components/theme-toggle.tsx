@@ -9,8 +9,10 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    // Avoid setState synchronously in effect body (React warning)
+    queueMicrotask(() => setMounted(true))
   }, [])
+
 
   if (!mounted) {
     return null

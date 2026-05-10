@@ -1,0 +1,857 @@
+{
+  "matching_priority": ["aliases", "keywords", "education", "field"],
+  "normalization_rules": {
+    "remove_accents": true,
+    "lowercase": true,
+    "trim_spaces": true,
+    "arabic_normalization": {
+      "أ": "ا",
+      "إ": "ا",
+      "آ": "ا",
+      "ة": "ه",
+      "ى": "ي",
+      "ّ": "",
+      "َ": "",
+      "ُ": "",
+      "ِ": "",
+      "ْ": "",
+      "ً": "",
+      "ٌ": "",
+      "ٍ": ""
+    }
+  },
+  "domains": [
+    {
+      "field": "Cybersecurity",
+      "aliases": [
+        "cybersecurity", "cyber", "sécurité", "security", "infosec", "cybersécurité", "network security",
+        "pentest", "hacking", "ethical hacking", "hacker éthique", "sécurité informatique", "protection",
+        "cyber defense", "forensics", "audit sécurité", "blue team", "red team", "SOC", "SIEM",
+        "أمن سيبراني", "أمن معلوماتي", "حماية", "شبكات", "اختراق أخلاقي", "الأمن السيبراني", "حماية المعلومات"
+      ],
+      "keywords": [
+        "cybersecurity", "penetration testing", "ethical hacking", "network security", "malware analysis",
+        "digital forensics", "incident response", "vulnerability assessment", "security operations",
+        "threat intelligence", "firewall", "IDS/IPS", "SIEM", "cryptography", "compliance"
+      ],
+      "education": ["العلوم المعلوماتية - أمن المعلومات", "هندسة نظم المعلومات", "شبكات الاتصال"],
+      "demand_in_tunisia": "Very High",
+      "future_outlook": "Excellent",
+      "unemployment_risk": "Very Low",
+      "tools": ["Kali Linux", "Wireshark", "Metasploit", "Nmap", "Burp Suite", "Splunk", "Snort", "OWASP ZAP", "TryHackMe", "HackTheBox"],
+      "skills": [
+        "Linux Administration", "Network Protocols (TCP/IP)", "Python/Bash Scripting",
+        "Vulnerability Assessment", "Penetration Testing", "Malware Analysis",
+        "Incident Response", "Cryptography", "Risk Assessment", "Security Compliance"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-4 months",
+          "phases": [
+            {
+              "title": "Linux & Networking Fundamentals",
+              "duration": "4-6 weeks",
+              "skills": ["Linux command line", "Bash scripting", "TCP/IP protocols", "Network topology"],
+              "projects": ["Setup Kali Linux VM", "Configure home network", "Wireshark packet analysis"],
+              "resources": ["Linux Journey", "CompTIA Network+", "OverTheWire Bandit"],
+              "milestones": ["Complete Linux basics", "Pass Network+ practice exam"]
+            },
+            {
+              "title": "Security Fundamentals",
+              "duration": "6-8 weeks",
+              "skills": ["Security concepts", "OWASP Top 10", "Basic cryptography", "Risk assessment"],
+              "projects": ["Security audit checklist", "Password strength analyzer"],
+              "resources": ["CompTIA Security+", "TryHackMe Pre-Security", "OWASP Web Security Guide"],
+              "milestones": ["Earn Security+ certification", "Complete 25 TryHackMe rooms"]
+            }
+          ],
+          "certifications": ["CompTIA Network+", "CompTIA Security+"],
+          "career_paths": ["Junior Security Analyst", "IT Support Security", "SOC Trainee"]
+        },
+        "intermediate": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Offensive Security",
+              "duration": "3-4 months",
+              "skills": ["Web app pentesting", "Network pentesting", "Exploit development", "Social engineering"],
+              "projects": ["CTF competitions", "Bug bounty participation", "Vulnerability reports"],
+              "resources": ["HackTheBox", "TryHackMe", "PentesterLab", "PortSwigger Web Security Academy"],
+              "milestones": ["Hack 50+ machines on HTB", "Submit first bug bounty report"]
+            },
+            {
+              "title": "Defensive Security",
+              "duration": "3-4 months",
+              "skills": ["SIEM tools", "Incident response", "Malware analysis", "Threat hunting"],
+              "projects": ["SIEM deployment", "Incident response playbook", "Threat detection rules"],
+              "resources": ["Splunk Fundamentals", "BlueTeamLabsOnline", "LetsDefend"],
+              "milestones": ["Configure Splunk/SIEM", "Complete IR certification"]
+            }
+          ],
+          "certifications": ["CEH", "eJPT", "OSCP"],
+          "career_paths": ["Penetration Tester", "Security Analyst", "SOC Analyst"]
+        },
+        "advanced": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "Specialized Security",
+              "duration": "6-12 months",
+              "skills": ["Advanced pentesting", "Red team operations", "Cloud security", "DevSecOps"],
+              "projects": ["Advanced red team assessment", "Cloud security audit", "Security automation"],
+              "resources": ["Offensive Security Proving Grounds", "Cloud Security Academy", "SANS Training"],
+              "milestones": ["OSCP certification", "Lead red team engagement"]
+            },
+            {
+              "title": "Security Leadership",
+              "duration": "6-12 months",
+              "skills": ["Security architecture", "Risk management", "Compliance (ISO 27001, NIST)", "Team leadership"],
+              "projects": ["Enterprise security framework", "Security policy development"],
+              "resources": ["CISSP materials", "ISO 27001 Lead Implementer", "CISM"],
+              "milestones": ["CISSP certification", "Security manager role"]
+            }
+          ],
+          "certifications": ["OSCP", "CISSP", "GWAPT", "GXPN"],
+          "career_paths": ["Senior Penetration Tester", "Security Consultant", "CISO", "Red Team Lead"]
+        }
+      }
+    },
+    {
+      "field": "Frontend Development",
+      "aliases": [
+        "frontend", "front-end", "développement web", "web dev", "interface", "UI", "react", "vue", "angular",
+        "développeur web", "web developer", "javascript", "typescript", "webdesign", "responsive",
+        "واجهة المستخدم", "تطوير الويب", "فرونت اند", "رياكت", "جافاسكريبت", "مواقع", "تصميم ويب"
+      ],
+      "keywords": [
+        "frontend development", "web development", "javascript", "typescript", "react", "vue", "angular",
+        "html", "css", "responsive design", "UI/UX", "web performance", "accessibility", "SPA"
+      ],
+      "education": ["العلوم المعلوماتية", "تقنيات الإعلامية", "الإعلامية"],
+      "demand_in_tunisia": "Very High",
+      "future_outlook": "Strong",
+      "unemployment_risk": "Low",
+      "tools": ["VS Code", "Chrome DevTools", "Figma", "Git", "Webpack/Vite", "npm/yarn", "Tailwind CSS", "Next.js"],
+      "skills": [
+        "HTML5/CSS3", "JavaScript ES6+", "TypeScript", "React/Vue/Angular",
+        "Responsive Design", "RESTful APIs", "Git/GitHub", "Web Performance",
+        "Accessibility (WCAG)", "State Management"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-4 months",
+          "phases": [
+            {
+              "title": "Web Fundamentals",
+              "duration": "6-8 weeks",
+              "skills": ["HTML5 semantic markup", "CSS3 Flexbox/Grid", "Responsive design", "Basic JavaScript"],
+              "projects": ["Personal portfolio site", "Landing page clone", "CSS animations showcase"],
+              "resources": ["MDN Web Docs", "freeCodeCamp", "CSS-Tricks", "JavaScript.info"],
+              "milestones": ["Build responsive portfolio", "Master CSS Grid/Flexbox"]
+            },
+            {
+              "title": "JavaScript Mastery",
+              "duration": "6-8 weeks",
+              "skills": ["ES6+ features", "DOM manipulation", "Async programming", "Fetch API"],
+              "projects": ["Interactive todo app", "Weather dashboard", "Movie search app"],
+              "resources": ["JavaScript: The Good Parts", "Eloquent JavaScript", "Frontend Masters"],
+              "milestones": ["Complete 50 JS challenges", "Build API-connected app"]
+            }
+          ],
+          "certifications": ["Meta Frontend Developer"],
+          "career_paths": ["Junior Frontend Developer", "Web Developer", "UI Developer"]
+        },
+        "intermediate": {
+          "duration": "6-9 months",
+          "phases": [
+            {
+              "title": "Modern Frameworks",
+              "duration": "3-4 months",
+              "skills": ["React hooks & context", "TypeScript", "State management (Redux/Zustand)", "Component libraries"],
+              "projects": ["E-commerce frontend", "Dashboard with charts", "Social media clone"],
+              "resources": ["React docs", "TypeScript Handbook", "Epic React", "UI.dev"],
+              "milestones": ["Ship production React app", "Contribute to open source"]
+            },
+            {
+              "title": "Advanced Frontend",
+              "duration": "3-5 months",
+              "skills": ["Next.js", "SSR/SSG", "Testing (Jest/Cypress)", "Performance optimization"],
+              "projects": ["Full-stack Next.js app", "PWA", "Design system"],
+              "resources": ["Next.js Learn", "Testing JavaScript", "Web.dev Performance"],
+              "milestones": ["Deploy scalable app", "Achieve 90+ Lighthouse score"]
+            }
+          ],
+          "certifications": ["Meta Frontend Professional"],
+          "career_paths": ["Frontend Developer", "React Developer", "UI Engineer"]
+        },
+        "advanced": {
+          "duration": "12-18 months",
+          "phases": [
+            {
+              "title": "Architecture & Performance",
+              "duration": "6-9 months",
+              "skills": ["Micro-frontends", "Module federation", "Advanced patterns", "WebAssembly"],
+              "projects": ["Enterprise architecture", "Component library", "Performance audit tool"],
+              "resources": ["Patterns.dev", "Frontend System Design", "Performance Engineering"],
+              "milestones": ["Lead frontend architecture", "Mentor junior developers"]
+            },
+            {
+              "title": "Leadership & Specialization",
+              "duration": "6-9 months",
+              "skills": ["Technical leadership", "Code review", "Frontend DevOps", "Accessibility expertise"],
+              "projects": ["Team standards documentation", "Accessibility audit", "Build pipeline optimization"],
+              "resources": ["Staff Engineer", "Frontend Architecture", "Web Accessibility"],
+              "milestones": ["Senior Frontend Engineer", "Tech Lead role"]
+            }
+          ],
+          "certifications": ["Google UX Design", "AWS Developer"],
+          "career_paths": ["Senior Frontend Developer", "Frontend Architect", "Tech Lead", "UI/UX Engineer"]
+        }
+      }
+    },
+    {
+      "field": "Backend Development",
+      "aliases": [
+        "backend", "back-end", "server", "api", "database", "base de données", "serveur", "node.js", "python",
+        "développeur backend", "développeur serveur", "sql", "nosql", "architecture logicielle",
+        "خادم", "باك اند", "قواعد البيانات", "خلفية", "سيرفر", "واجهة برمجة التطبيقات"
+      ],
+      "keywords": [
+        "backend development", "server-side", "API design", "database", "microservices", "cloud infrastructure",
+        "Node.js", "Python", "Java", "Go", "SQL", "NoSQL", "Docker", "Kubernetes", "AWS", "Azure"
+      ],
+      "education": ["العلوم المعلوماتية", "هندسة نظم المعلومات", "تقنيات الإعلامية"],
+      "demand_in_tunisia": "Very High",
+      "future_outlook": "Strong",
+      "unemployment_risk": "Low",
+      "tools": ["Node.js", "PostgreSQL", "MongoDB", "Redis", "Docker", "Kubernetes", "AWS", "Git", "Postman"],
+      "skills": [
+        "API Design (REST/GraphQL)", "Database Design", "Authentication/Authorization", "Caching",
+        "Message Queues", "Microservices", "Docker", "Cloud Services", "System Design"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-4 months",
+          "phases": [
+            {
+              "title": "Programming & Databases",
+              "duration": "6-8 weeks",
+              "skills": ["JavaScript/Python/Java", "SQL fundamentals", "Git version control", "HTTP basics"],
+              "projects": ["CLI tool", "Database CRUD app", "API client"],
+              "resources": ["freeCodeCamp", "SQLBolt", "The Odin Project"],
+              "milestones": ["First REST API", "Database schema design"]
+            },
+            {
+              "title": "Backend Frameworks",
+              "duration": "6-8 weeks",
+              "skills": ["Express.js/Django/Spring", "Authentication (JWT/OAuth)", "ORM usage", "Error handling"],
+              "projects": ["User auth system", "Blog API", "E-commerce backend"],
+              "resources": ["Node.js docs", "Django docs", "JWT.io"],
+              "milestones": ["Secure API with auth", "Complete CRUD operations"]
+            }
+          ],
+          "certifications": ["AWS Cloud Practitioner"],
+          "career_paths": ["Junior Backend Developer", "API Developer"]
+        },
+        "intermediate": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Advanced Backend",
+              "duration": "4-6 months",
+              "skills": ["Microservices", "Message queues (RabbitMQ/Kafka)", "Caching strategies", "Database optimization"],
+              "projects": ["Microservices architecture", "Real-time chat system", "Payment processing"],
+              "resources": ["System Design Primer", "Microservices.io", "Redis University"],
+              "milestones": ["Deploy microservices", "Handle 10k+ concurrent users"]
+            },
+            {
+              "title": "DevOps & Cloud",
+              "duration": "4-6 months",
+              "skills": ["Docker", "Kubernetes basics", "CI/CD pipelines", "Monitoring/Logging"],
+              "projects": ["Containerized deployment", "K8s cluster", "Automated testing pipeline"],
+              "resources": ["Docker docs", "Kubernetes docs", "GitHub Actions"],
+              "milestones": ["Production K8s deployment", "99.9% uptime monitoring"]
+            }
+          ],
+          "certifications": ["AWS Developer Associate", "MongoDB Certified Developer"],
+          "career_paths": ["Backend Developer", "API Engineer", "Systems Engineer"]
+        },
+        "advanced": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "System Architecture",
+              "duration": "6-12 months",
+              "skills": ["Distributed systems", "High availability", "Scalability patterns", "Security architecture"],
+              "projects": ["Scalable architecture", "Multi-region deployment", "Zero-downtime migration"],
+              "resources": ["Designing Data-Intensive Apps", "System Design Interview", "AWS Architecture"],
+              "milestones": ["Architect enterprise system", "Lead technical decisions"]
+            },
+            {
+              "title": "Technical Leadership",
+              "duration": "6-12 months",
+              "skills": ["Code review", "Mentoring", "Technical writing", "Architecture decisions"],
+              "projects": ["API standards", "Backend guild leadership", "Performance optimization"],
+              "resources": ["Staff Engineer", "Team Topologies", "Building Microservices"],
+              "milestones": ["Staff Engineer", "Principal Engineer role"]
+            }
+          ],
+          "certifications": ["AWS Solutions Architect Professional", "Kubernetes Administrator"],
+          "career_paths": ["Senior Backend Developer", "Staff Engineer", "Platform Engineer", "Principal Engineer"]
+        }
+      }
+    },
+    {
+      "field": "Droit / Avocat",
+      "aliases": [
+        "droit", "law", "avocat", "lawyer", "juridique", "legal", "judge", "magistrat", "notaire",
+        "avocat conseil", "conseiller juridique", "juriste", "parquet", "barreau", "juridiction",
+        "محامي", "قانون", "حقوق", "قانوني", "العدالة", "القضاء", "المحكمة"
+      ],
+      "keywords": [
+        "law", "legal", "jurisprudence", "civil law", "criminal law", "commercial law", "international law",
+        "litigation", "contracts", "bar exam", "legal writing", "case law", "compliance"
+      ],
+      "education": ["الحقوق", "القانون", "المحاماة", "القضاء"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Moderate",
+      "tools": ["Legal databases", "LexisNexis", "Westlaw", "Droit.tn", "Case management software"],
+      "skills": [
+        "Legal Research", "Legal Writing", "Contract Drafting", "Litigation",
+        "Negotiation", "Client Counseling", "Case Analysis", "Public Speaking"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Legal Foundations",
+              "duration": "3-6 months",
+              "skills": ["Constitutional law", "Civil law basics", "Legal terminology", "Legal research methods"],
+              "projects": ["Legal research memo", "Case briefs", "Legal analysis paper"],
+              "resources": ["Code civil tunisien", "Constitution", "Legal research guides"],
+              "milestones": ["Master legal research", "Complete constitutional law course"]
+            },
+            {
+              "title": "Specialized Law",
+              "duration": "3-6 months",
+              "skills": ["Civil procedure", "Contract law", "Tort law", "Criminal law basics"],
+              "projects": ["Contract drafting", "Case analysis", "Legal opinion writing"],
+              "resources": ["Civil procedure code", "Contract law texts", "Bar exam prep"],
+              "milestones": ["Draft legal contracts", "Pass bar exam prerequisites"]
+            }
+          ],
+          "certifications": ["Maîtrise en Droit"],
+          "career_paths": ["Étudiant en Droit", "Stagiaire juridique", "Assistant juridique"]
+        },
+        "intermediate": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "Bar Exam & Practical Training",
+              "duration": "6-12 months",
+              "skills": ["Bar exam preparation", "Court procedures", "Client intake", "Case preparation"],
+              "projects": ["Moot court competitions", "Legal clinic participation", "Bar exam simulations"],
+              "resources": ["Centre de Formation des Avocats", "Bar exam materials", "Legal clinic"],
+              "milestones": ["Pass bar exam", "Complete legal internship"]
+            },
+            {
+              "title": "Legal Practice",
+              "duration": "6-12 months",
+              "skills": ["Client representation", "Legal strategy", "Negotiation", "Legal ethics"],
+              "projects": ["First legal cases", "Contract negotiations", "Legal consultations"],
+              "resources": ["Ordre des Avocats", "Continuing legal education", "Mentorship"],
+              "milestones": ["First court appearance", "Win first case"]
+            }
+          ],
+          "certifications": ["Certificat d'Aptitude à la Profession d'Avocat (CAPA)"],
+          "career_paths": ["Avocat Stagiaire", "Avocat Collaborateur", "Conseiller Juridique"]
+        },
+        "advanced": {
+          "duration": "24-48 months",
+          "phases": [
+            {
+              "title": "Specialization",
+              "duration": "12-24 months",
+              "skills": ["Corporate law", "International law", "Tax law", "Labor law", "Intellectual property"],
+              "projects": ["Complex litigation", "Corporate transactions", "International arbitration"],
+              "resources": ["Advanced legal courses", "Specialized bar sections", "International law programs"],
+              "milestones": ["Specialization certification", "High-profile case wins"]
+            },
+            {
+              "title": "Legal Leadership",
+              "duration": "12-24 months",
+              "skills": ["Partnership management", "Business development", "Legal team leadership", "Judicial expertise"],
+              "projects": ["Law firm management", "Legal publications", "Judicial appointments"],
+              "resources": ["Leadership training", "Legal business management", "Judicial training"],
+              "milestones": ["Law firm partnership", "Judge/Magistrate appointment"]
+            }
+          ],
+          "certifications": ["Doctorat en Droit", "Certificats de Spécialisation"],
+          "career_paths": ["Avocat de Renom", "Juge/Magistrat", "Notaire", "Conseiller d'État", "Professeur de Droit"]
+        }
+      }
+    },
+    {
+      "field": "Médecine / Santé",
+      "aliases": [
+        "médecine", "santé", "médecin", "docteur", "infirmier", "pharmacien", "dentiste", "chirurgien",
+        "médecine générale", "spécialité médicale", "clinique", "hôpital", "soins", "patient",
+        "طب", "صحة", "طبيب", "دكتور", "ممرض", "صيدلي", "طبيب أسنان", "جراح", "مستشفى", "عيادة"
+      ],
+      "keywords": [
+        "medicine", "healthcare", "clinical practice", "surgery", "pharmacy", "nursing", "diagnosis",
+        "treatment", "medical research", "public health", "specialization"
+      ],
+      "education": ["الطب", "الصيدلة", "طب الأسنان", "التمريض", "التصوير الطبي", "التحاليل الطبية"],
+      "demand_in_tunisia": "Very High",
+      "future_outlook": "Excellent",
+      "unemployment_risk": "Low",
+      "tools": ["Medical equipment", "Electronic health records", "Medical imaging", "Diagnostic tools", "Lab equipment"],
+      "skills": [
+        "Clinical Skills", "Patient Care", "Diagnosis", "Treatment Planning",
+        "Medical Ethics", "Communication", "Empathy", "Stress Management"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "2-3 years",
+          "phases": [
+            {
+              "title": "Science Prerequisites",
+              "duration": "1-2 years",
+              "skills": ["Biology", "Chemistry", "Physics", "Anatomy", "Physiology", "Medical terminology"],
+              "projects": ["Lab experiments", "Anatomy study", "Research papers"],
+              "resources": ["Medical textbooks", "Lab manuals", "Online medical courses"],
+              "milestones": ["Complete science prerequisites", "Medical school admission"]
+            },
+            {
+              "title": "Medical School Year 1-2",
+              "duration": "1-2 years",
+              "skills": ["Basic medical sciences", "Pathology", "Pharmacology", "Clinical examination"],
+              "projects": ["Patient case studies", "Clinical skills practice", "Research projects"],
+              "resources": ["Medical school curriculum", "Clinical skills labs", "Medical journals"],
+              "milestones": ["Pass medical school exams", "Clinical rotation completion"]
+            }
+          ],
+          "certifications": ["PCEM1/2"],
+          "career_paths": ["Étudiant en Médecine", "Stagiaire en santé"]
+        },
+        "intermediate": {
+          "duration": "3-4 years",
+          "phases": [
+            {
+              "title": "Clinical Training",
+              "duration": "2-3 years",
+              "skills": ["Patient diagnosis", "Treatment protocols", "Surgical basics", "Emergency medicine"],
+              "projects": ["Clinical rotations", "Surgical observation", "Emergency room duty"],
+              "resources": ["Hospital training", "Residency programs", "Medical conferences"],
+              "milestones": ["Complete clinical rotations", "Medical license (Doctorat)", "Residency match"]
+            },
+            {
+              "title": "Residency",
+              "duration": "1-2 years",
+              "skills": ["Specialized clinical practice", "Patient management", "Medical procedures"],
+              "projects": ["Residency rotations", "Patient care", "Case presentations"],
+              "resources": ["Residency program", "Specialty training", "Medical boards prep"],
+              "milestones": ["Residency completion", "Medical board certification"]
+            }
+          ],
+          "certifications": ["Doctorat en Médecine", "Certificat de Spécialisation"],
+          "career_paths": ["Médecin Résident", "Médecin Généraliste", "Pharmacien", "Infirmier Spécialisé"]
+        },
+        "advanced": {
+          "duration": "4-6 years",
+          "phases": [
+            {
+              "title": "Specialization",
+              "duration": "3-5 years",
+              "skills": ["Specialized medical practice", "Advanced procedures", "Research methodology", "Teaching"],
+              "projects": ["Specialty training", "Medical research", "Clinical trials"],
+              "resources": ["Specialty fellowship", "Research institutions", "Teaching hospitals"],
+              "milestones": ["Specialty board certification", "Independent practice", "Research publication"]
+            },
+            {
+              "title": "Medical Leadership",
+              "duration": "1-2 years",
+              "skills": ["Department management", "Medical education", "Healthcare policy", "Research leadership"],
+              "projects": ["Department head", "Medical school teaching", "Policy development", "Research leadership"],
+              "resources": ["Healthcare management", "Medical education", "Leadership programs"],
+              "milestones": ["Chef de Service", "Professor of Medicine", "Hospital Director"]
+            }
+          ],
+          "certifications": ["Spécialisation Médicale", "DES (Diplôme d'Études Spécialisées)"],
+          "career_paths": ["Médecin Spécialiste", "Chirurgien", "Chef de Service", "Professeur de Médecine", "Directeur d'Hôpital"]
+        }
+      }
+    },
+    {
+      "field": "AI & Machine Learning",
+      "aliases": [
+        "AI", "intelligence artificielle", "machine learning", "deep learning", "data science", "big data",
+        "neural networks", "NLP", "computer vision", "data analyst", "data engineer",
+        "ذكاء اصطناعي", "تعلم الآلة", "تعلم عميق", "علم البيانات", "محلل بيانات", "مهندس بيانات"
+      ],
+      "keywords": [
+        "artificial intelligence", "machine learning", "deep learning", "neural networks", "data science",
+        "natural language processing", "computer vision", "reinforcement learning", "MLOps", "tensorflow", "pytorch"
+      ],
+      "education": ["العلوم المعلوماتية", "الرياضيات", "الفيزياء", "الإحصاء"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Excellent",
+      "unemployment_risk": "Low",
+      "tools": ["Python", "TensorFlow", "PyTorch", "Jupyter", "Scikit-learn", "Pandas", "NumPy", "AWS SageMaker", "Google Cloud AI"],
+      "skills": [
+        "Python Programming", "Mathematics & Statistics", "Machine Learning Algorithms", "Deep Learning",
+        "Data Processing", "Model Deployment", "Cloud AI Services", "Problem Solving"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "4-6 months",
+          "phases": [
+            {
+              "title": "Python & Math Foundations",
+              "duration": "2-3 months",
+              "skills": ["Python programming", "Linear algebra", "Statistics", "Probability", "NumPy/Pandas"],
+              "projects": ["Data analysis project", "Statistical visualization", "Python automation scripts"],
+              "resources": ["Python for Data Analysis", "Kaggle Learn", "3Blue1Brown Math"],
+              "milestones": ["Complete Python course", "First Kaggle competition"]
+            },
+            {
+              "title": "ML Basics",
+              "duration": "2-3 months",
+              "skills": ["Supervised learning", "Unsupervised learning", "Model evaluation", "Scikit-learn"],
+              "projects": ["Classification model", "Regression analysis", "Clustering project"],
+              "resources": ["Andrew Ng ML Course", "Hands-On ML Book", "Fast.ai"],
+              "milestones": ["Build 5 ML models", "Deploy first model"]
+            }
+          ],
+          "certifications": ["Google Data Analytics", "IBM Data Science"],
+          "career_paths": ["Junior Data Analyst", "ML Engineer Trainee", "Data Scientist Junior"]
+        },
+        "intermediate": {
+          "duration": "8-12 months",
+          "phases": [
+            {
+              "title": "Deep Learning",
+              "duration": "4-6 months",
+              "skills": ["Neural networks", "CNN/RNN", "TensorFlow/PyTorch", "Transfer learning"],
+              "projects": ["Image classifier", "Sentiment analysis", "Recommendation system"],
+              "resources": ["Deep Learning Specialization", "PyTorch docs", "Papers with Code"],
+              "milestones": ["Train custom CNN", "Deploy DL model to production"]
+            },
+            {
+              "title": "Specialized AI",
+              "duration": "4-6 months",
+              "skills": ["NLP (BERT/GPT)", "Computer Vision", "MLOps", "Model optimization"],
+              "projects": ["Chatbot", "Object detection system", "ML pipeline"],
+              "resources": ["Hugging Face", "OpenAI API", "MLflow", "Kubeflow"],
+              "milestones": ["Production NLP system", "End-to-end ML pipeline"]
+            }
+          ],
+          "certifications": ["TensorFlow Developer", "AWS Machine Learning"],
+          "career_paths": ["ML Engineer", "Data Scientist", "AI Engineer"]
+        },
+        "advanced": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "Advanced AI Research",
+              "duration": "6-12 months",
+              "skills": ["Research methods", "State-of-the-art models", "AI architecture design", "Distributed training"],
+              "projects": ["Research paper", "Novel model architecture", "Large-scale AI system"],
+              "resources": ["ArXiv", "NeurIPS/ICML papers", "Research labs"],
+              "milestones": ["Published research", "Conference presentation"]
+            },
+            {
+              "title": "AI Leadership",
+              "duration": "6-12 months",
+              "skills": ["AI strategy", "Team leadership", "AI ethics", "Business integration"],
+              "projects": ["AI product strategy", "AI team building", "Ethics framework"],
+              "resources": ["AI for Everyone", "MLOps maturity models", "AI governance"],
+              "milestones": ["AI product launch", "AI team lead role"]
+            }
+          ],
+          "certifications": ["AWS ML Specialty", "Google Professional ML Engineer"],
+          "career_paths": ["Senior ML Engineer", "AI Research Scientist", "Head of AI", "Chief Data Officer"]
+        }
+      }
+    },
+    {
+      "field": "Coaching / Sport",
+      "aliases": [
+        "coaching", "coach", "sport", "fitness", "personal trainer", "nutrition sportive",
+        "préparation physique", "athlétisme", "football", "basketball", "entraîneur",
+        "تدريب", "مدرب", "رياضة", "لياقة بدنية", "تغذية رياضية", "إعداد بدني"
+      ],
+      "keywords": [
+        "sports coaching", "fitness training", "nutrition", "physical preparation", "athletic performance",
+        "sports management", "exercise physiology", "sports psychology", "strength training"
+      ],
+      "education": ["التربية البدنية", "علوم الرياضة", "الطب الرياضي", "التغذية الرياضية"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Growing",
+      "unemployment_risk": "Moderate",
+      "tools": ["Fitness equipment", "Sports analysis software", "Nutrition planning tools", "Performance tracking apps"],
+      "skills": [
+        "Training Program Design", "Nutrition Planning", "Motivation Techniques",
+        "Performance Analysis", "First Aid/CPR", "Communication", "Leadership"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Fitness Foundations",
+              "duration": "2-3 months",
+              "skills": ["Anatomy & physiology", "Exercise techniques", "Basic nutrition", "Client assessment"],
+              "projects": ["Personal training plan", "Client intake system", "Fitness assessment"],
+              "resources": ["NASM CPT", "ACE Fitness", "ISSA"],
+              "milestones": ["Complete CPT certification", "Train 5 clients"]
+            },
+            {
+              "title": "Practical Coaching",
+              "duration": "1-3 months",
+              "skills": ["Program design", "Injury prevention", "Motivation techniques", "Group classes"],
+              "projects": ["Group fitness class", "Online coaching program", "Nutrition guide"],
+              "resources": ["Coaching psychology books", "Sports nutrition courses"],
+              "milestones": ["Lead group classes", "Build client base"]
+            }
+          ],
+          "certifications": ["NASM CPT", "ACE Personal Trainer"],
+          "career_paths": ["Personal Trainer", "Fitness Instructor", "Junior Coach"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Specialized Coaching",
+              "duration": "6-12 months",
+              "skills": ["Sports-specific training", "Periodization", "Performance testing", "Video analysis"],
+              "projects": ["Athlete development program", "Team training plan", "Performance dashboard"],
+              "resources": ["NSCA CSCS", "Sports-specific courses", "Performance analysis tools"],
+              "milestones": ["CSCS certification", "Coach competitive athletes"]
+            },
+            {
+              "title": "Sports Nutrition",
+              "duration": "6-12 months",
+              "skills": ["Sports nutrition", "Supplement knowledge", "Meal planning", "Hydration strategies"],
+              "projects": ["Nutrition protocols", "Supplement guides", "Diet analysis"],
+              "resources": ["ISSN", "Precision Nutrition", "Sports dietetics"],
+              "milestones": ["Nutrition certification", "Work with pro athletes"]
+            }
+          ],
+          "certifications": ["NSCA CSCS", "Precision Nutrition L1"],
+          "career_paths": ["Strength Coach", "Sports Coach", "Performance Specialist"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Elite Performance",
+              "duration": "1-2 years",
+              "skills": ["Elite athlete coaching", "Periodization mastery", "Team management", "Data analysis"],
+              "projects": ["Olympic preparation", "Professional team coaching", "Research publication"],
+              "resources": ["High Performance Training", "Sports science journals", "Elite coaching seminars"],
+              "milestones": ["Coach national team", "Published research"]
+            },
+            {
+              "title": "Leadership & Business",
+              "duration": "1-2 years",
+              "skills": ["Facility management", "Business development", "Team leadership", "Brand building"],
+              "projects": ["Gym/facility ownership", "Coaching business", "Training methodology"],
+              "resources": ["Business courses", "Leadership training", "Entrepreneurship"],
+              "milestones": ["Own facility", "Elite coaching reputation"]
+            }
+          ],
+          "certifications": ["NSCA RSCC", "Master Strength Coach"],
+          "career_paths": ["Head Coach", "Performance Director", "Gym Owner", "Elite Performance Coach"]
+        }
+      }
+    },
+    {
+      "field": "Traduction / Langues",
+      "aliases": [
+        "traduction", "translation", "interprète", "interpreter", "langues", "languages",
+        "linguistique", "linguistics", "communication", "rédaction", "writing",
+        "ترجمة", "لغات", "مترجم", "لغوي", "تواصل", "كتابة"
+      ],
+      "keywords": [
+        "translation", "interpretation", "linguistics", "multilingual", "localization",
+        "technical writing", "content creation", "copywriting", "editing", "proofreading"
+      ],
+      "education": ["اللغات", "الترجمة", "الأداب", "الإعلامية"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Moderate",
+      "tools": ["CAT tools", "Translation memory", "Dictionaries", "Terminology databases", "Subtitling software"],
+      "skills": [
+        "Bilingual Proficiency", "Cultural Knowledge", "Research", "Writing", "Attention to Detail",
+        "Time Management", "Subject Matter Expertise"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Language Mastery",
+              "duration": "2-3 months",
+              "skills": ["Advanced grammar", "Vocabulary expansion", "Idioms & expressions", "Cultural nuances"],
+              "projects": ["Daily translation practice", "Vocabulary journal", "Grammar exercises"],
+              "resources": ["Language courses", "Dictionaries", "Grammar books"],
+              "milestones": ["C1/C2 level certification", "5000+ vocabulary"]
+            },
+            {
+              "title": "Translation Basics",
+              "duration": "1-3 months",
+              "skills": ["Translation theory", "CAT tools", "Terminology management", "Quality assurance"],
+              "projects": ["Short text translations", "Glossary creation", "Style guide development"],
+              "resources": ["Translation workshops", "CAT tool tutorials", "Terminology courses"],
+              "milestones": ["First paid translation", "CAT tool proficiency"]
+            }
+          ],
+          "certifications": ["DELF/DALF", "TOEFL/IELTS"],
+          "career_paths": ["Junior Translator", "Language Assistant", "Content Writer"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Specialized Translation",
+              "duration": "6-12 months",
+              "skills": ["Technical translation", "Legal translation", "Medical translation", "Localization"],
+              "projects": ["Specialized translation portfolio", "Website localization", "Technical documentation"],
+              "resources": ["Specialized courses", "Industry glossaries", "Translation communities"],
+              "milestones": ["Specialization certification", "Niche expertise"]
+            },
+            {
+              "title": "Professional Practice",
+              "duration": "6-12 months",
+              "skills": ["Client management", "Project management", "Quality control", "Specialization"],
+              "projects": ["Large project completion", "Client base building", "Specialization portfolio"],
+              "resources": ["ProZ", "ATA", "Translation business courses"],
+              "milestones": ["Regular client base", "Specialization recognition"]
+            }
+          ],
+          "certifications": ["ATA Certification", "Specialized Translation Cert"],
+          "career_paths": ["Professional Translator", "Interpreter", "Localization Specialist"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Expert Level",
+              "duration": "1-2 years",
+              "skills": ["Conference interpretation", "High-stakes translation", "Terminology expert", "Quality lead"],
+              "projects": ["Conference interpretation", "Book translation", "UN/EU projects"],
+              "resources": ["AIIC", "Conference training", "Diplomatic courses"],
+              "milestones": ["Conference interpreter", "Published translator"]
+            },
+            {
+              "title": "Leadership & Business",
+              "duration": "1-2 years",
+              "skills": ["Agency management", "Team leadership", "Business development", "Industry influence"],
+              "projects": ["Translation agency", "Training programs", "Industry speaking"],
+              "resources": ["Business management", "Leadership training", "Mentorship"],
+              "milestones": ["Agency ownership", "Industry recognition"]
+            }
+          ],
+          "certifications": ["Conference Interpreter", "Master Translator"],
+          "career_paths": ["Senior Translator", "Conference Interpreter", "Translation Agency Owner", "Linguistic Consultant"]
+        }
+      }
+    },
+    {
+      "field": "Journalisme / Médias",
+      "aliases": [
+        "journalisme", "journalist", "médias", "media", "presse", "news", "reporter",
+        "correspondant", "édition", "rédacteur", "content creator", "youtube", "podcast",
+        "صحافة", "إعلام", "صحفي", "مراسل", "إعلامي", "محتوى"
+      ],
+      "keywords": [
+        "journalism", "broadcasting", "digital media", "content creation", "social media",
+        "video production", "podcasting", "investigative journalism", "news writing"
+      ],
+      "education": ["الصحافة", "الإعلام", "الاتصال", "الأداب"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Evolving",
+      "unemployment_risk": "High",
+      "tools": ["WordPress", "Adobe Premiere", "Social media platforms", "Audio recorders", "Analytics tools"],
+      "skills": [
+        "Writing & Editing", "Research", "Interviewing", "Digital storytelling",
+        "Social media", "Video editing", "Critical thinking"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Journalism Foundations",
+              "duration": "2-3 months",
+              "skills": ["News writing", "Interview techniques", "Research methods", "Media ethics"],
+              "projects": ["Blog articles", "Interview practice", "News analysis"],
+              "resources": ["Journalism courses", "Style guides", "Media ethics codes"],
+              "milestones": ["First published article", "Interview 10 people"]
+            },
+            {
+              "title": "Digital Media",
+              "duration": "1-3 months",
+              "skills": ["Social media management", "Content creation", "SEO basics", "Analytics"],
+              "projects": ["Social media campaign", "Blog launch", "Video content"],
+              "resources": ["HubSpot Academy", "Google Analytics", "Canva"],
+              "milestones": ["1000+ followers", "Viral content"]
+            }
+          ],
+          "certifications": ["Google Digital Marketing"],
+          "career_paths": ["Junior Reporter", "Content Writer", "Social Media Assistant"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Beat Reporting",
+              "duration": "6-12 months",
+              "skills": ["Specialized reporting", "Investigative techniques", "Data journalism", "Multimedia storytelling"],
+              "projects": ["Investigation series", "Data story", "Video documentary"],
+              "resources": ["IRE", "Data journalism courses", "Multimedia tools"],
+              "milestones": ["Major story publication", "Award nomination"]
+            },
+            {
+              "title": "Media Production",
+              "duration": "6-12 months",
+              "skills": ["Video production", "Podcasting", "Live broadcasting", "Editing mastery"],
+              "projects": ["Video series", "Podcast launch", "Live coverage"],
+              "resources": ["Adobe Creative Suite", "Broadcast training", "Production courses"],
+              "milestones": ["Regular content production", "Audience growth"]
+            }
+          ],
+          "certifications": ["Broadcasting Certificate"],
+          "career_paths": ["Reporter", "Journalist", "Content Creator", "Video Producer"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Expert Journalism",
+              "duration": "1-2 years",
+              "skills": ["Investigative reporting", "Editorial leadership", "Industry expertise", "Award-winning work"],
+              "projects": ["Major investigation", "Book publication", "Industry awards"],
+              "resources": ["Pulitzer Center", "Journalism fellowships", "Master classes"],
+              "milestones": ["Pulitzer/Award win", "National recognition"]
+            },
+            {
+              "title": "Media Leadership",
+              "duration": "1-2 years",
+              "skills": ["Editor-in-chief", "Media strategy", "Business management", "Industry influence"],
+              "projects": ["Publication leadership", "Media startup", "Industry reform"],
+              "resources": ["Media management", "Executive training", "Industry networks"],
+              "milestones": ["Editor-in-chief", "Media ownership"]
+            }
+          ],
+          "certifications": ["Master Journalist"],
+          "career_paths": ["Senior Journalist", "Editor", "News Director", "Media Entrepreneur"]
+        }
+      }
+    }
+  ]
+}

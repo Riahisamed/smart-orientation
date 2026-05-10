@@ -56,7 +56,7 @@ const BAC_DOMAINS: Record<string, string[]> = {
   SCIENCE: ['biologie', 'chimie', 'recherche'],
   SVT: ['médecine', 'pharmacie', 'biologie'],
   ECO: ['gestion', 'commerce', 'finance'],
-  LETTERS: ['langues', 'communication', 'enseignement'],
+  LETTRES: ['langues', 'communication', 'enseignement'],
   TECHNIQUE: ['industriel', 'mécanique', 'électrique'],
   SPORT: ['sport', 'kinésithérapie', 'éducation physique'],
 };
@@ -449,6 +449,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         headers: {
           'Content-Type': 'application/json',
         },
+        
         body: JSON.stringify({
           message: inputMessage,
           studentData: {
@@ -459,7 +460,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
           },
         }),
       });
-
+      
       const data = await res.json();
       console.log('Response:', data);
 
@@ -508,6 +509,272 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     setChatStarted(false);
     setInterest('');
   };
+
+  const roadmapCardUi = [
+    {
+      domain: 'frontend',
+      labelFr: 'Front-end',
+      labelAr: 'الواجهة (Front)',
+      icon: '💻',
+      color: '#6366f1',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'backend',
+      labelFr: 'Back-end',
+      labelAr: 'الخلفية (Back)',
+      icon: '⚙️',
+      color: '#22c55e',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'ai',
+      labelFr: 'AI',
+      labelAr: 'الذكاء الاصطناعي',
+      icon: '🤖',
+      color: '#8b5cf6',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'cybersecurity',
+      labelFr: 'Cybersecurity',
+      labelAr: 'الأمن السيبراني',
+      icon: '🛡️',
+      color: '#ef4444',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'data science',
+      labelFr: 'Data Science',
+      labelAr: 'علم البيانات',
+      icon: '📊',
+      color: '#06b6d4',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'genie logiciel',
+      labelFr: 'Génie Logiciel',
+      labelAr: 'هندسة البرمجيات',
+      icon: '🧠',
+      color: '#f59e0b',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'medecine',
+      labelFr: 'Médecine',
+      labelAr: 'الطب',
+      icon: '🩺',
+      color: '#22c55e',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'pharmacie',
+      labelFr: 'Pharmacie',
+      labelAr: 'الصيدلة',
+      icon: '💊',
+      color: '#16a34a',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'biologie',
+      labelFr: 'Biologie',
+      labelAr: 'علم الأحياء',
+      icon: '🧬',
+      color: '#10b981',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'nutrition',
+      labelFr: 'Nutrition',
+      labelAr: 'التغذية',
+      icon: '🥗',
+      color: '#f97316',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'kine',
+      labelFr: 'Kin   é',
+      labelAr: 'علاج طبيعي',
+      icon: '👐',
+      color: '#14b8a6',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'droit',
+      labelFr: 'Droit',
+      labelAr: 'القانون',
+      icon: '⚖️',
+      color: '#3b82f6',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'traduction',
+      labelFr: 'Traduction',
+      labelAr: 'الترجمة',
+      icon: '🌍',
+      color: '#a855f7',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'journalisme',
+      labelFr: 'Journalisme',
+      labelAr: 'الصحافة',
+      icon: '🗞️',
+      color: '#ef4444',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'communication',
+      labelFr: 'Communication',
+      labelAr: 'التواصل',
+      icon: '📣',
+      color: '#f59e0b',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'coaching',
+      labelFr: 'Coaching',
+      labelAr: 'التدريب',
+      icon: '🏋️',
+      color: '#22c55e',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'nutrition sportive',
+      labelFr: 'Nutrition Sportive',
+      labelAr: 'تغذية رياضية',
+      icon: '🥑',
+      color: '#14b8a6',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+    {
+      domain: 'preparation physique',
+      labelFr: 'Préparation Physique',
+      labelAr: 'إعداد بدني',
+      icon: '⏱️',
+      color: '#6366f1',
+      promptTemplate: (d: string) => `roadmap ${d}`,
+    },
+  ];
+
+  const [showRoadmaps, setShowRoadmaps] = useState(false);
+  const hideSuggestionChips = showRoadmaps;
+
+  function getRoadmapDomainsByProfile(
+    bacTypeValue: BacType,
+    currentInterest: string,
+    _language: 'fr' | 'ar',
+  ) {
+
+    // Interest is intentionally lightweight: it can enrich ordering,
+    // but base domains must come from bacType.
+    const interestKey = normalizeText(currentInterest);
+
+    const baseByBac: Record<BacType, string[]> = {
+      MATH: ['frontend', 'backend', 'ai', 'cybersecurity', 'data science', 'genie logiciel'],
+      SVT: ['medecine', 'pharmacie', 'biologie', 'nutrition', 'kine'],
+      LETTRES: ['droit', 'traduction', 'journalisme', 'communication'],
+      SPORT: ['coaching', 'nutrition sportive', 'preparation physique'],
+      ECO: ['gestion', 'finance', 'economie', 'marketing'],
+      TECH: ['genie civil', 'mecanique', 'electrique', 'industriel'],
+      INFO: ['informatique', 'developpement', 'reseaux', 'ia'],
+    };
+
+    const base = baseByBac[bacTypeValue] ?? baseByBac.MATH;
+
+    // Small enrichment based on interest id (optional ordering only)
+    const interestBoost: Record<string, Partial<Record<string, number>>> = {
+      tech: { frontend: 3, backend: 2, ai: 3, cybersecurity: 2, 'data science': 2, 'genie logiciel': 2 },
+      health: { medecine: 3, pharmacie: 2, biologie: 2, nutrition: 3, kine: 2 },
+      business: { gestion: 3, finance: 3, economie: 2, marketing: 2 },
+      sport: { coaching: 3, 'nutrition sportive': 3, 'preparation physique': 3 },
+      art: { design: 3, 'communication': 2 },
+    };
+
+    const boost = interestBoost[interestKey] ?? {};
+    return [...base]
+      .sort((a, b) => (boost[b] ?? 0) - (boost[a] ?? 0))
+      .slice(0, 6);
+  };
+
+
+  const sendRoadmapPrompt = async (prompt: string) => {
+    if (isLoading) return;
+
+    // Keep the existing UX rules: chat must be started + score required
+    if (!score) {
+      setShowRoadmaps(true);
+      return;
+    }
+
+    setChatStarted(true);
+    setShowRoadmaps(true);
+
+    const numScore = parseFloat(score);
+    if (isNaN(numScore) || numScore < 0) return;
+
+    const userMessage: MessageWithPrograms = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: prompt,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setSuggestionRefreshKey((prev) => prev + 1);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('http://localhost:3001/chatbot/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: prompt,
+          studentData: {
+            score: numScore,
+            bacType: bac,
+            language,
+            interest,
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.reply) {
+        const assistantMessage: MessageWithPrograms = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.reply,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } else {
+        const errorMessage: MessageWithPrograms = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `Error: ${data.error || 'Failed to get response'}`,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+      const errorMessage: MessageWithPrograms = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+      inputRef.current?.focus();
+    }
+  };
+
 
   const renderProgramCategory = (
     title: string,
@@ -566,8 +833,10 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const messageWrapperClasses = hideHeader
     ? 'flex-1 overflow-y-auto bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700'
     : 'space-y-4 max-h-[500px] overflow-y-auto bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700';
-
+  // Roadmap selector cards are now fetched dynamically from backend (see state+effect below)
+  // so the roadmapCardUi hardcoded array was removed.
   return (
+
     <div className={containerClasses}>
       <div className={wrapperClasses}>
         {!hideHeader ? (
@@ -684,7 +953,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         )}
 
         {chatStarted && (
-          <div className="flex gap-2 items-end bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex-1">
               <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400">
                 Score: {score} • Bac: {bac}
@@ -692,38 +961,97 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
                 {' • '} {language === 'ar' ? '🇹🇳' : '🇫🇷'}
               </Label>
             </div>
-            <Button variant="outline" size="sm" onClick={clearChat}>
-              Clear Chat
-            </Button>
+
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowRoadmaps((v) => !v)}
+                className="whitespace-nowrap"
+              >
+                🗺️ Roadmaps
+              </Button>
+              <Button variant="outline" size="sm" onClick={clearChat}>
+                Clear Chat
+              </Button>
+            </div>
+          </div>
+
+        )}
+
+        {showRoadmaps && chatStarted && (
+          <div className="mt-3 rounded-2xl border border-slate-200/80 bg-white/70 p-3 animate-[fadeIn_0.2s_ease-out] dark:border-slate-700 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">🗺️ Roadmaps</p>
+              <button
+                type="button"
+                onClick={() => setShowRoadmaps(false)}
+                className="text-xs text-indigo-600 dark:text-indigo-300 hover:underline"
+              >
+                Back
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {roadmapCards.map((c) => (
+                <button
+                  key={c.domain}
+                  type="button"
+                  onClick={() => {
+                    const prompt = c.promptTemplate(c.domain);
+                    sendRoadmapPrompt(prompt);
+                  }}
+                  className="group rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60"
+                  style={{
+                    borderColor: `${c.color}55`,
+                    background: `linear-gradient(135deg, ${c.color}25 0%, rgba(255,255,255,0) 70%)`,
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl" aria-hidden="true">{c.icon}</span>
+                    <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{isArabic ? c.labelAr : c.labelFr}</span>
+                  </div>
+                  <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                    Click to ask the chatbot
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
+
         <div className={messageWrapperClasses}>
+
           {!chatStarted ? (
             <div className="mx-auto max-w-3xl py-12 text-center">
               <p className="text-gray-500 dark:text-gray-400 mb-6">
                 {t?.empty_intro || '💬 No messages yet. Fill in your details and ask a question to get started!'}
               </p>
-              <div className="space-y-3" dir={isArabic ? 'rtl' : 'ltr'}>
-                {suggestions.map((q, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setInputMessage(q);
-                      setTimeout(() => inputRef.current?.focus(), 100);
-                    }}
-                    className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-5 py-4 text-start text-base font-semibold leading-relaxed text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 dark:hover:border-indigo-500 dark:hover:bg-gray-600"
-                  >
-                    <span className="shrink-0 text-lg" aria-hidden="true">
-                      📌
-                    </span>
-                    <span className="flex-1">{q}</span>
-                  </button>
-                ))}
-              </div>
+              {!hideSuggestionChips && (
+                <div className="space-y-3" dir={isArabic ? 'rtl' : 'ltr'}>
+                  {suggestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setInputMessage(q);
+                        setTimeout(() => inputRef.current?.focus(), 100);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-5 py-4 text-start text-base font-semibold leading-relaxed text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-100 dark:hover:border-indigo-500 dark:hover:bg-gray-600"
+                    >
+                      <span className="shrink-0 text-lg" aria-hidden="true">
+                        📌
+                      </span>
+                      <span className="flex-1">{q}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
+
             <>
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -792,7 +1120,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
               ⚠️ Please fill in your score above before sending a message
             </div>
           )}
-          {chatStarted && !isLoading && (
+          {chatStarted && !isLoading && !hideSuggestionChips && (
             <div className="flex flex-wrap gap-2" dir={isArabic ? 'rtl' : 'ltr'}>
               {suggestions.map((q, idx) => (
                 <button

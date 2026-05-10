@@ -1,0 +1,403 @@
+[
+  {
+    "field": "IT",
+    "keywords": [
+      "informatique", "IT", "dev", "développement", "programmation", "web", "mobile", 
+      "data", "cyber", "cybersécurité", "réseau", "système", "cloud", "tech", "digital",
+      "software", "logiciel", "database", "IA", "intelligence artificielle", "machine learning",
+      "برمجة", "اعلامية", "معلوماتية", "شبكات", "أمن معلومات", "تطوير", "ويب"
+    ],
+    "jobs": [
+      {
+        "title": "Développeur Full-Stack",
+        "domain": "IT",
+        "description": "Développe des applications web complètes frontend et backend",
+        "skills": ["JavaScript", "React", "Node.js", "SQL", "REST APIs", "Git"],
+        "demand": "High",
+        "unemployment_rate": 4,
+        "future_outlook": "Excellent avec croissance du digital en Tunisie",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Spécialiste Cybersécurité",
+        "domain": "IT",
+        "description": "Protège les systèmes informatiques contre les cyberattaques",
+        "skills": ["Network Security", "Penetration Testing", "Linux", "Cryptographie", "SIEM"],
+        "demand": "High",
+        "unemployment_rate": 2,
+        "future_outlook": "Très forte demande mondiale et locale",
+        "salary_level": "High"
+      },
+      {
+        "title": "Data Scientist",
+        "domain": "IT",
+        "description": "Analyse les données et crée des modèles prédictifs",
+        "skills": ["Python", "Machine Learning", "TensorFlow", "SQL", "Statistiques", "Big Data"],
+        "demand": "High",
+        "unemployment_rate": 3,
+        "future_outlook": "Croissance rapide avec l'IA et l'analyse prédictive",
+        "salary_level": "High"
+      },
+      {
+        "title": "Développeur Mobile",
+        "domain": "IT",
+        "description": "Crée des applications mobiles pour iOS et Android",
+        "skills": ["React Native", "Flutter", "Swift", "Kotlin", "APIs Mobile", "UI/UX Mobile"],
+        "demand": "Medium",
+        "unemployment_rate": 5,
+        "future_outlook": "Stable avec demande constante pour apps mobiles",
+        "salary_level": "Medium"
+      }
+    ]
+  },
+  {
+    "field": "Sport",
+    "keywords": [
+      "sport", "sports", "activité physique", "éducation physique", "entraînement", 
+      "coaching", "kinésithérapie", "performance", "athlétisme", "football", "basketball",
+      "رياضة", "تربية بدنية", "تدريب", "مدرب", "علاج طبيعي", "أداء رياضي"
+    ],
+    "jobs": [
+      {
+        "title": "Coach Sportif",
+        "domain": "Sport",
+        "description": "Encadre et forme des athlètes ou groupes fitness",
+        "skills": ["Entraînement personnalisé", "Nutrition sportive", "Psychologie sportive", "Premiers secours"],
+        "demand": "Medium",
+        "unemployment_rate": 8,
+        "future_outlook": "Croissance du fitness et bien-être en Tunisie",
+        "salary_level": "Low"
+      },
+      {
+        "title": "Kinésithérapeute",
+        "domain": "Sport",
+        "description": "Rééduque et réhabilite les patients par la kinésithérapie",
+        "skills": ["Anatomie", "Rééducation fonctionnelle", "Massage thérapeutique", "Physiologie"],
+        "demand": "High",
+        "unemployment_rate": 3,
+        "future_outlook": "Forte demande dans le secteur médical-sportif",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Préparateur Physique",
+        "domain": "Sport",
+        "description": "Prépare et optimise la condition physique des athlètes",
+        "skills": ["Physiologie de l'effort", "Musculation", "Planification entraînement", "Tests physiques"],
+        "demand": "Medium",
+        "unemployment_rate": 6,
+        "future_outlook": "Demande croissante dans les clubs professionnels",
+        "salary_level": "Low"
+      }
+    ]
+  },
+  {
+    "field": "Medical / Health",
+    "keywords": [
+      "médical", "health", "santé", "médecine", "pharmacie", "infirmier", "infirmière",
+      "biologie", "biologiste", "laboratoire", "clinique", "hôpital", "soins", "dentaire",
+      "طب", "صحة", "صيدلة", "تمريض", "بيولوجيا", "مختبر", "مستشفى"
+    ],
+    "jobs": [
+      {
+        "title": "Infirmier",
+        "domain": "Medical / Health",
+        "description": "Prodigue les soins aux patients et assiste les médecins",
+        "skills": ["Soins infirmiers", "Urgences", "Communication patient", "Hygiène", "Médication"],
+        "demand": "High",
+        "unemployment_rate": 2,
+        "future_outlook": "Demande constante dans tous les hôpitaux",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Pharmacien",
+        "domain": "Medical / Health",
+        "description": "Prépare et délivre des médicaments avec conseil patient",
+        "skills": ["Pharmacologie", "Chimie pharmaceutique", "Réglementation", "Conseil patient", "Management officine"],
+        "demand": "High",
+        "unemployment_rate": 3,
+        "future_outlook": "Stable avec ouverture d'officines en Tunisie",
+        "salary_level": "High"
+      },
+      {
+        "title": "Biologiste Médical",
+        "domain": "Medical / Health",
+        "description": "Effectue des analyses biologiques en laboratoire",
+        "skills": ["Biologie clinique", "Microbiologie", "Biochimie", "Techniques de laboratoire", "Analyse médicale"],
+        "demand": "High",
+        "unemployment_rate": 4,
+        "future_outlook": "Croissance des laboratoires d'analyses en Tunisie",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Technicien de Laboratoire",
+        "domain": "Medical / Health",
+        "description": "Réalise des analyses biologiques et entretient l'équipement",
+        "skills": ["Analyses biologiques", "Manipulation échantillons", "Stérilisation", "Maintenance équipement"],
+        "demand": "Medium",
+        "unemployment_rate": 5,
+        "future_outlook": "Demande stable dans le secteur médical",
+        "salary_level": "Low"
+      }
+    ]
+  },
+  {
+    "field": "Business",
+    "keywords": [
+      "business", "gestion", "management", "comptabilité", "finance", "audit", 
+      "ressources humaines", "RH", "marketing", "commerce", "économie", "administration",
+      "أعمال", "إدارة", "محاسبة", "مالية", "تصرف", "تجارة", "تسويق"
+    ],
+    "jobs": [
+      {
+        "title": "Expert-Comptable",
+        "domain": "Business",
+        "description": "Gère la comptabilité et la fiscalité des entreprises",
+        "skills": ["Comptabilité", "Fiscalité", "Audit", "IFRS", "Logiciels comptables"],
+        "demand": "Medium",
+        "unemployment_rate": 6,
+        "future_outlook": "Stable avec création d'entreprises en Tunisie",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Analyste Financier",
+        "domain": "Business",
+        "description": "Analyse les données financières et conseille les investissements",
+        "skills": ["Analyse financière", "Excel avancé", "Modélisation", "Reporting", "ERP"],
+        "demand": "Medium",
+        "unemployment_rate": 7,
+        "future_outlook": "Demande dans banques et grandes entreprises",
+        "salary_level": "High"
+      },
+      {
+        "title": "Responsable Marketing Digital",
+        "domain": "Business",
+        "description": "Gère la stratégie marketing et la présence digitale",
+        "skills": ["Marketing digital", "SEO/SEM", "Social Media", "Analytics", "Content Marketing"],
+        "demand": "Medium",
+        "unemployment_rate": 8,
+        "future_outlook": "Croissance rapide du digital marketing",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Responsable RH",
+        "domain": "Business",
+        "description": "Gère le recrutement et le développement du personnel",
+        "skills": ["Gestion RH", "Recrutement", "Paie", "Droit du travail", "Formation"],
+        "demand": "Low",
+        "unemployment_rate": 10,
+        "future_outlook": "Concentré dans grandes entreprises et multinationales",
+        "salary_level": "Medium"
+      }
+    ]
+  },
+  {
+    "field": "Engineering",
+    "keywords": [
+      "engineering", "ingénierie", "ingénieur", "génie", "mécanique", "civil", 
+      "électrique", "électronique", "industriel", "production", "énergie", "automatisme",
+      "هندسة", "مهندس", "مدني", "ميكانيك", "كهرباء", "إلكترونيك", "صناعة"
+    ],
+    "jobs": [
+      {
+        "title": "Ingénieur Mécanique",
+        "domain": "Engineering",
+        "description": "Conçoit et développe des systèmes et machines mécaniques",
+        "skills": ["CAO (AutoCAD/CATIA)", "Thermodynamique", "Matériaux", "Mécanique des fluides", "Calcul structures"],
+        "demand": "Medium",
+        "unemployment_rate": 6,
+        "future_outlook": "Stable dans industrie et services",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Ingénieur Génie Civil",
+        "domain": "Engineering",
+        "description": "Conçoit et supervise des projets de construction",
+        "skills": ["BIM", "Calcul de structures", "Géotechnique", "AutoCAD", "Gestion de chantier"],
+        "demand": "Medium",
+        "unemployment_rate": 7,
+        "future_outlook": "Cyclique selon projets immobiliers et infrastructure",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Ingénieur Électrique",
+        "domain": "Engineering",
+        "description": "Conçoit des systèmes électriques et électroniques",
+        "skills": ["Électrotechnique", "Automates programmables", "Énergie", "Électronique de puissance"],
+        "demand": "High",
+        "unemployment_rate": 4,
+        "future_outlook": "Forte demande avec transition énergétique",
+        "salary_level": "High"
+      },
+      {
+        "title": "Ingénieur Production",
+        "domain": "Engineering",
+        "description": "Optimise les processus de fabrication industrielle",
+        "skills": ["Lean Manufacturing", "Six Sigma", "ERP", "Planification", "Qualité"],
+        "demand": "Medium",
+        "unemployment_rate": 5,
+        "future_outlook": "Stable dans zones industrielles tunisiennes",
+        "salary_level": "Medium"
+      }
+    ]
+  },
+  {
+    "field": "Art",
+    "keywords": [
+      "art", "design", "graphisme", "architecture", "création", "mode", "fashion",
+      "multimédia", "audiovisuel", "cinéma", "musique", "beaux-arts", "illustration",
+      "فن", "تصميم", "عمارة", "أزياء", "موسيقى", "سينما", "جرافيك"
+    ],
+    "jobs": [
+      {
+        "title": "Designer Graphique",
+        "domain": "Art",
+        "description": "Crée des visuels pour communication et branding",
+        "skills": ["Adobe Creative Suite", "Design thinking", "Typographie", "Branding", "Illustration"],
+        "demand": "Medium",
+        "unemployment_rate": 8,
+        "future_outlook": "Concurrence élevée mais demande dans agences",
+        "salary_level": "Low"
+      },
+      {
+        "title": "Designer UX/UI",
+        "domain": "Art",
+        "description": "Conçoit l'expérience utilisateur des applications",
+        "skills": ["Figma", "User Research", "Wireframing", "Prototyping", "Design System"],
+        "demand": "Medium",
+        "unemployment_rate": 6,
+        "future_outlook": "Croissance avec le secteur tech en Tunisie",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Architecte",
+        "domain": "Art",
+        "description": "Conçoit des bâtiments et espaces architecturaux",
+        "skills": ["CAO/DAO", "Modélisation 3D", "Réglementation construction", "Design d'espace"],
+        "demand": "Low",
+        "unemployment_rate": 12,
+        "future_outlook": "Saturé avec concurrence importante",
+        "salary_level": "Medium"
+      }
+    ]
+  },
+  {
+    "field": "Science",
+    "keywords": [
+      "science", "recherche", "laboratoire", "chimie", "physique", "biologie", 
+      "mathématiques", "environnement", "agronomie", "géologie", "recherche scientifique",
+      "علوم", "كيمياء", "فيزياء", "أحياء", "رياضيات", "بحث علمي"
+    ],
+    "jobs": [
+      {
+        "title": "Chercheur Scientifique",
+        "domain": "Science",
+        "description": "Mène des recherches dans le domaine scientifique",
+        "skills": ["Méthodologie recherche", "Analyse données", "Publication scientifique", "Laboratoire"],
+        "demand": "Low",
+        "unemployment_rate": 10,
+        "future_outlook": "Limité aux institutions publiques et universités",
+        "salary_level": "Low"
+      },
+      {
+        "title": "Chimiste Analytique",
+        "domain": "Science",
+        "description": "Effectue des analyses chimiques qualité et R&D",
+        "skills": ["Chimie analytique", "Chromatographie", "Spectroscopie", "Contrôle qualité"],
+        "demand": "Medium",
+        "unemployment_rate": 7,
+        "future_outlook": "Demande dans industrie pharmaceutique et agroalimentaire",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Spécialiste Environnement",
+        "domain": "Science",
+        "description": "Assure la conformité environnementale et durabilité",
+        "skills": ["Droit environnemental", "Audit environnemental", "ISO 14001", "Durabilité"],
+        "demand": "Medium",
+        "unemployment_rate": 6,
+        "future_outlook": "Croissance avec réglementations environnementales",
+        "salary_level": "Medium"
+      }
+    ]
+  },
+  {
+    "field": "Education",
+    "keywords": [
+      "éducation", "enseignement", "formation", "pédagogie", "professeur", "enseignant",
+      "maître", "éducateur", "école", "université", "tutorat", "coaching éducatif",
+      "تربية", "تعليم", "أستاذ", "مدرس", "تكوين", "تعليمي"
+    ],
+    "jobs": [
+      {
+        "title": "Enseignant",
+        "domain": "Education",
+        "description": "Dispense des cours et évalue les étudiants",
+        "skills": ["Pédagogie", "Discipline académique", "Évaluation", "Adaptation", "Communication"],
+        "demand": "Low",
+        "unemployment_rate": 12,
+        "future_outlook": "Saturé dans le public, opportunités dans privé",
+        "salary_level": "Low"
+      },
+      {
+        "title": "Formateur Professionnel",
+        "domain": "Education",
+        "description": "Forme des adultes aux compétences professionnelles",
+        "skills": ["Ingénierie pédagogique", "E-learning", "Évaluation", "Soft skills", "Andragogie"],
+        "demand": "Medium",
+        "unemployment_rate": 8,
+        "future_outlook": "Croissance avec formation continue en entreprise",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Conseiller Pédagogique",
+        "domain": "Education",
+        "description": "Accompagne l'innovation dans les méthodes d'enseignement",
+        "skills": ["Innovation éducative", "Mentoring", "Curriculum design", "Accompagnement"],
+        "demand": "Low",
+        "unemployment_rate": 11,
+        "future_outlook": "Niche concentrée dans institutions innovantes",
+        "salary_level": "Medium"
+      }
+    ]
+  },
+  {
+    "field": "Law",
+    "keywords": [
+      "law", "droit", "justice", "avocat", "notaire", "juriste", "légal", "magistrat",
+      "juge", "tribunal", "loi", "réglementation", "compliance", "contentieux",
+      "قانون", "عدالة", "محامي", "قاضي", "محكمة", "قضاء"
+    ],
+    "jobs": [
+      {
+        "title": "Avocat",
+        "domain": "Law",
+        "description": "Conseille et défend des clients devant les tribunaux",
+        "skills": ["Droit civil", "Plaidoirie", "Recherche juridique", "Droit commercial", "Négociation"],
+        "demand": "Medium",
+        "unemployment_rate": 9,
+        "future_outlook": "Concurrence élevée mais demande constante",
+        "salary_level": "Medium"
+      },
+      {
+        "title": "Notaire",
+        "domain": "Law",
+        "description": "Authentifie les actes et conseille en droit immobilier",
+        "skills": ["Droit immobilier", "Droit de famille", "Documentation", "Conformité", "Conseil client"],
+        "demand": "Medium",
+        "unemployment_rate": 7,
+        "future_outlook": "Stable avec transactions immobilières",
+        "salary_level": "High"
+      },
+      {
+        "title": "Juriste d'Entreprise",
+        "domain": "Law",
+        "description": "Conseille l'entreprise sur les aspects légaux",
+        "skills": ["Contrats", "Droit social", "Compliance", "Propriété intellectuelle", "Contentieux"],
+        "demand": "Medium",
+        "unemployment_rate": 8,
+        "future_outlook": "Demande dans grandes entreprises et multinationales",
+        "salary_level": "Medium"
+      }
+    ]
+  }
+]
