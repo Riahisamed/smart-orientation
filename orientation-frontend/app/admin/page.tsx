@@ -1,8 +1,96 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Bell, FileUp, GraduationCap, LineChart, Users } from "lucide-react"
+import { Bell, FileUp, GraduationCap, LineChart, PieChart, TrendingUp, Users } from "lucide-react"
 import { API_BASE_URL } from "@/lib/api/config"
+
+type ChartItem = { label: string; value: number; color?: string }
+
+const palette = ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4", "#84cc16", "#f97316"]
+
+function MiniBarChart({ items }: { items: ChartItem[] }) {
+  const max = Math.max(...items.map((item) => item.value), 1)
+  return (
+    <div className="space-y-3">
+      {items.map((item, index) => (
+        <div key={item.label}>
+          <div className="mb-1 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span className="max-w-[70%] truncate">{item.label}</span>
+            <span className="font-semibold">{item.value}</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${(item.value / max) * 100}%`, backgroundColor: item.color ?? palette[index % palette.length] }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function DonutChart({ items }: { items: ChartItem[] }) {
+  const total = Math.max(items.reduce((sum, item) => sum + item.value, 0), 1)
+  let offset = 25
+  return (
+    <div className="flex items-center gap-5">
+      <svg viewBox="0 0 42 42" className="h-36 w-36 shrink-0 -rotate-90">
+        <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#e2e8f0" strokeWidth="7" />
+        {items.map((item, index) => {
+          const dash = (item.value / total) * 100
+          const segment = (
+            <circle
+              key={item.label}
+              cx="21"
+              cy="21"
+              r="15.9"
+              fill="transparent"
+              stroke={item.color ?? palette[index % palette.length]}
+              strokeWidth="7"
+              strokeDasharray={`${dash} ${100 - dash}`}
+              strokeDashoffset={offset}
+            />
+          )
+          offset -= dash
+          return segment
+        })}
+      </svg>
+      <div className="min-w-0 flex-1 space-y-2">
+        {items.map((item, index) => (
+          <div key={item.label} className="flex items-center justify-between gap-3 text-sm">
+            <span className="flex min-w-0 items-center gap-2 text-slate-600 dark:text-slate-300">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color ?? palette[index % palette.length] }} />
+              <span className="truncate">{item.label}</span>
+            </span>
+            <span className="font-semibold">{Math.round((item.value / total) * 100)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function LineTrend({ items }: { items: ChartItem[] }) {
+  const max = Math.max(...items.map((item) => item.value), 1)
+  const points = items.map((item, index) => `${20 + index * 48},${110 - (item.value / max) * 80}`).join(" ")
+  return (
+    <svg viewBox="0 0 340 130" className="h-44 w-full">
+      <polyline points="20,110 320,110" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+      <polyline points={points} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      {items.map((item, index) => {
+        const x = 20 + index * 48
+        const y = 110 - (item.value / max) * 80
+        return (
+          <g key={item.label}>
+            <circle cx={x} cy={y} r="4" fill="#2563eb" />
+            <text x={x} y="126" textAnchor="middle" fontSize="8" fill="#64748b">{item.label.slice(5)}</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
 
 export default function AdminDashboard() {
   const [file, setFile] = useState<File | null>(null)
@@ -106,6 +194,10 @@ export default function AdminDashboard() {
     { label: "Filieres", value: stats?.totals?.filieres ?? 0, icon: LineChart },
     { label: "Tests", value: stats?.totals?.tests ?? 0, icon: Bell },
   ]
+  const bacChart = (stats?.bacTypes ?? []).map((item: any, index: number) => ({ label: item.bacType, value: item.count, color: palette[index % palette.length] }))
+  const domainChart = (stats?.popularDomains ?? []).map((item: any, index: number) => ({ label: item.domain, value: item.count, color: palette[index % palette.length] }))
+  const trendChart = (stats?.orientationTrends ?? []).map((item: any) => ({ label: item.date, value: item.count }))
+  const marketChart = (stats?.market ?? []).map((item: any, index: number) => ({ label: item.domain, value: item.jobs, color: palette[index % palette.length] }))
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950">
@@ -139,16 +231,40 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Domaines populaires</h2>
-            <div className="mt-4 space-y-3">
-              {(stats?.popularDomains ?? []).map((item: any) => (
-                <div key={item.domain} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-950">
-                  <span>{item.domain}</span>
-                  <span className="font-semibold">{item.count}</span>
-                </div>
-              ))}
-              {(stats?.popularDomains ?? []).length === 0 && <p className="text-sm text-slate-500">Pas encore de tests.</p>}
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Domaines populaires</h2>
+              <LineChart className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="mt-5">
+              {domainChart.length > 0 ? <MiniBarChart items={domainChart} /> : <p className="text-sm text-slate-500">Pas encore de tests.</p>}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Distribution bac</h2>
+              <PieChart className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div className="mt-5">
+              {bacChart.length > 0 ? <DonutChart items={bacChart} /> : <p className="text-sm text-slate-500">Aucune distribution disponible.</p>}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Tendances orientation</h2>
+              <TrendingUp className="h-5 w-5 text-violet-600" />
+            </div>
+            <div className="mt-2">
+              {trendChart.length > 0 ? <LineTrend items={trendChart} /> : <p className="text-sm text-slate-500">Aucune tendance disponible.</p>}
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Demande marche</h2>
+            <div className="mt-5">
+              {marketChart.length > 0 ? <MiniBarChart items={marketChart} /> : <p className="text-sm text-slate-500">Aucun snapshot marche.</p>}
             </div>
           </section>
 

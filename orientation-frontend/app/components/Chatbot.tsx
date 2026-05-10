@@ -279,14 +279,9 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
         }
       } else {
         const errorData = await response.json()
-        console.error("[DEBUG] Backend error:", {
-          status: response.status,
-          error: errorData.error || "Unknown error"
-        })
         addMessage("assistant", `❌ خطأ: ${errorData.error || "مشكلة في الاتصال بالخادم"}`)
       }
     } catch (error) {
-      console.error("[DEBUG] Network error:", error)
       addMessage("assistant", "❌ مشكلة في الاتصال. تأكد من:\n1. الخادم (NestJS) يشتغل على 3001\n2. Ollama يشتغل على 11434\n3. Firebase متصل")
     } finally {
       setIsLoading(false)

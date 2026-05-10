@@ -1,4 +1,4 @@
-const CACHE_NAME = "smart-orientation-v1";
+const CACHE_NAME = "smart-orientation-v2";
 const APP_SHELL = [
   "/",
   "/dashboard",
@@ -34,7 +34,7 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(request).then((cached) => {
-      if (cached) return cached;
+      if (cached && request.destination !== "document") return cached;
       return fetch(request)
         .then((response) => {
           if (response.ok && url.origin === self.location.origin) {
@@ -43,7 +43,10 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => caches.match("/dashboard"));
+        .catch(() => {
+          if (request.destination === "document") return caches.match("/offline.html");
+          return cached || caches.match("/offline.html");
+        });
     })
   );
 });

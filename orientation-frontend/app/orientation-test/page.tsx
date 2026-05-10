@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Download, Send } from "lucide-react"
+import { Award, BriefcaseBusiness, Download, GraduationCap, Lightbulb, Send, TrendingUp } from "lucide-react"
 import { API_BASE_URL } from "@/lib/api/config"
 
 type OrientationQuestion = {
@@ -11,6 +11,23 @@ type OrientationQuestion = {
   domains: string[]
   skills: string[]
 }
+
+const domainStyles = [
+  { icon: GraduationCap, color: "blue", label: "Academique" },
+  { icon: BriefcaseBusiness, color: "emerald", label: "Marche fort" },
+  { icon: Lightbulb, color: "amber", label: "Innovation" },
+  { icon: TrendingUp, color: "violet", label: "Croissance" },
+]
+
+const toneClasses: Record<string, { bg: string; text: string; bar: string; ring: string }> = {
+  blue: { bg: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", bar: "bg-blue-600", ring: "border-blue-200 dark:border-blue-800" },
+  emerald: { bg: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", bar: "bg-emerald-600", ring: "border-emerald-200 dark:border-emerald-800" },
+  amber: { bg: "bg-amber-50 dark:bg-amber-950/40", text: "text-amber-700 dark:text-amber-300", bar: "bg-amber-500", ring: "border-amber-200 dark:border-amber-800" },
+  violet: { bg: "bg-violet-50 dark:bg-violet-950/40", text: "text-violet-700 dark:text-violet-300", bar: "bg-violet-600", ring: "border-violet-200 dark:border-violet-800" },
+}
+
+const demandFor = (percent: number) => (percent >= 80 ? "Elevee" : percent >= 55 ? "Stable" : "Niche")
+const outlookFor = (percent: number) => (percent >= 80 ? "Tres prometteur" : percent >= 55 ? "Bon potentiel" : "A explorer")
 
 export default function OrientationTestPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({})
@@ -75,6 +92,10 @@ export default function OrientationTestPage() {
   }
 
   const reportId = result?.report?.id ?? latest?.report?.id
+  const visibleResult = result?.test ?? latest
+  const domainResults = (visibleResult?.dominantDomains ?? []) as any[]
+  const maxScore = Math.max(...domainResults.map((item) => Number(item.score) || 0), 1)
+  const topDomain = domainResults[0]
 
   const downloadReport = async () => {
     if (!reportId) return
@@ -136,20 +157,69 @@ export default function OrientationTestPage() {
         </section>
 
         {(result || latest) && (
-          <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Resultats</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {((result?.test ?? latest)?.dominantDomains ?? []).map((item: any) => (
-                <div key={item.domain} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-950">
-                  <p className="font-medium">{item.domain}</p>
-                  <p className="text-sm text-slate-500">Score {item.score}</p>
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="border-b border-slate-100 bg-slate-50 px-5 py-4 dark:border-slate-800 dark:bg-slate-950/50">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Resultats intelligents</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Compatibilite, demande marche et perspectives par domaine.</p>
                 </div>
-              ))}
+                {topDomain && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+                      <Award className="h-4 w-4" />
+                      Top recommandation
+                    </div>
+                    <p className="mt-1 font-bold">{topDomain.domain}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-4 p-5 sm:grid-cols-2">
+              {domainResults.map((item: any, index: number) => {
+                const style = domainStyles[index % domainStyles.length]
+                const tone = toneClasses[style.color]
+                const Icon = style.icon
+                const percent = Math.min(100, Math.round(((Number(item.score) || 0) / maxScore) * 100))
+                return (
+                  <div key={item.domain} className={`rounded-2xl border p-4 ${tone.bg} ${tone.ring}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`rounded-xl bg-white p-2 shadow-sm dark:bg-slate-900 ${tone.text}`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-950 dark:text-slate-50">{item.domain}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{style.label}</p>
+                        </div>
+                      </div>
+                      <span className={`rounded-full bg-white px-2.5 py-1 text-xs font-bold shadow-sm dark:bg-slate-900 ${tone.text}`}>
+                        {percent}%
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span>Score {item.score}</span>
+                        <span>Compatibilite</span>
+                      </div>
+                      <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
+                        <div className={`h-full rounded-full ${tone.bar} transition-all duration-700 ease-out`} style={{ width: `${percent}%` }} />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium">
+                      <span className="rounded-full bg-white px-2.5 py-1 text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">Demande: {demandFor(percent)}</span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">Avenir: {outlookFor(percent)}</span>
+                      {index === 0 && <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-white">Recommande</span>}
+                    </div>
+                  </div>
+                )
+              })}
+              {domainResults.length === 0 && <p className="text-sm text-slate-500">Pas encore de resultats disponibles.</p>}
             </div>
             {reportId && (
               <button
                 onClick={downloadReport}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-white dark:bg-slate-100 dark:text-slate-950"
+                className="mx-5 mb-5 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-100 dark:text-slate-950"
               >
                 <Download className="h-4 w-4" />
                 Telecharger le rapport PDF

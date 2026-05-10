@@ -24,7 +24,7 @@ export class AdminService {
     const latestTests = await this.prisma.orientationTest.findMany({
       orderBy: { createdAt: 'desc' },
       take: 50,
-      select: { dominantDomains: true },
+      select: { dominantDomains: true, createdAt: true },
     });
 
     const domainCounts = new Map<string, number>();
@@ -50,6 +50,7 @@ export class AdminService {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 8)
         .map(([domain, count]) => ({ domain, count })),
+      orientationTrends: this.orientationTrends(latestTests),
       market: this.marketSnapshot(),
     };
   }
@@ -104,5 +105,22 @@ export class AdminService {
     } catch {
       return [];
     }
+  }
+
+  private orientationTrends(tests: { createdAt: Date }[]) {
+    const buckets = new Map<string, number>();
+    for (let index = 6; index >= 0; index -= 1) {
+      const date = new Date();
+      date.setDate(date.getDate() - index);
+      buckets.set(date.toISOString().slice(0, 10), 0);
+    }
+    for (const test of tests) {
+      const key = test.createdAt.toISOString().slice(0, 10);
+      if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
+    }
+    return [...buckets.entries()].map(([date, count]) => ({
+      date,
+      count,
+    }));
   }
 }

@@ -425,8 +425,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         }));
         setMessages(normalized);
         setChatStarted(true);
-      } catch (error) {
-        console.error('Failed to load chat history:', error);
+      } catch {
       }
     }
   }, []);
@@ -459,11 +458,9 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
           const data: RoadmapCardsResponse = await res.json();
           setRoadmapCards(data.cards);
         } else {
-          console.error('Failed to fetch roadmap cards:', res.status);
           setRoadmapCards([]);
         }
-      } catch (error) {
-        console.error('Error fetching roadmap cards:', error);
+      } catch {
         setRoadmapCards([]);
       } finally {
         setRoadmapCardsLoading(false);
@@ -536,7 +533,6 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         setMessages((prev) => [...prev, errorMessage]);
       }
     } catch (error) {
-      console.error('Network error:', error);
       const errorMessage: MessageWithPrograms = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -630,7 +626,6 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
         setMessages((prev) => [...prev, errorMessage]);
       }
     } catch (error) {
-      console.error('Network error:', error);
       const errorMessage: MessageWithPrograms = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
