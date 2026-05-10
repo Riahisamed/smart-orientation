@@ -85,6 +85,10 @@ export class IntentDetectorService {
       return 'ask_programs';
     }
 
+    if (/\b(score|moyenne|fg)\b.*\b(chnowa|najem|faire|choisir|orientation|programme|filiere)\b/i.test(normalized)) {
+      return 'ask_programs';
+    }
+
     // ============================================================
     // 9. DEFAULT — general
     // ============================================================
@@ -246,7 +250,7 @@ export class IntentDetectorService {
 
     // "نحب X" — interest in a field
     if (/نحب\s+(informatique|sport|طب|صحة|تجارة|فن|رياضة|تكنولوجيا|انفورماتيك|معلومية|اعلامية)/i.test(text)) return true;
-    if (/nheb\s+(informatique|informatia|sport|tech|it|medecine|commerce|art)/i.test(text)) return true;
+    if (/nheb\s+(info|informatique|informatia|sport|tech|it|medecine|commerce|art)/i.test(text)) return true;
     if (/حاب\s+(informatique|sport|طب|صحة|فن|تجارة)/i.test(text)) return true;
 
     // "تنصحني", "شنو تنصحني", "nansahni"
@@ -259,7 +263,7 @@ export class IntentDetectorService {
 
     // Direct field mention as interest (positive, no question words)
     const domainTerms = [
-      'informatique', 'informatia', 'it', 'tech',
+      'info', 'informatique', 'informatia', 'it', 'tech',
       'sport', 'santé', 'sante', 'medecine', 'médecine',
       'business', 'commerce', 'gestion', 'finance',
       'art', 'design', 'architecture',
@@ -283,7 +287,7 @@ export class IntentDetectorService {
     const results: { category: string; value: string }[] = [];
 
     const domainMap: Record<string, string[]> = {
-      tech: ['informatique', 'informatia', 'dev', 'développement', 'programmation',
+      tech: ['info', 'informatique', 'informatia', 'dev', 'développement', 'programmation',
         'software', 'réseau', 'reseau', 'cyber', 'data', 'ia', 'ai', 'it', 'tech',
         'coding', 'برمجة', 'تكنولوجيا', 'ديف', 'اعلامية', 'معلوماتية', 'web', 'mobile'],
       sport: ['sport', 'kiné', 'kine', 'football', 'basket', 'tennis', 'رياضة', 'سبور', 'تدريب',
@@ -326,7 +330,7 @@ export class IntentDetectorService {
     if (!normalized) return null;
 
     const domainMap: Record<string, string[]> = {
-      tech: ['informatique', 'informatia', 'dev', 'développement', 'programmation',
+      tech: ['info', 'informatique', 'informatia', 'dev', 'développement', 'programmation',
         'software', 'réseau', 'reseau', 'cyber', 'data', 'ia', 'ai', 'it', 'tech',
         'coding', 'برمجة', 'تكنولوجيا', 'ديف', 'اعلامية', 'معلوماتية', 'web', 'mobile'],
       sport: ['sport', 'kiné', 'kine', 'football', 'basket', 'tennis', 'رياضة', 'سبور', 'تدريب'],

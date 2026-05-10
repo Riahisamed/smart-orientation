@@ -6,6 +6,7 @@ import { Card, CardContent } from "../components/ui/card"
 import { Input } from "../components/ui/input"
 import { Button } from "../components/ui/button"
 import { Label } from "../components/ui/label"
+import { API_BASE_URL } from "@/lib/api/config"
 
 const bacSubjects:any = {
 
@@ -107,8 +108,8 @@ if(mode === "controle"){
 //////////////////////////////////////////////////
 
 const endpoint = mode === "controle"
-? "http://localhost:3001/student/calculate-fg-controle"
-: "http://localhost:3001/student/calculate-fg"
+? `${API_BASE_URL}/student/calculate-fg-controle`
+: `${API_BASE_URL}/student/calculate-fg`
 
 const fgRes = await fetch(endpoint,{
 method:"POST",
@@ -126,7 +127,7 @@ body:JSON.stringify(body)
 // 🔥 CREATE STUDENT
 //////////////////////////////////////////////////
 
-await fetch("http://localhost:3001/student/update",{
+await fetch(`${API_BASE_URL}/student/update`,{
   method:"PUT",
   headers:{
     "Content-Type":"application/json",

@@ -9,6 +9,7 @@ import { Button } from "../components/ui/button"
 import { Label } from "../components/ui/label"
 import { Chrome } from "lucide-react"
 import Link from "next/link"
+import { API_BASE_URL } from "@/lib/api/config"
 
 export default function AuthPage() {
 
@@ -46,7 +47,7 @@ export default function AuthPage() {
 
       setLoading(true)
 
-      const res = await fetch("http://localhost:3001/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -56,7 +57,6 @@ export default function AuthPage() {
 
       const data = await res.json()
       
-      console.log(data)
       if (!res.ok) {
         setError(data.message || "Login failed")
         return
@@ -111,7 +111,7 @@ if (data.user.role === "ADMIN") {
 
       setLoading(true)
 
-      const res = await fetch("http://localhost:3001/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

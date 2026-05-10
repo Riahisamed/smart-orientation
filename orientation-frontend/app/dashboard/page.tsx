@@ -8,6 +8,7 @@ import { Card, CardContent } from "lib/components/ui/card"
 import { Button } from "lib/components/ui/button"
 import { Input } from "lib/components/ui/input"
 import { Select } from "lib/components/ui/select"
+import { API_BASE_URL } from "@/lib/api/config"
 
 export default function Dashboard() {
   const [fg, setFG] = useState(0)
@@ -27,21 +28,19 @@ export default function Dashboard() {
     }
 
     if (token) {
-      fetch("http://localhost:3001/student/me", {
+      fetch(`${API_BASE_URL}/student/me`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       })
       .then(async (res) => {
         if (!res.ok) {
-          console.log("❌ error from backend")
           return
         }
 
         const text = await res.text()
 
         if (!text) {
-          console.log("❌ empty response")
           return
         }
 
@@ -50,16 +49,13 @@ export default function Dashboard() {
         setStudent(data)
         setFG(data?.FG || 0)
       })
-      .catch(err => {
-        console.error("ERROR:", err)
-      })
+      .catch(() => {})
     }
 
     // ✅ filieres
-    fetch("http://localhost:3001/student/me/orientation")
+    fetch(`${API_BASE_URL}/student/me/orientation`)
       .then(res => res.json())
       .then(data => {
-        console.log("FILIERES:", data)
         setFilieres(data || [])
       })
   }, [status, session, router])

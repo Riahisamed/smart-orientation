@@ -18,6 +18,7 @@ export default function Navbar() {
   const navigationLinks = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Orientation', href: '/orientation' },
+    { label: 'Test', href: '/orientation-test' },
     { label: 'T Calculator', href: '/t-calculator' },
     { label: 'FG Calculator', href: '/fg-calculator' },
     { label: 'AI Assistant', href: '/chat', icon: Bot },
@@ -77,10 +78,10 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-all duration-200 hover:scale-110 dark:bg-gray-700">
+          <Link href="/notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-all duration-200 hover:scale-110 dark:bg-gray-700">
             <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-red-500"></span>
-          </button>
+          </Link>
 
           <div className="relative">
             <button

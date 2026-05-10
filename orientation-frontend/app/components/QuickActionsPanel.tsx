@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { DomainSuggestion, RoadmapSelectorData } from '@/lib/types/ai';
-
+import { API_BASE_URL } from '@/lib/api/config';
 
 type QuickActionKey = 'roadmaps' | 'careers' | 'best-fields' | 'compare';
 
@@ -59,7 +59,7 @@ export default function QuickActionsPanel({
     const fetchData = async () => {
       setLoadingRoadmaps(true);
       try {
-        const res = await fetch('http://localhost:3001/chatbot/roadmap-selector', {
+        const res = await fetch(`${API_BASE_URL}/chatbot/roadmap-selector`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: 'roadmap', bacType, score, detectedInterest: interest }),

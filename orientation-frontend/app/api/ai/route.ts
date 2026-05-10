@@ -117,7 +117,10 @@ Explique clairement les options de l'étudiant avec des recommandations.`;
  * Calls Ollama API to generate response
  */
 async function callOllama(prompt: string): Promise<string> {
-  const ollamaUrl = process.env.OLLAMA_API_URL || 'http://localhost:11434';
+  const ollamaUrl = process.env.OLLAMA_API_URL;
+  if (!ollamaUrl) {
+    throw new Error('OLLAMA_API_URL is not configured');
+  }
 
   try {
     const response = await fetch(`${ollamaUrl}/api/generate`, {

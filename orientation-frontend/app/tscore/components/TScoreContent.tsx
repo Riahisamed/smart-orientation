@@ -12,6 +12,7 @@ import {
   calculateAcceptanceProbability,
   FormulaVariable,
 } from '@/lib/utils/formulaParser';
+import { API_BASE_URL } from '@/lib/api/config';
 
 interface GuideFiliere {
   code: string;
@@ -54,7 +55,7 @@ export default function TScoreContent() {
         }
 
         // Load guide.json from backend or static
-        const response = await fetch('http://localhost:3001/filieres');
+        const response = await fetch(`${API_BASE_URL}/filiere`);
         if (!response.ok) throw new Error('Failed to load filieres');
 
         const filieres: GuideFiliere[] = await response.json();

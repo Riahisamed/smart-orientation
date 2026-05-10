@@ -209,7 +209,10 @@ Fournis une réponse claire avec des recommandations utiles.`;
  * Calls Ollama API
  */
 async function callOllama(prompt: string): Promise<string> {
-  const ollamaUrl = process.env.OLLAMA_API_URL || 'http://localhost:11434';
+  const ollamaUrl = process.env.OLLAMA_API_URL;
+  if (!ollamaUrl) {
+    throw new Error('OLLAMA_API_URL is not configured');
+  }
 
   try {
     const response = await fetch(`${ollamaUrl}/api/generate`, {

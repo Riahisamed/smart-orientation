@@ -10,7 +10,8 @@ export class AuthEmailService {
   private readonly frontendBaseUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    const host = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
+    const host =
+      this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
     const port = Number(this.configService.get<string>('SMTP_PORT') || 587);
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
@@ -20,7 +21,7 @@ export class AuthEmailService {
       this.configService.get<string>('SMTP_USER') ||
       'no-reply@smart-orientation.local';
 
-    this.frontendBaseUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    this.frontendBaseUrl = this.configService.get<string>('FRONTEND_URL') || '';
 
     this.transporter = nodemailer.createTransport({
       host,

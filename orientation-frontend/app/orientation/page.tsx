@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Input } from "../../lib/components/ui/input"
 import { Select } from "../../lib/components/ui/select"
 import { Card, CardContent } from "../../lib/components/ui/card"
+import { API_BASE_URL } from "@/lib/api/config"
 
 export default function Orientation() {
   const [search, setSearch] = useState("")
@@ -21,7 +22,7 @@ export default function Orientation() {
     const token = localStorage.getItem("token")
 
     // Fetch student data
-    fetch("http://localhost:3001/student/me", {
+    fetch(`${API_BASE_URL}/student/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -32,7 +33,7 @@ export default function Orientation() {
     })
 
     // Fetch filieres
-    fetch("http://localhost:3001/student/me/orientation")
+    fetch(`${API_BASE_URL}/student/me/orientation`)
       .then(res => res.json())
       .then(data => {
         setFilieres(data || [])

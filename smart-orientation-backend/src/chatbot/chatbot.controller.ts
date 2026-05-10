@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Request, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  Get,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { ChatbotService } from './chatbot.service';
@@ -36,13 +44,13 @@ export class ChatbotController {
     const { message, conversationHistory, studentData: bodyStudentData } = body;
 
     // Priority 1: Use studentData from request body (frontend)
-    const hasBodyStudentData = !!bodyStudentData && (
-      bodyStudentData.score !== undefined ||
-      !!bodyStudentData.bacType ||
-      !!bodyStudentData.bac ||
-      !!bodyStudentData.interest ||
-      !!bodyStudentData.language
-    );
+    const hasBodyStudentData =
+      !!bodyStudentData &&
+      (bodyStudentData.score !== undefined ||
+        !!bodyStudentData.bacType ||
+        !!bodyStudentData.bac ||
+        !!bodyStudentData.interest ||
+        !!bodyStudentData.language);
 
     if (hasBodyStudentData) {
       const reply = await this.chatbotService.processMessage(
@@ -74,7 +82,7 @@ export class ChatbotController {
           bacType: String(student.bacType),
           bacAverage: student.bacAverage,
           FG: student.FG ?? undefined,
-          selectedFiliere: (student as any).selectedFiliere ?? undefined,
+          selectedFiliere: student.selectedFiliere ?? undefined,
         }
       : undefined;
 
@@ -112,20 +120,21 @@ export class ChatbotController {
     @Query('interest') interest?: string,
   ) {
     // Generate personalized roadmap selector config based on BAC type
-    const config = this.dynamicRoadmapService.generatePersonalizedRoadmapSelector(
-      '', // empty message - we just want the cards
-      bacType,
-      undefined,
-      interest,
-    );
+    const config =
+      this.dynamicRoadmapService.generatePersonalizedRoadmapSelector(
+        '', // empty message - we just want the cards
+        bacType,
+        undefined,
+        interest,
+      );
 
     // Map suggestions to the format expected by the frontend
     // Use domain field as-is for labels (domains.json fields are already descriptive)
     const cards = config.suggestions.map((suggestion) => ({
       domain: suggestion.domain,
       field: suggestion.field,
-      labelFr: suggestion.field,  // Domain names are already descriptive
-      labelAr: suggestion.field,  // Can be enhanced with Arabic translations if available
+      labelFr: suggestion.field, // Domain names are already descriptive
+      labelAr: suggestion.field, // Can be enhanced with Arabic translations if available
       icon: suggestion.icon,
       color: suggestion.color,
       description: suggestion.description,
@@ -137,9 +146,34 @@ export class ChatbotController {
     return {
       title: config.title,
       subtitle: config.subtitle,
+      suggestions: cards,
       cards,
       maxSuggestions: config.maxSuggestions,
       personalized: config.personalized,
     };
+  }
+
+  @Post('roadmap-selector')
+  @Public()
+  getRoadmapSelector(@Body() body: any) {
+    const config =
+      this.dynamicRoadmapService.generatePersonalizedRoadmapSelector(
+        body?.message ?? 'roadmap',
+        body?.bacType,
+        body?.score,
+        body?.detectedInterest ?? body?.interest,
+      );
+
+    return config;
+  }
+
+  @Get('roadmap')
+  @Public()
+  getRoadmap(
+    @Query('domain') domain: string,
+    @Query('level')
+    level: 'beginner' | 'intermediate' | 'advanced' = 'beginner',
+  ) {
+    return this.dynamicRoadmapService.generateSpecificRoadmap(domain, level);
   }
 }

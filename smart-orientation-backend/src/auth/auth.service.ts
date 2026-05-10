@@ -38,8 +38,6 @@ password: hashedPassword
 }
 })
 
-console.log("USER CREATED:",user)
-
 await this.prisma.student.create({
 data:{
 name: email,

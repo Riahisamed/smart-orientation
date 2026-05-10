@@ -28,7 +28,14 @@ Instructions:
 Provide orientation advice:`
 
     // Connect to Ollama
-    const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+    if (!process.env.OLLAMA_API_URL) {
+      return NextResponse.json(
+        { error: 'OLLAMA_API_URL is not configured' },
+        { status: 503 }
+      )
+    }
+
+    const ollamaResponse = await fetch(`${process.env.OLLAMA_API_URL}/api/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

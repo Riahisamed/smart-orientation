@@ -446,9 +446,6 @@ export class ChatbotService {
     const extractedIntent = this.memoryService.extractFromMessage(userMessage, this.conversationMemory);
     this.conversationMemory = this.memoryService.updateMemory(this.conversationMemory, extractedIntent, userMessage);
 
-    console.log('INTENT:', advisorIntent);
-    console.log('DOMAIN:', detectedDomain || 'none');
-
     // Rejection
     if (advisorIntent === 'rejection') {
       return this.handleRejection(userMessage, lang);

@@ -7,6 +7,7 @@ import { Input } from "../../lib/components/ui/input"
 import { Button } from "../../lib/components/ui/button"
 import { Label } from "../../lib/components/ui/label"
 import { Select } from "../../lib/components/ui/select"
+import { API_BASE_URL } from "@/lib/api/config"
 
 function TCalculatorContent(){
   const [userScore, setUserScore] = useState<number | null>(null)
@@ -41,11 +42,6 @@ function TCalculatorContent(){
     // Force uppercase normalization
     const variables = [...new Set(matches.map(v => v.toUpperCase()))]
 
-    // Debug logging
-    console.log("Formula:", formula)
-    console.log("Matches:", matches)
-    console.log("Variables:", variables)
-
     // Map variables to normalized subject keys using the exact formula variable names
     const variableToKey: Record<string, string> = {
       FG: 'FG',
@@ -73,11 +69,6 @@ function TCalculatorContent(){
     // Return array of {variable, key}, exclude FG since it's separate
     const result = variables.filter(v => v !== 'FG').map(v => ({ variable: v, key: variableToKey[v] })).filter(item => item.key)
 
-    // Edge case: if no variables detected
-    if (result.length === 0 && variables.length > 1) {
-      console.log("No valid variables detected in formula")
-    }
-
     return result
   }
   //////////////////////////////////////////////////
@@ -86,7 +77,7 @@ function TCalculatorContent(){
   useEffect(()=>{
     // جلب بيانات الطالب ونوع الباك
     const token = localStorage.getItem("token")
-    fetch("http://localhost:3001/student/me", {
+    fetch(`${API_BASE_URL}/student/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -98,7 +89,7 @@ function TCalculatorContent(){
 
     if(!filiereId) return
 
-    fetch(`http://localhost:3001/filiere/${filiereId}`)
+    fetch(`${API_BASE_URL}/filiere/${filiereId}`)
     .then(res => res.json())
     .then(data => {
       setFiliere(data)
@@ -122,12 +113,6 @@ function TCalculatorContent(){
     const m = Number(values.M ?? 0)
     const sp = Number(values.SP ?? 0)
     const info = Number(values.INFO ?? 0)
-
-    console.log("FG:", fg)
-    console.log("M:", m)
-    console.log("SP:", sp)
-    console.log("INFO:", info)
-    console.log("Calculate T inputs:", values, "formula:", formula)
 
     const calculatedT = calculateT()
     if (calculatedT === null) return

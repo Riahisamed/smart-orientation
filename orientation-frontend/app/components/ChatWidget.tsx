@@ -8,6 +8,7 @@ import { Input } from '@/lib/components/ui/input';
 import { Select } from '@/lib/components/ui/select';
 import { Label } from '@/lib/components/ui/label';
 import { ChatMessage, BacType, ProgramClassification } from '@/lib/types/ai';
+import { API_BASE_URL } from '@/lib/api/config';
 
 const BAC_TYPES: BacType[] = ['MATH', 'SVT', 'ECO', 'TECH', 'INFO', 'LETTRES', 'SPORT'];
 
@@ -453,7 +454,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
           params.append('interest', interest);
         }
 
-        const res = await fetch(`http://localhost:3001/chatbot/roadmap-cards?${params.toString()}`);
+        const res = await fetch(`${API_BASE_URL}/chatbot/roadmap-cards?${params.toString()}`);
         if (res.ok) {
           const data: RoadmapCardsResponse = await res.json();
           setRoadmapCards(data.cards);
@@ -498,9 +499,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     setIsLoading(true);
 
     try {
-      console.log('Sending message:', inputMessage);
-
-      const res = await fetch('http://localhost:3001/chatbot/ask', {
+      const res = await fetch(`${API_BASE_URL}/chatbot/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -518,7 +517,6 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
       });
       
       const data = await res.json();
-      console.log('Response:', data);
 
       if (res.ok && data.reply) {
         const assistantMessage: MessageWithPrograms = {
@@ -596,7 +594,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3001/chatbot/ask', {
+      const res = await fetch(`${API_BASE_URL}/chatbot/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -686,7 +684,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
 
     (async () => {
       try {
-        const r = await fetch(`http://localhost:3001/chatbot/i18n/${lang}`);
+        const r = await fetch(`${API_BASE_URL}/chatbot/i18n/${lang}`);
         const json = await r.json();
         setT(json);
       } catch (e) {

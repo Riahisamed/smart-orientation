@@ -65,3 +65,23 @@ export interface ProgramClassification {
   possible: Program[];
   hard: Program[];
 }
+
+export interface DomainSuggestion {
+  domain: string;
+  field: string;
+  icon?: string;
+  color?: string;
+  description?: string;
+  relevanceScore: number;
+  difficulty?: string;
+  demand?: string;
+}
+
+export interface RoadmapSelectorData {
+  title?: string;
+  subtitle?: string;
+  suggestions: DomainSuggestion[];
+  cards?: DomainSuggestion[];
+  maxSuggestions?: number;
+  personalized?: boolean;
+}

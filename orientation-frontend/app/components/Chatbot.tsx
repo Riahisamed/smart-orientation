@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { X, Send, Bot, User, Loader2, Sparkles } from "lucide-react"
+import { API_BASE_URL } from "@/lib/api/config"
 
 interface Message {
   id: string
@@ -46,7 +47,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
 
   useEffect(() => {
     const lang = (studentData as any)?.language || 'ar'
-    fetch(`http://localhost:3001/chatbot/i18n/${lang}`)
+    fetch(`${API_BASE_URL}/chatbot/i18n/${lang}`)
       .then((r) => r.json())
       .then((json) => setT(json))
       .catch(() => setT(null))
@@ -252,13 +253,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
     try {
       const token = localStorage.getItem("token")
       
-      console.log("[DEBUG] Sending message to backend:", {
-        message: userMsg,
-        studentData,
-        timestamp: new Date().toISOString()
-      })
-
-      const response = await fetch("http://localhost:3001/chatbot/ask", {
+      const response = await fetch(`${API_BASE_URL}/chatbot/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -274,20 +269,13 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
         })
       })
 
-      console.log("[DEBUG] Backend response status:", response.status)
-
       if (response.ok) {
         const data = await response.json()
-        console.log("[DEBUG] Backend response data:", {
-          hasResponse: !!data.response,
-          responseLength: data.response?.length || 0
-        })
         
         if (data.response && data.response.trim()) {
           addMessage("assistant", data.response)
         } else {
-          console.warn("[DEBUG] Empty response from backend")
-          addMessage("assistant", "عذرا، الخدمة ما ترجعت جواب. تأكد من تشغيل Ollama على localhost:11434")
+          addMessage("assistant", "عذرا، الخدمة ما رجعتش جواب. تأكد من تشغيل خدمة الذكاء الاصطناعي.")
         }
       } else {
         const errorData = await response.json()

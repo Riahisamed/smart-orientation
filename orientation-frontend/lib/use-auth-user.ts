@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
+import { API_BASE_URL } from "@/lib/api/config"
 
 type StudentProfile = {
   name?: string | null

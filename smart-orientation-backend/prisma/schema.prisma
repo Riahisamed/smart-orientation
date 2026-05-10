@@ -108,6 +108,9 @@ model Student {
   user         User?    @relation(fields: [userId], references: [id])
 
   roadmaps     Roadmap[]
+  orientationTests OrientationTest[]
+  recommendationReports RecommendationReport[]
+  notifications Notification[]
 
   createdAt    DateTime @default(now())
 }
@@ -184,5 +187,64 @@ model Roadmap {
 
   result    Json
 
+  createdAt DateTime @default(now())
+}
+
+model OrientationTest {
+  id        Int      @id @default(autoincrement())
+
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  answers         Json
+  interests       String?
+  skills          Json?
+  dominantDomains Json
+  recommendations Json
+  score           Float?
+
+  report RecommendationReport?
+
+  createdAt DateTime @default(now())
+}
+
+model RecommendationReport {
+  id        Int      @id @default(autoincrement())
+
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  orientationTestId Int? @unique
+  orientationTest   OrientationTest? @relation(fields: [orientationTestId], references: [id])
+
+  summary         String
+  recommendations Json
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+
+  studentId Int?
+  student   Student? @relation(fields: [studentId], references: [id])
+
+  title     String
+  message   String
+  readAt    DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model MarketSignal {
+  id        Int      @id @default(autoincrement())
+
+  domain           String
+  title            String
+  demand           String?
+  unemploymentRate Float?
+  source           String?
+
+  updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 }

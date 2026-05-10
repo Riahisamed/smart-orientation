@@ -1,5 +1,6 @@
 import { PrismaClient, BacType } from "@prisma/client"
 import guide from "./guide.json"
+import * as bcrypt from "bcrypt"
 
 const prisma = new PrismaClient()
 
@@ -100,7 +101,129 @@ async function main() {
     }
   }
 
-  console.log("✅ Guide imported correctly")
+  const demoPassword = await bcrypt.hash("Demo1234!", 10)
+  const adminPassword = await bcrypt.hash("Admin1234!", 10)
+  await prisma.user.upsert({
+    where: { email: "demo.admin@smart-orientation.local" },
+    update: {
+      password: adminPassword,
+      role: "ADMIN",
+    },
+    create: {
+      email: "demo.admin@smart-orientation.local",
+      password: adminPassword,
+      role: "ADMIN",
+    },
+  })
+
+  const demoUser = await prisma.user.upsert({
+    where: { email: "demo.student@smart-orientation.local" },
+    update: {
+      password: demoPassword,
+      role: "STUDENT",
+    },
+    create: {
+      email: "demo.student@smart-orientation.local",
+      password: demoPassword,
+      role: "STUDENT",
+    },
+  })
+
+  const demoStudent = await prisma.student.upsert({
+    where: { userId: demoUser.id },
+    update: {
+      name: "Demo Student",
+      bacType: "MATH",
+      bacAverage: 15.75,
+      math: 16,
+      physics: 15,
+      svt: 14,
+      french: 13,
+      english: 15,
+      gov: "Tunis",
+      FG: 118.5,
+      interests: "informatique, intelligence artificielle, data",
+    },
+    create: {
+      name: "Demo Student",
+      bacType: "MATH",
+      bacAverage: 15.75,
+      math: 16,
+      physics: 15,
+      svt: 14,
+      french: 13,
+      english: 15,
+      gov: "Tunis",
+      FG: 118.5,
+      interests: "informatique, intelligence artificielle, data",
+      userId: demoUser.id,
+    },
+  })
+
+  await prisma.notification.deleteMany({
+    where: {
+      title: {
+        in: [
+          "Bienvenue sur Smart Orientation",
+          "Pensez a completer votre test",
+          "Demo: rapport PDF disponible",
+        ],
+      },
+    },
+  })
+
+  await prisma.notification.createMany({
+    data: [
+      {
+        studentId: null,
+        title: "Bienvenue sur Smart Orientation",
+        message: "Explorez les roadmaps et lancez le chatbot pour une recommandation rapide.",
+      },
+      {
+        studentId: demoStudent.id,
+        title: "Pensez a completer votre test",
+        message: "Le test d orientation aide a affiner vos domaines dominants.",
+      },
+      {
+        studentId: demoStudent.id,
+        title: "Demo: rapport PDF disponible",
+        message: "Apres soumission du test, utilisez le bouton PDF depuis le dashboard.",
+      },
+    ],
+  })
+
+  await prisma.marketSignal.deleteMany({
+    where: {
+      domain: {
+        in: ["Informatique", "Ingenierie", "Sante"],
+      },
+    },
+  })
+
+  await prisma.marketSignal.createMany({
+    data: [
+      {
+        domain: "Informatique",
+        title: "Forte demande en developpement logiciel et data",
+        demand: "HIGH",
+        source: "demo",
+      },
+      {
+        domain: "Ingenierie",
+        title: "Besoins stables dans l industrie et l energie",
+        demand: "MEDIUM",
+        source: "demo",
+      },
+      {
+        domain: "Sante",
+        title: "Parcours selectifs avec bonne employabilite",
+        demand: "HIGH",
+        source: "demo",
+      },
+    ],
+  })
+
+  console.log("Guide and demo data imported correctly")
 }
 
 main()

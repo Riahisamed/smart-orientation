@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth"
 import { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
+import { API_BASE_URL } from "@/lib/api/config"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,7 +16,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
       try {
-        await fetch("http://localhost:3001/auth/google", {
+        await fetch(`${API_BASE_URL}/auth/google`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

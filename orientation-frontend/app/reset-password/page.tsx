@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Input } from "../components/ui/input"
 import { Button } from "../components/ui/button"
 import { Label } from "../components/ui/label"
+import { API_BASE_URL } from "@/lib/api/config"
 
 function ResetPasswordContent() {
   const router = useRouter()
@@ -49,7 +50,7 @@ function ResetPasswordContent() {
     try {
       setLoading(true)
 
-      const res = await fetch("http://localhost:3001/auth/reset-password", {
+      const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

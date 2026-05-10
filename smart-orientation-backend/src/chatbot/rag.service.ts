@@ -893,8 +893,6 @@ export class RagService {
       : undefined;
     const requestedDomain = selectedInterestDomain || detectedInterestDomain;
 
-    console.log('Detected field:', field?.field || 'none', '| Requested domain:', requestedDomain || 'none');
-
     // HARD FILTER: Use STRICT name-based filtering from fields.json if field is detected
     // This ensures ONLY programs matching the detected field's Arabic names are returned
     let candidates = allPrograms;
@@ -995,8 +993,6 @@ export class RagService {
     }
 
     rankedPrograms = this.excludeOtherDomainUnlessEmpty(rankedPrograms);
-    console.log('FINAL PROGRAM DOMAINS:', rankedPrograms.map((p) => p.domain));
-
     this.logger.log(`RAG programs: ${rankedPrograms.length}`);
 
     const demand = field?.demand_in_tunisia;

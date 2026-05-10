@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common';
 
 export interface OllamaConfig {
-  url: string
-  model: string
-  temperature: number
-  num_predict: number
-  timeout: number
+  url: string;
+  model: string;
+  temperature: number;
+  num_predict: number;
+  timeout: number;
 }
 
 /**
@@ -15,7 +15,7 @@ export interface OllamaConfig {
 @Injectable()
 export class OllamaConfigService {
   private config: OllamaConfig = {
-    url: process.env.OLLAMA_URL || 'http://localhost:11434/api/generate',
+    url: process.env.OLLAMA_URL || '',
     model: process.env.OLLAMA_MODEL || 'gemma4:e2b',
     // Balanced temperature for varied but accurate responses (avoid repetition while maintaining quality)
     temperature: parseFloat(process.env.OLLAMA_TEMPERATURE || '0.5'),
@@ -23,18 +23,18 @@ export class OllamaConfigService {
     num_predict: parseInt(process.env.OLLAMA_NUM_PREDICT || '300', 10),
     // Timeout to prevent hanging requests
     timeout: parseInt(process.env.OLLAMA_TIMEOUT || '30000', 10),
-  }
+  };
 
   getConfig(): OllamaConfig {
-    return { ...this.config }
+    return { ...this.config };
   }
 
   getUrl(): string {
-    return this.config.url
+    return this.config.url;
   }
 
   getModel(): string {
-    return this.config.model
+    return this.config.model;
   }
 
   getRequestBody(prompt: string): object {
@@ -44,10 +44,10 @@ export class OllamaConfigService {
       stream: false,
       temperature: this.config.temperature,
       num_predict: this.config.num_predict,
-    }
+    };
   }
 
   getTimeout(): number {
-    return this.config.timeout
+    return this.config.timeout;
   }
 }

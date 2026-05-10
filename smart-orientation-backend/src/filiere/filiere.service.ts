@@ -185,7 +185,6 @@ async processPdf(file: Express.Multer.File) {
         console.error(stderr)
         return reject(error)
       }
-      console.log(stdout)
       resolve(stdout)
     })
   })

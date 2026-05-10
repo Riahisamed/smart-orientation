@@ -256,11 +256,6 @@ export class DynamicRoadmapService {
     // This ensures students ONLY see compatible domains
     const isAllowed = bacRule.allowedDomains.includes(domain.field);
     
-    // Debug logging for troubleshooting
-    if (process.env.DEBUG_ROADMAP === 'true') {
-      console.log(`[RoadmapFilter] BAC=${bacType}, Domain=${domain.field}, Allowed=${isAllowed}`);
-    }
-    
     if (!isAllowed) {
       return 0; // Domain not compatible with this BAC type
     }

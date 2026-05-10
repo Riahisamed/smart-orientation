@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Loader2, Sparkles, TrendingUp, Target, Zap } from "lucide-react"
+import { API_BASE_URL } from "@/lib/api/config"
 
 interface DomainSuggestion {
   domain: string
@@ -85,7 +86,7 @@ export default function RoadmapSelector({
     setError(null)
 
     try {
-      const response = await fetch("http://localhost:3001/chatbot/roadmap-selector", {
+      const response = await fetch(`${API_BASE_URL}/chatbot/roadmap-selector`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

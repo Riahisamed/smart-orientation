@@ -13,6 +13,7 @@ import {
   Target,
   Zap
 } from "lucide-react"
+import { API_BASE_URL } from "@/lib/api/config"
 
 interface RoadmapPhase {
   title: string
@@ -109,7 +110,7 @@ export default function RoadmapDisplay({
 
     try {
       const response = await fetch(
-        `http://localhost:3001/chatbot/roadmap?domain=${encodeURIComponent(domain)}&level=${level}`
+        `${API_BASE_URL}/chatbot/roadmap?domain=${encodeURIComponent(domain)}&level=${level}`
       )
 
       if (!response.ok) {
