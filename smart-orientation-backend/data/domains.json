@@ -22,9 +22,12 @@
   },
   "domains": [
     {
+      "id": "cybersecurity",
       "field": "Cybersecurity",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
       "aliases": [
-        "cybersecurity", "cyber", "sécurité", "security", "infosec", "cybersécurité", "network security",
+        "cybersecurity", "cyber security", "cyber", "sécurité", "security", "infosec", "cybersécurité", "network security",
         "pentest", "hacking", "ethical hacking", "hacker éthique", "sécurité informatique", "protection",
         "cyber defense", "forensics", "audit sécurité", "blue team", "red team", "SOC", "SIEM",
         "أمن سيبراني", "أمن معلوماتي", "حماية", "شبكات", "اختراق أخلاقي", "الأمن السيبراني", "حماية المعلومات"
@@ -117,9 +120,12 @@
       }
     },
     {
+      "id": "frontend-development",
       "field": "Frontend Development",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
       "aliases": [
-        "frontend", "front-end", "développement web", "web dev", "interface", "UI", "react", "vue", "angular",
+        "frontend", "front-end", "frontend development", "développement web", "web dev", "interface", "UI", "react", "vue", "angular",
         "développeur web", "web developer", "javascript", "typescript", "webdesign", "responsive",
         "واجهة المستخدم", "تطوير الويب", "فرونت اند", "رياكت", "جافاسكريبت", "مواقع", "تصميم ويب"
       ],
@@ -210,9 +216,12 @@
       }
     },
     {
+      "id": "backend-development",
       "field": "Backend Development",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
       "aliases": [
-        "backend", "back-end", "server", "api", "database", "base de données", "serveur", "node.js", "python",
+        "backend", "back-end", "backend development", "server", "api", "database", "base de données", "serveur", "node.js", "python",
         "développeur backend", "développeur serveur", "sql", "nosql", "architecture logicielle",
         "خادم", "باك اند", "قواعد البيانات", "خلفية", "سيرفر", "واجهة برمجة التطبيقات"
       ],
@@ -302,9 +311,13 @@
       }
     },
     {
+      "id": "droit-avocat",
       "field": "Droit / Avocat",
+      "category": "Law",
+      "bacTypes": ["LETTRES"],
       "aliases": [
         "droit", "law", "avocat", "lawyer", "juridique", "legal", "judge", "magistrat", "notaire",
+        "droit / avocat", "droit avocat", "law attorney", "legal lawyer",
         "avocat conseil", "conseiller juridique", "juriste", "parquet", "barreau", "juridiction",
         "محامي", "قانون", "حقوق", "قانوني", "العدالة", "القضاء", "المحكمة"
       ],
@@ -394,7 +407,10 @@
       }
     },
     {
+      "id": "medecine-sante",
       "field": "Médecine / Santé",
+      "category": "Health",
+      "bacTypes": ["SVT"],
       "aliases": [
         "médecine", "santé", "médecin", "docteur", "infirmier", "pharmacien", "dentiste", "chirurgien",
         "médecine générale", "spécialité médicale", "clinique", "hôpital", "soins", "patient",
@@ -486,11 +502,16 @@
       }
     },
     {
+      "id": "ai-machine-learning",
       "field": "AI & Machine Learning",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
       "aliases": [
         "AI", "intelligence artificielle", "machine learning", "deep learning", "data science", "big data",
         "neural networks", "NLP", "computer vision", "data analyst", "data engineer",
-        "ذكاء اصطناعي", "تعلم الآلة", "تعلم عميق", "علم البيانات", "محلل بيانات", "مهندس بيانات"
+        "ذكاء اصطناعي", "تعلم الآلة", "تعلم عميق", "علم البيانات", "محلل بيانات", "مهندس بيانات",
+        "ai & machine learning", "ai and machine learning", "artificial intelligence & machine learning",
+        "artificial intelligence and machine learning", "ai ml", "ml ai", "intelligence artificielle et apprentissage automatique"
       ],
       "keywords": [
         "artificial intelligence", "machine learning", "deep learning", "neural networks", "data science",
@@ -578,9 +599,13 @@
       }
     },
     {
+      "id": "coaching-sport",
       "field": "Coaching / Sport",
+      "category": "Sport",
+      "bacTypes": ["SPORT"],
       "aliases": [
         "coaching", "coach", "sport", "fitness", "personal trainer", "nutrition sportive",
+        "coaching / sport", "coaching sport", "sport coaching", "coach sportif",
         "préparation physique", "athlétisme", "football", "basketball", "entraîneur",
         "تدريب", "مدرب", "رياضة", "لياقة بدنية", "تغذية رياضية", "إعداد بدني"
       ],
@@ -670,7 +695,10 @@
       }
     },
     {
+      "id": "traduction-langues",
       "field": "Traduction / Langues",
+      "category": "Language",
+      "bacTypes": ["LETTRES"],
       "aliases": [
         "traduction", "translation", "interprète", "interpreter", "langues", "languages",
         "linguistique", "linguistics", "communication", "rédaction", "writing",
@@ -762,7 +790,10 @@
       }
     },
     {
+      "id": "journalisme-medias",
       "field": "Journalisme / Médias",
+      "category": "Media",
+      "bacTypes": ["LETTRES"],
       "aliases": [
         "journalisme", "journalist", "médias", "media", "presse", "news", "reporter",
         "correspondant", "édition", "rédacteur", "content creator", "youtube", "podcast",
@@ -850,6 +881,1335 @@
           ],
           "certifications": ["Master Journalist"],
           "career_paths": ["Senior Journalist", "Editor", "News Director", "Media Entrepreneur"]
+        }
+      }
+    },
+    {
+      "id": "data-science",
+      "field": "Data Science",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
+      "aliases": [
+        "data science", "data scientist", "data analysis", "analytics", "big data",
+        "statistical analysis", "data mining", "business intelligence", "BI",
+        "علم البيانات", "محلل بيانات", "بيانات ضخمة", "تحليل البيانات"
+      ],
+      "keywords": [
+        "data analysis", "statistics", "machine learning", "data visualization",
+        "SQL", "Python", "R", "Tableau", "PowerBI", "ETL", "data warehouse"
+      ],
+      "education": ["العلوم المعلوماتية", "الرياضيات", "الإحصاء", "الفيزياء"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Excellent",
+      "unemployment_risk": "Low",
+      "tools": ["Python", "R", "SQL", "Tableau", "PowerBI", "Apache Spark", "Hadoop", "Jupyter", "Pandas", "NumPy"],
+      "skills": [
+        "Statistical Analysis", "Data Visualization", "Machine Learning", "SQL",
+        "Python Programming", "Data Cleaning", "Predictive Modeling", "Business Intelligence"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Data Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["SQL basics", "Python for data", "Statistics fundamentals", "Data types"],
+              "projects": ["Sales data analysis", "Customer segmentation"],
+              "resources": ["Kaggle Learn", "SQLBolt", "Statistics courses"],
+              "milestones": ["First SQL query", "Basic statistical analysis"]
+            },
+            {
+              "title": "Data Processing",
+              "duration": "2-4 months",
+              "skills": ["Pandas", "NumPy", "Data cleaning", "Data visualization"],
+              "projects": ["Data cleaning project", "Interactive dashboard"],
+              "resources": ["Python for Data Analysis", "Matplotlib docs", "Seaborn tutorials"],
+              "milestones": ["Clean 10 datasets", "Build first dashboard"]
+            }
+          ],
+          "certifications": ["Google Data Analytics", "IBM Data Science"],
+          "career_paths": ["Junior Data Analyst", "Data Analyst", "Business Analyst"]
+        },
+        "intermediate": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Advanced Analytics",
+              "duration": "3-6 months",
+              "skills": ["Statistical modeling", "A/B testing", "Regression analysis", "Time series"],
+              "projects": ["Predictive model", "A/B test analysis", "Sales forecasting"],
+              "resources": ["Statistical Learning", "Causal Inference", "Experimentation courses"],
+              "milestones": ["Deploy predictive model", "Lead analytics project"]
+            },
+            {
+              "title": "Machine Learning Integration",
+              "duration": "3-6 months",
+              "skills": ["Scikit-learn", "Feature engineering", "Model evaluation", "ML pipelines"],
+              "projects": ["Recommendation system", "Churn prediction", "Classification model"],
+              "resources": ["Hands-On ML", "Fast.ai", "ML engineering courses"],
+              "milestones": ["Production ML model", "End-to-end ML pipeline"]
+            }
+          ],
+          "certifications": ["Microsoft Data Analyst", "AWS Data Analytics"],
+          "career_paths": ["Data Scientist", "Senior Data Analyst", "Analytics Engineer"]
+        },
+        "advanced": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "Big Data & Engineering",
+              "duration": "6-12 months",
+              "skills": ["Apache Spark", "Data pipelines", "Cloud data platforms", "Data governance"],
+              "projects": ["Big data pipeline", "Data warehouse", "Real-time analytics"],
+              "resources": ["Spark docs", "Data Engineering", "Cloud data certifications"],
+              "milestones": ["Build data platform", "Lead data engineering team"]
+            },
+            {
+              "title": "Data Strategy & Leadership",
+              "duration": "6-12 months",
+              "skills": ["Data strategy", "Team leadership", "Business intelligence", "Data governance"],
+              "projects": ["Data strategy", "Analytics platform", "Data culture transformation"],
+              "resources": ["Data Strategy", "Leadership courses", "Business intelligence"],
+              "milestones": ["Head of Data", "Chief Data Officer track"]
+            }
+          ],
+          "certifications": ["AWS Data Analytics Specialty", "Google Professional Data Engineer"],
+          "career_paths": ["Senior Data Scientist", "Lead Data Engineer", "Chief Data Officer"]
+        }
+      }
+    },
+    {
+      "id": "devops",
+      "field": "DevOps",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
+      "aliases": [
+        "devops", "site reliability engineering", "SRE", "platform engineering",
+        "infrastructure", "automation", "CI/CD", "continuous integration",
+        "ديف أوبس", "هندسة الموثوقية", "أتمتة", "بنية تحتية"
+      ],
+      "keywords": [
+        "DevOps", "CI/CD", "Docker", "Kubernetes", "Infrastructure as Code",
+        "Terraform", "Ansible", "Jenkins", "GitLab CI", "GitHub Actions", "Monitoring"
+      ],
+      "education": ["العلوم المعلوماتية", "هندسة نظم المعلومات", "تقنيات الإعلامية"],
+      "demand_in_tunisia": "Very High",
+      "future_outlook": "Excellent",
+      "unemployment_risk": "Very Low",
+      "tools": ["Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitLab CI", "Prometheus", "Grafana", "AWS/Azure/GCP"],
+      "skills": [
+        "Linux Administration", "Containerization", "Orchestration", "Infrastructure as Code",
+        "CI/CD Pipelines", "Cloud Platforms", "Monitoring & Logging", "Scripting"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Linux & Scripting",
+              "duration": "1-2 months",
+              "skills": ["Linux fundamentals", "Bash scripting", "Git workflows", "Basic networking"],
+              "projects": ["Automated backup script", "Git workflow setup"],
+              "resources": ["Linux Journey", "Bash scripting", "Git tutorials"],
+              "milestones": ["Linux proficiency", "Script automation"]
+            },
+            {
+              "title": "Containerization Basics",
+              "duration": "2-4 months",
+              "skills": ["Docker", "Docker Compose", "Container networking", "Image optimization"],
+              "projects": ["Dockerize application", "Multi-container setup"],
+              "resources": ["Docker docs", "Container courses", "KodeKloud"],
+              "milestones": ["First container", "Docker-compose project"]
+            }
+          ],
+          "certifications": ["Docker Certified Associate", "Linux Foundation"],
+          "career_paths": ["Junior DevOps Engineer", "System Administrator", "Platform Engineer"]
+        },
+        "intermediate": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Kubernetes & Orchestration",
+              "duration": "3-6 months",
+              "skills": ["Kubernetes", "Helm", "Service mesh", "Auto-scaling"],
+              "projects": ["K8s cluster setup", "Helm charts", "Microservices deployment"],
+              "resources": ["K8s docs", "CKA course", "KodeKloud K8s"],
+              "milestones": ["CKA certification", "Production K8s cluster"]
+            },
+            {
+              "title": "CI/CD & Automation",
+              "duration": "3-6 months",
+              "skills": ["Jenkins/GitLab CI", "GitHub Actions", "Pipeline as code", "ArgoCD"],
+              "projects": ["Full CI/CD pipeline", "GitOps workflow", "Automated testing"],
+              "resources": ["Jenkins docs", "GitLab CI", "ArgoCD docs"],
+              "milestones": ["Zero-downtime deployment", "Automated rollback"]
+            }
+          ],
+          "certifications": ["CKA", "CKAD", "AWS DevOps Engineer"],
+          "career_paths": ["DevOps Engineer", "SRE", "Platform Engineer"]
+        },
+        "advanced": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "Infrastructure & Cloud",
+              "duration": "6-12 months",
+              "skills": ["Terraform", "Cloud architecture", "Security hardening", "Cost optimization"],
+              "projects": ["Multi-cloud setup", "Security audit", "Cost optimization"],
+              "resources": ["Terraform docs", "Cloud certifications", "Security courses"],
+              "milestones": ["Terraform modules", "Cloud architect role"]
+            },
+            {
+              "title": "Platform Engineering",
+              "duration": "6-12 months",
+              "skills": ["Internal platforms", "Developer experience", "Observability", "Chaos engineering"],
+              "projects": ["Platform engineering", "Self-service infrastructure", "Observability stack"],
+              "resources": ["Platform Engineering", "SRE books", "Observability"],
+              "milestones": ["Platform lead", "Staff Engineer"]
+            }
+          ],
+          "certifications": ["AWS DevOps Professional", "GCP DevOps Engineer"],
+          "career_paths": ["Senior DevOps Engineer", "Staff Engineer", "Platform Architect"]
+        }
+      }
+    },
+    {
+      "id": "cloud-computing",
+      "field": "Cloud Computing",
+      "category": "Technology",
+      "bacTypes": ["INFO", "MATH", "TECH"],
+      "aliases": [
+        "cloud computing", "cloud engineer", "cloud architect", "AWS", "Azure", "GCP",
+        "cloud infrastructure", "cloud services", "serverless", "cloud native",
+        "الحوسبة السحابية", "مهندس سحابي", "بنية سحابية", "خدمات سحابية"
+      ],
+      "keywords": [
+        "Cloud", "AWS", "Azure", "GCP", "Serverless", "Lambda", "EC2", "S3", "VPC",
+        "Cloud Architecture", "IaaS", "PaaS", "SaaS", "Microservices", "Containers"
+      ],
+      "education": ["العلوم المعلوماتية", "هندسة نظم المعلومات", "تقنيات الإعلامية"],
+      "demand_in_tunisia": "Very High",
+      "future_outlook": "Excellent",
+      "unemployment_risk": "Low",
+      "tools": ["AWS", "Azure", "GCP", "Terraform", "CloudFormation", "Docker", "Kubernetes", "Serverless Framework"],
+      "skills": [
+        "Cloud Architecture", "AWS/Azure/GCP", "Infrastructure as Code", "Networking",
+        "Security", "Cost Optimization", "High Availability", "Disaster Recovery"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Cloud Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["Cloud concepts", "AWS/Azure basics", "Compute services", "Storage services"],
+              "projects": ["First cloud deployment", "Static website hosting"],
+              "resources": ["AWS Free Tier", "Azure Learn", "Cloud fundamentals"],
+              "milestones": ["First EC2 instance", "S3 static site"]
+            },
+            {
+              "title": "Core Cloud Services",
+              "duration": "2-4 months",
+              "skills": ["VPC", "Databases", "IAM", "Monitoring"],
+              "projects": ["3-tier architecture", "Secure cloud setup"],
+              "resources": ["AWS Solutions Architect", "Cloud labs"],
+              "milestones": ["Multi-service architecture", "Security best practices"]
+            }
+          ],
+          "certifications": ["AWS Cloud Practitioner", "Azure Fundamentals"],
+          "career_paths": ["Cloud Support Engineer", "Junior Cloud Engineer"]
+        },
+        "intermediate": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Cloud Architecture",
+              "duration": "3-6 months",
+              "skills": ["High availability", "Auto-scaling", "Load balancing", "Multi-region"],
+              "projects": ["HA architecture", "Global application", "Disaster recovery"],
+              "resources": ["AWS Solutions Architect Associate", "Cloud architecture patterns"],
+              "milestones": ["Architect Associate cert", "Production architecture"]
+            },
+            {
+              "title": "Advanced Cloud",
+              "duration": "3-6 months",
+              "skills": ["Serverless", "Containers", "Kubernetes", "DevOps integration"],
+              "projects": ["Serverless application", "K8s on cloud", "CI/CD pipeline"],
+              "resources": ["Serverless courses", "EKS/AKS/GKE", "DevOps on cloud"],
+              "milestones": ["Serverless in production", "Cloud-native app"]
+            }
+          ],
+          "certifications": ["AWS Solutions Architect Associate", "Azure Administrator"],
+          "career_paths": ["Cloud Engineer", "Cloud Architect", "Solutions Architect"]
+        },
+        "advanced": {
+          "duration": "12-24 months",
+          "phases": [
+            {
+              "title": "Enterprise Architecture",
+              "duration": "6-12 months",
+              "skills": ["Multi-cloud", "Hybrid cloud", "Cloud governance", "FinOps"],
+              "projects": ["Multi-cloud strategy", "Cloud migration", "Cost optimization"],
+              "resources": ["AWS Solutions Architect Professional", "Multi-cloud strategies"],
+              "milestones": ["Enterprise architecture", "Cloud center of excellence"]
+            },
+            {
+              "title": "Cloud Leadership",
+              "duration": "6-12 months",
+              "skills": ["Cloud strategy", "Team leadership", "Vendor management", "Innovation"],
+              "projects": ["Cloud transformation", "Innovation programs", "Industry solutions"],
+              "resources": ["Cloud leadership", "Strategic planning", "Innovation"],
+              "milestones": ["Cloud practice lead", "Principal Architect"]
+            }
+          ],
+          "certifications": ["AWS Solutions Architect Professional", "Azure Solutions Architect"],
+          "career_paths": ["Senior Cloud Architect", "Cloud Practice Lead", "Principal Architect"]
+        }
+      }
+    },
+    {
+      "id": "pharmacie",
+      "field": "Pharmacie",
+      "category": "Health",
+      "bacTypes": ["SVT"],
+      "aliases": [
+        "pharmacie", "pharmacien", "pharmacy", "pharmacist", "médicaments",
+        "clinical pharmacy", "retail pharmacy", "صيدلة", "صيدلي", "أدوية", "صيدلية"
+      ],
+      "keywords": [
+        "pharmacy", "pharmacology", "drug interactions", "clinical pharmacy",
+        "pharmaceuticals", "medication therapy", "drug development"
+      ],
+      "education": ["الصيدلة", "الطب", "العلوم البيولوجية"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Low",
+      "tools": ["Drug databases", "Pharmacy management systems", "Compounding equipment", "Clinical references"],
+      "skills": [
+        "Pharmacology", "Drug Interactions", "Patient Counseling", "Medication Therapy Management",
+        "Clinical Skills", "Compounding", "Regulatory Compliance"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Pharmacy Fundamentals",
+              "duration": "3-6 months",
+              "skills": ["Pharmacology basics", "Dosage forms", "Drug classifications", "Anatomy review"],
+              "projects": ["Drug monograph", "Dosage calculations", "Formulation practice"],
+              "resources": ["Pharmacy textbooks", "Drug guides", "Anatomy courses"],
+              "milestones": ["Pharmacy entrance exam", "First clinical rotation"]
+            },
+            {
+              "title": "Clinical Basics",
+              "duration": "3-6 months",
+              "skills": ["Patient assessment", "Drug therapy basics", "Counseling techniques", "Ethics"],
+              "projects": ["Patient counseling simulation", "Case presentations"],
+              "resources": ["Clinical pharmacy", "Ethics courses", "Communication skills"],
+              "milestones": ["Clinical competency", "Ethics certification"]
+            }
+          ],
+          "certifications": ["Pharmacy Technician"],
+          "career_paths": ["Pharmacy Student", "Pharmacy Intern", "Junior Pharmacist"]
+        },
+        "intermediate": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Pharmacy Degree",
+              "duration": "1-2 years",
+              "skills": ["Advanced pharmacology", "Therapeutics", "Pharmaceutics", "Pharmacy law"],
+              "projects": ["Research project", "Clinical rotations", "Community pharmacy"],
+              "resources": ["Pharmacy school", "Clinical training", "Law courses"],
+              "milestones": ["Pharmacy degree", "State exam preparation"]
+            },
+            {
+              "title": "Professional Practice",
+              "duration": "1-2 years",
+              "skills": ["Clinical pharmacy", "Drug therapy management", "Patient care", "Business skills"],
+              "projects": ["Clinical pharmacy residency", "Specialty practice", "Business management"],
+              "resources": ["Residency programs", "Specialty training", "Business courses"],
+              "milestones": ["State license", "Residency completion"]
+            }
+          ],
+          "certifications": ["PharmD", "Board Certification"],
+          "career_paths": ["Licensed Pharmacist", "Clinical Pharmacist", "Community Pharmacist"]
+        },
+        "advanced": {
+          "duration": "4-8 years",
+          "phases": [
+            {
+              "title": "Specialization",
+              "duration": "2-4 years",
+              "skills": ["Specialty pharmacy", "Oncology", "Pediatrics", "Geriatrics", "Research"],
+              "projects": ["Specialty practice", "Research publications", "Clinical trials"],
+              "resources": ["Specialty residencies", "Research programs", "Fellowships"],
+              "milestones": ["Specialty certification", "Research publications"]
+            },
+            {
+              "title": "Leadership & Academia",
+              "duration": "2-4 years",
+              "skills": ["Pharmacy management", "Academia", "Research leadership", "Policy"],
+              "projects": ["Pharmacy ownership", "Academic position", "Policy development"],
+              "resources": ["Management courses", "Academic training", "Leadership programs"],
+              "milestones": ["Pharmacy owner", "Professor", "Pharmacy director"]
+            }
+          ],
+          "certifications": ["Specialty Board Certification", "PhD"],
+          "career_paths": ["Specialty Pharmacist", "Pharmacy Owner", "Pharmacy Professor"]
+        }
+      }
+    },
+    {
+      "id": "biologie",
+      "field": "Biologie",
+      "category": "Health",
+      "bacTypes": ["SVT"],
+      "aliases": [
+        "biologie", "biologist", "biology", "life sciences", "biological sciences",
+        "microbiology", "molecular biology", "cell biology", "ecology",
+        "بيولوجيا", "علوم الحياة", "أحياء", "بيولوجي"
+      ],
+      "keywords": [
+        "biology", "microbiology", "molecular biology", "genetics", "ecology",
+        "biochemistry", "cell biology", "research", "laboratory"
+      ],
+      "education": ["العلوم البيولوجية", "البيولوجيا", "العلوم الطبيعية", "التكنولوجيا الحيوية"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Moderate",
+      "tools": ["Microscopes", "PCR machines", "Spectrophotometers", "Lab equipment", "Statistical software"],
+      "skills": [
+        "Laboratory Techniques", "Research Methods", "Data Analysis", "Scientific Writing",
+        "Microscopy", "Molecular Biology", "Field Research"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Biology Fundamentals",
+              "duration": "3-6 months",
+              "skills": ["Cell biology", "Genetics", "Evolution", "Ecology basics"],
+              "projects": ["Lab reports", "Field observations", "Species identification"],
+              "resources": ["Biology textbooks", "Online courses", "Lab manuals"],
+              "milestones": ["Basic lab competency", "First research report"]
+            },
+            {
+              "title": "Laboratory Skills",
+              "duration": "3-6 months",
+              "skills": ["Microscopy", "Basic molecular techniques", "Lab safety", "Data recording"],
+              "projects": ["Microscopy project", "Basic experiments", "Lab notebook"],
+              "resources": ["Lab techniques", "Safety courses", "Methodology"],
+              "milestones": ["Lab certification", "Independent experiments"]
+            }
+          ],
+          "certifications": ["Lab Safety"],
+          "career_paths": ["Biology Student", "Lab Technician", "Research Assistant"]
+        },
+        "intermediate": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Advanced Biology",
+              "duration": "1-2 years",
+              "skills": ["Molecular techniques", "Biochemistry", "Advanced genetics", "Bioinformatics basics"],
+              "projects": ["Research project", "Thesis", "Advanced lab work"],
+              "resources": ["University courses", "Research labs", "Bioinformatics tools"],
+              "milestones": ["Bachelor degree", "Research publication"]
+            },
+            {
+              "title": "Specialization",
+              "duration": "1-2 years",
+              "skills": ["Specialized techniques", "Research design", "Grant writing", "Presentation"],
+              "projects": ["Specialized research", "Grant proposal", "Conference presentation"],
+              "resources": ["Specialized courses", "Research grants", "Conferences"],
+              "milestones": ["Master degree", "First author publication"]
+            }
+          ],
+          "certifications": ["Masters in Biology"],
+          "career_paths": ["Biologist", "Research Scientist", "Lab Manager"]
+        },
+        "advanced": {
+          "duration": "4-8 years",
+          "phases": [
+            {
+              "title": "Research Leadership",
+              "duration": "2-4 years",
+              "skills": ["Independent research", "Project management", "Team leadership", "Funding"],
+              "projects": ["Major research project", "Grant leadership", "Team building"],
+              "resources": ["PhD program", "Research grants", "Leadership training"],
+              "milestones": ["PhD defense", "Major publications"]
+            },
+            {
+              "title": "Expert & Academic",
+              "duration": "2-4 years",
+              "skills": ["Expert consultation", "Academic leadership", "Policy influence", "Industry"],
+              "projects": ["Research program", "Academic position", "Industry collaboration"],
+              "resources": ["Postdoc", "Faculty positions", "Industry roles"],
+              "milestones": ["Professor", "Research Director", "Industry expert"]
+            }
+          ],
+          "certifications": ["PhD in Biology"],
+          "career_paths": ["Senior Researcher", "Professor", "Research Director"]
+        }
+      }
+    },
+    {
+      "id": "nutrition",
+      "field": "Nutrition",
+      "category": "Health",
+      "bacTypes": ["SVT"],
+      "aliases": [
+        "nutrition", "nutritionist", "dietetics", "dietitian", "diet",
+        "clinical nutrition", "public health nutrition", "food science",
+        "تغذية", "أخصائي تغذية", "حمية", "غذاء", "علوم الغذاء"
+      ],
+      "keywords": [
+        "nutrition", "dietetics", "clinical nutrition", "public health nutrition",
+        "food science", "meal planning", "nutritional assessment"
+      ],
+      "education": ["التغذية", "علوم الغذاء", "الصحة العامة", "الطب"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Growing",
+      "unemployment_risk": "Moderate",
+      "tools": ["Nutrition software", "Body composition analyzers", "Metabolic carts", "Food analysis tools"],
+      "skills": [
+        "Nutritional Assessment", "Meal Planning", "Diet Therapy", "Counseling",
+        "Research Methods", "Public Health", "Food Science"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Nutrition Fundamentals",
+              "duration": "3-6 months",
+              "skills": ["Macronutrients", "Micronutrients", "Metabolism", "Food groups"],
+              "projects": ["Diet analysis", "Meal planning", "Nutrition assessment"],
+              "resources": ["Nutrition textbooks", "Dietary guidelines", "Online courses"],
+              "milestones": ["Basic nutrition knowledge", "First meal plan"]
+            },
+            {
+              "title": "Assessment Basics",
+              "duration": "3-6 months",
+              "skills": ["Anthropometrics", "Dietary assessment", "Basic counseling", "Food safety"],
+              "projects": ["Client assessment", "Food diary analysis", "Counseling practice"],
+              "resources": ["Assessment tools", "Counseling courses", "Food safety"],
+              "milestones": ["Assessment competency", "Counseling certification"]
+            }
+          ],
+          "certifications": ["Nutrition Certificate"],
+          "career_paths": ["Nutrition Student", "Nutrition Assistant", "Wellness Coach"]
+        },
+        "intermediate": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Clinical Nutrition",
+              "duration": "1-2 years",
+              "skills": ["Medical nutrition therapy", "Disease management", "Special diets", "Research"],
+              "projects": ["Clinical rotations", "Case studies", "Research project"],
+              "resources": ["Clinical nutrition", "Medical courses", "Research methods"],
+              "milestones": ["Clinical competency", "Research publication"]
+            },
+            {
+              "title": "Professional Practice",
+              "duration": "1-2 years",
+              "skills": ["Advanced counseling", "Program development", "Public speaking", "Business"],
+              "projects": ["Internship", "Community program", "Business plan"],
+              "resources": ["Internship programs", "Business courses", "Public health"],
+              "milestones": ["Registered Dietitian", "Independent practice"]
+            }
+          ],
+          "certifications": ["Registered Dietitian"],
+          "career_paths": ["Clinical Dietitian", "Community Nutritionist", "Consultant"]
+        },
+        "advanced": {
+          "duration": "4-8 years",
+          "phases": [
+            {
+              "title": "Specialization",
+              "duration": "2-4 years",
+              "skills": ["Specialty certification", "Advanced clinical", "Research leadership", "Teaching"],
+              "projects": ["Specialty practice", "Research program", "Teaching position"],
+              "resources": ["Specialty certifications", "Masters/PhD", "Academic positions"],
+              "milestones": ["Specialty certification", "Advanced degree"]
+            },
+            {
+              "title": "Leadership & Research",
+              "duration": "2-4 years",
+              "skills": ["Program management", "Research direction", "Policy development", "Industry"],
+              "projects": ["Program leadership", "Major research", "Policy work"],
+              "resources": ["Management courses", "Research grants", "Leadership roles"],
+              "milestones": ["Program director", "Research director", "Industry leader"]
+            }
+          ],
+          "certifications": ["Masters/PhD in Nutrition"],
+          "career_paths": ["Specialist Dietitian", "Nutrition Director", "Professor"]
+        }
+      }
+    },
+    {
+      "id": "sante-publique",
+      "field": "Santé Publique",
+      "category": "Health",
+      "bacTypes": ["SVT"],
+      "aliases": [
+        "santé publique", "public health", "épidémiologie", "epidemiology",
+        "health policy", "community health", "preventive medicine",
+        "الصحة العامة", "أمراض وبائية", "صحة المجتمع", "طب وقائي"
+      ],
+      "keywords": [
+        "public health", "epidemiology", "health policy", "biostatistics",
+        "community health", "preventive medicine", "health promotion"
+      ],
+      "education": ["الصحة العامة", "الطب", "الصيدلة", "التمريض"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Growing",
+      "unemployment_risk": "Moderate",
+      "tools": ["Statistical software", "GIS tools", "Survey tools", "Data analysis software"],
+      "skills": [
+        "Epidemiology", "Biostatistics", "Health Policy", "Program Planning",
+        "Research Methods", "Community Engagement", "Data Analysis"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Public Health Basics",
+              "duration": "3-6 months",
+              "skills": ["Public health concepts", "Epidemiology basics", "Biostatistics", "Health systems"],
+              "projects": ["Health survey", "Community assessment", "Data analysis"],
+              "resources": ["Public health textbooks", "Epidemiology courses", "Statistics"],
+              "milestones": ["Basic competency", "First analysis"]
+            },
+            {
+              "title": "Program Skills",
+              "duration": "3-6 months",
+              "skills": ["Program planning", "Health promotion", "Evaluation", "Communication"],
+              "projects": ["Program proposal", "Health campaign", "Evaluation plan"],
+              "resources": ["Program planning", "Health communication", "Evaluation"],
+              "milestones": ["Program planning", "Campaign delivery"]
+            }
+          ],
+          "certifications": ["Public Health Certificate"],
+          "career_paths": ["Public Health Student", "Health Educator", "Research Assistant"]
+        },
+        "intermediate": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Advanced Public Health",
+              "duration": "1-2 years",
+              "skills": ["Advanced epidemiology", "Policy analysis", "Program management", "Research"],
+              "projects": ["Epidemiological study", "Policy analysis", "Program evaluation"],
+              "resources": ["MPH program", "Epidemiology courses", "Policy courses"],
+              "milestones": ["MPH degree", "Research publication"]
+            },
+            {
+              "title": "Professional Practice",
+              "duration": "1-2 years",
+              "skills": ["Leadership", "Grant writing", "Advocacy", "Systems thinking"],
+              "projects": ["Program leadership", "Grant award", "Policy advocacy"],
+              "resources": ["Leadership courses", "Grant writing", "Advocacy training"],
+              "milestones": ["Program manager", "Policy influence"]
+            }
+          ],
+          "certifications": ["MPH (Master of Public Health)"],
+          "career_paths": ["Epidemiologist", "Public Health Specialist", "Program Manager"]
+        },
+        "advanced": {
+          "duration": "4-8 years",
+          "phases": [
+            {
+              "title": "Leadership & Research",
+              "duration": "2-4 years",
+              "skills": ["Research leadership", "Policy development", "Systems change", "Global health"],
+              "projects": ["Research program", "Policy reform", "Global health project"],
+              "resources": ["DrPH/PhD", "Leadership programs", "Global health"],
+              "milestones": ["DrPH/PhD", "Major policy impact"]
+            },
+            {
+              "title": "Executive & Expert",
+              "duration": "2-4 years",
+              "skills": ["Executive leadership", "Strategic planning", "Organizational change", "Consultation"],
+              "projects": ["Agency leadership", "System reform", "Expert consultation"],
+              "resources": ["Executive training", "Consulting", "Academic roles"],
+              "milestones": ["Health Director", "Professor", "Consultant"]
+            }
+          ],
+          "certifications": ["DrPH or PhD"],
+          "career_paths": ["Health Director", "Professor", "Global Health Expert"]
+        }
+      }
+    },
+    {
+      "id": "business-management",
+      "field": "Business / Management",
+      "category": "Business",
+      "bacTypes": ["ECO"],
+      "aliases": [
+        "business", "management", "business administration", "MBA",
+        "entreprise", "gestion d'entreprise", "direction", "leadership",
+        "أعمال", "إدارة", "إدارة الأعمال", "قيادة"
+      ],
+      "keywords": [
+        "business strategy", "management", "leadership", "operations",
+        "strategic planning", "organizational behavior", "project management"
+      ],
+      "education": ["التصرف", "الاقتصاد", "العلوم التجارية", "إدارة الأعمال"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Moderate",
+      "tools": ["ERP systems", "CRM", "Project management tools", "Business intelligence", "Analytics platforms"],
+      "skills": [
+        "Strategic Planning", "Leadership", "Financial Management", "Operations Management",
+        "Project Management", "Business Analysis", "Team Building"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Business Fundamentals",
+              "duration": "3-6 months",
+              "skills": ["Business principles", "Economics", "Accounting basics", "Marketing intro"],
+              "projects": ["Business plan draft", "Market analysis", "Financial statements"],
+              "resources": ["Business textbooks", "Economics courses", "Accounting basics"],
+              "milestones": ["Business fundamentals", "First business analysis"]
+            },
+            {
+              "title": "Management Basics",
+              "duration": "3-6 months",
+              "skills": ["Leadership principles", "Communication", "Team dynamics", "Problem solving"],
+              "projects": ["Team project", "Leadership assessment", "Case studies"],
+              "resources": ["Management courses", "Leadership training", "Case studies"],
+              "milestones": ["Leadership skills", "Team management"]
+            }
+          ],
+          "certifications": ["Business Certificate"],
+          "career_paths": ["Business Student", "Management Trainee", "Junior Analyst"]
+        },
+        "intermediate": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Management Degree",
+              "duration": "1-2 years",
+              "skills": ["Strategic management", "Finance", "Marketing", "Operations", "HR"],
+              "projects": ["Strategic plan", "Marketing campaign", "Operations project"],
+              "resources": ["Business school", "MBA prep", "Industry courses"],
+              "milestones": ["Bachelor/Master", "Internship completion"]
+            },
+            {
+              "title": "Professional Management",
+              "duration": "1-2 years",
+              "skills": ["Project management", "Leadership", "Financial analysis", "Business development"],
+              "projects": ["Project leadership", "Department management", "Business growth"],
+              "resources": ["PMP certification", "Leadership programs", "Industry training"],
+              "milestones": ["PMP", "Management role"]
+            }
+          ],
+          "certifications": ["Bachelor/Master in Business", "PMP"],
+          "career_paths": ["Manager", "Business Analyst", "Project Manager"]
+        },
+        "advanced": {
+          "duration": "4-8 years",
+          "phases": [
+            {
+              "title": "Executive Development",
+              "duration": "2-4 years",
+              "skills": ["Executive leadership", "Strategic planning", "Change management", "Governance"],
+              "projects": ["MBA", "Executive project", "Transformation initiative"],
+              "resources": ["MBA program", "Executive education", "Leadership coaching"],
+              "milestones": ["MBA", "Executive role"]
+            },
+            {
+              "title": "C-Suite & Strategy",
+              "duration": "2-4 years",
+              "skills": ["CEO skills", "Board management", "M&A", "Global strategy", "Innovation"],
+              "projects": ["Company leadership", "Major transformation", "Strategic growth"],
+              "resources": ["Executive MBA", "Board training", "Strategy programs"],
+              "milestones": ["C-level role", "Board position"]
+            }
+          ],
+          "certifications": ["MBA", "Executive Education"],
+          "career_paths": ["Senior Manager", "Director", "VP", "CEO"]
+        }
+      }
+    },
+    {
+      "id": "marketing",
+      "field": "Marketing",
+      "category": "Business",
+      "bacTypes": ["ECO"],
+      "aliases": [
+        "marketing", "digital marketing", "brand management", "market research",
+        "publicité", "communication marketing", "content marketing",
+        "تسويق", "تسويق رقمي", "إدارة العلامة التجارية", "إعلان"
+      ],
+      "keywords": [
+        "marketing strategy", "digital marketing", "SEO", "SEM", "social media",
+        "content marketing", "brand management", "market research", "analytics"
+      ],
+      "education": ["التسويق", "التصرف", "الإعلامية", "الاتصال"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Growing",
+      "unemployment_risk": "Moderate",
+      "tools": ["Google Analytics", "SEO tools", "Social media platforms", "Marketing automation", "CRM"],
+      "skills": [
+        "Marketing Strategy", "Digital Marketing", "SEO/SEM", "Content Creation",
+        "Social Media", "Analytics", "Brand Management"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Marketing Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["Marketing principles", "Consumer behavior", "Marketing mix", "Branding basics"],
+              "projects": ["Marketing plan draft", "Brand analysis", "Campaign concept"],
+              "resources": ["Marketing textbooks", "Online courses", "Case studies"],
+              "milestones": ["Marketing basics", "First campaign concept"]
+            },
+            {
+              "title": "Digital Marketing",
+              "duration": "2-4 months",
+              "skills": ["Social media", "Content creation", "Email marketing", "Basic analytics"],
+              "projects": ["Social media campaign", "Content calendar", "Email campaign"],
+              "resources": ["Digital marketing courses", "Google Digital Garage", "HubSpot"],
+              "milestones": ["First campaign live", "Analytics competency"]
+            }
+          ],
+          "certifications": ["Google Digital Marketing", "HubSpot Inbound"],
+          "career_paths": ["Marketing Intern", "Digital Marketing Assistant", "Junior Marketer"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Advanced Marketing",
+              "duration": "6-12 months",
+              "skills": ["SEO/SEM", "Marketing automation", "Data analysis", "Campaign management"],
+              "projects": ["SEO project", "Marketing automation setup", "Campaign optimization"],
+              "resources": ["SEO courses", "Analytics certifications", "Marketing platforms"],
+              "milestones": ["SEO certification", "ROI improvement"]
+            },
+            {
+              "title": "Strategic Marketing",
+              "duration": "6-12 months",
+              "skills": ["Brand strategy", "Market research", "Customer journey", "Budgeting"],
+              "projects": ["Brand strategy", "Research project", "Annual marketing plan"],
+              "resources": ["Marketing strategy", "Research methods", "Budgeting courses"],
+              "milestones": ["Brand manager role", "Research publication"]
+            }
+          ],
+          "certifications": ["Google Analytics", "Facebook Blueprint"],
+          "career_paths": ["Marketing Specialist", "Brand Manager", "Digital Marketing Manager"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Marketing Leadership",
+              "duration": "1-2 years",
+              "skills": ["Team leadership", "Strategic planning", "Budget management", "Cross-functional"],
+              "projects": ["Marketing team leadership", "Strategic initiative", "Multi-channel campaign"],
+              "resources": ["Leadership training", "Strategic planning", "Management courses"],
+              "milestones": ["Marketing manager", "Team leadership"]
+            },
+            {
+              "title": "Executive Marketing",
+              "duration": "1-2 years",
+              "skills": ["CMO skills", "Business strategy", "Innovation", "Global marketing"],
+              "projects": ["Marketing strategy", "Business transformation", "Global campaign"],
+              "resources": ["Executive marketing", "Global strategy", "Innovation"],
+              "milestones": ["Marketing director", "CMO track"]
+            }
+          ],
+          "certifications": ["MBA Marketing"],
+          "career_paths": ["Marketing Director", "VP Marketing", "CMO"]
+        }
+      }
+    },
+    {
+      "id": "finance",
+      "field": "Finance",
+      "category": "Business",
+      "bacTypes": ["ECO"],
+      "aliases": [
+        "finance", "financial analyst", "banking", "investment", "comptabilité",
+        "accounting", "financial management", "audit", "contrôle de gestion",
+        "مالية", "محاسبة", "تدقيق", "استثمار", "بنوك"
+      ],
+      "keywords": [
+        "finance", "accounting", "financial analysis", "investment", "banking",
+        "audit", "risk management", "financial modeling", "corporate finance"
+      ],
+      "education": ["المالية", "المحاسبة", "التصرف", "الاقتصاد"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Low",
+      "tools": ["Excel", "Financial modeling", "ERP systems", "Bloomberg", "Accounting software"],
+      "skills": [
+        "Financial Analysis", "Accounting", "Financial Modeling", "Investment Analysis",
+        "Risk Management", "Audit", "Excel", "Reporting"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "6-12 months",
+          "phases": [
+            {
+              "title": "Finance Fundamentals",
+              "duration": "3-6 months",
+              "skills": ["Accounting principles", "Financial statements", "Time value of money", "Excel"],
+              "projects": ["Financial statement analysis", "Budget preparation", "Excel models"],
+              "resources": ["Accounting textbooks", "Excel courses", "Finance basics"],
+              "milestones": ["Accounting competency", "Financial analysis"]
+            },
+            {
+              "title": "Financial Analysis",
+              "duration": "3-6 months",
+              "skills": ["Ratio analysis", "Valuation basics", "Industry analysis", "Reporting"],
+              "projects": ["Company valuation", "Industry report", "Investment memo"],
+              "resources": ["Financial analysis", "Valuation courses", "Industry research"],
+              "milestones": ["Analysis certification", "First valuation"]
+            }
+          ],
+          "certifications": ["Financial Modeling"],
+          "career_paths": ["Finance Intern", "Junior Analyst", "Accounting Assistant"]
+        },
+        "intermediate": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Professional Finance",
+              "duration": "1-2 years",
+              "skills": ["Advanced modeling", "DCF valuation", "M&A basics", "Credit analysis"],
+              "projects": ["M&A model", "Credit analysis", "Industry coverage"],
+              "resources": ["Financial modeling courses", "CFA prep", "Banking training"],
+              "milestones": ["CFA Level 1", "Associate role"]
+            },
+            {
+              "title": "Specialization",
+              "duration": "1-2 years",
+              "skills": ["Industry specialization", "Complex transactions", "Risk assessment", "Client management"],
+              "projects": ["Major transaction", "Risk framework", "Client portfolio"],
+              "resources": ["Specialty certifications", "Advanced modeling", "Client management"],
+              "milestones": ["Senior associate", "Specialty certification"]
+            }
+          ],
+          "certifications": ["CFA Level 1/2", "CPA"],
+          "career_paths": ["Financial Analyst", "Associate", "Senior Associate"]
+        },
+        "advanced": {
+          "duration": "4-8 years",
+          "phases": [
+            {
+              "title": "Leadership & Strategy",
+              "duration": "2-4 years",
+              "skills": ["Team leadership", "Deal structuring", "Strategic finance", "Risk management"],
+              "projects": ["Deal leadership", "Strategic initiative", "Team building"],
+              "resources": ["Leadership training", "Executive education", "Strategy courses"],
+              "milestones": ["VP/Director", "Major deal closed"]
+            },
+            {
+              "title": "Executive Finance",
+              "duration": "2-4 years",
+              "skills": ["CFO skills", "Capital markets", "M&A strategy", "Investor relations"],
+              "projects": ["CFO role", "IPO", "Major M&A", "Strategic transformation"],
+              "resources": ["Executive MBA", "Board training", "Capital markets"],
+              "milestones": ["CFO", "Managing Director", "Partner"]
+            }
+          ],
+          "certifications": ["CFA", "CPA", "MBA Finance"],
+          "career_paths": ["VP", "Director", "CFO", "Partner"]
+        }
+      }
+    },
+    {
+      "id": "communication",
+      "field": "Communication",
+      "category": "Business",
+      "bacTypes": ["ECO", "LETTRES"],
+      "aliases": [
+        "communication", "corporate communication", "public relations", "PR",
+        "relations publiques", "communication d'entreprise", "stratégie de communication",
+        "اتصال", "علاقات عامة", "تواصل مؤسسي", "إعلام"
+      ],
+      "keywords": [
+        "communication strategy", "public relations", "corporate communication",
+        "media relations", "internal communication", "crisis communication", "branding"
+      ],
+      "education": ["الإعلامية", "الاتصال", "الأداب", "التصرف"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Moderate",
+      "tools": ["Social media platforms", "PR tools", "Content management", "Analytics", "Design tools"],
+      "skills": [
+        "Communication Strategy", "Public Relations", "Content Creation", "Media Relations",
+        "Crisis Management", "Internal Communication", "Digital Communication"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Communication Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["Communication theory", "Writing skills", "Media landscape", "Branding basics"],
+              "projects": ["Press release", "Social media plan", "Brand guidelines"],
+              "resources": ["Communication textbooks", "Writing courses", "Media studies"],
+              "milestones": ["Writing competency", "First press release"]
+            },
+            {
+              "title": "Digital Communication",
+              "duration": "2-4 months",
+              "skills": ["Social media management", "Content creation", "Community management", "Analytics"],
+              "projects": ["Social media campaign", "Content calendar", "Crisis simulation"],
+              "resources": ["Social media courses", "Content strategy", "Crisis management"],
+              "milestones": ["Campaign launch", "Crisis management"]
+            }
+          ],
+          "certifications": ["Digital Communication"],
+          "career_paths": ["Communication Intern", "Social Media Assistant", "Junior Communicator"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Professional Communication",
+              "duration": "6-12 months",
+              "skills": ["Media relations", "Event management", "Internal communication", "Measurement"],
+              "projects": ["Media campaign", "Corporate event", "Internal newsletter"],
+              "resources": ["PR courses", "Event management", "Measurement tools"],
+              "milestones": ["Media coverage", "Event success"]
+            },
+            {
+              "title": "Strategic Communication",
+              "duration": "6-12 months",
+              "skills": ["Communication strategy", "Crisis communication", "Stakeholder management", "Budgeting"],
+              "projects": ["Communication plan", "Crisis response", "Stakeholder mapping"],
+              "resources": ["Strategic communication", "Crisis training", "Stakeholder courses"],
+              "milestones": ["Communication manager", "Crisis handled"]
+            }
+          ],
+          "certifications": ["APR", "CIPR"],
+          "career_paths": ["Communication Specialist", "PR Manager", "Internal Communication Manager"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Leadership & Strategy",
+              "duration": "1-2 years",
+              "skills": ["Team leadership", "Strategic planning", "Reputation management", "Change communication"],
+              "projects": ["Communication leadership", "Reputation campaign", "Change initiative"],
+              "resources": ["Leadership courses", "Reputation management", "Change communication"],
+              "milestones": ["Communication director", "Reputation award"]
+            },
+            {
+              "title": "Executive Communication",
+              "duration": "1-2 years",
+              "skills": ["C-suite communication", "Board relations", "Investor communication", "Global strategy"],
+              "projects": ["Executive communication", "Board presentation", "Global campaign"],
+              "resources": ["Executive communication", "Board training", "Global strategy"],
+              "milestones": ["VP Communication", "CCO track"]
+            }
+          ],
+          "certifications": ["SCMP", "Fellowship"],
+          "career_paths": ["Communication Director", "VP Communication", "CCO"]
+        }
+      }
+    },
+    {
+      "id": "gestion-commerce",
+      "field": "Gestion / Commerce",
+      "category": "Business",
+      "bacTypes": ["ECO"],
+      "aliases": [
+        "gestion", "commerce", "business management", "retail", "sales",
+        "commercial", "vente", "négociation", "distribution", "logistics",
+        "تصرف", "تجارة", "مبيعات", "توزيع", "لوجستيك"
+      ],
+      "keywords": [
+        "management", "commerce", "retail", "sales", "negotiation",
+        "distribution", "logistics", "supply chain", "customer service"
+      ],
+      "education": ["التصرف", "التجارة", "الاقتصاد", "اللوجستيك"],
+      "demand_in_tunisia": "High",
+      "future_outlook": "Stable",
+      "unemployment_risk": "Moderate",
+      "tools": ["ERP", "CRM", "Salesforce", "Inventory management", "Analytics"],
+      "skills": [
+        "Sales Management", "Negotiation", "Customer Relations", "Inventory Management",
+        "Supply Chain", "Retail Operations", "Team Leadership"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Commerce Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["Sales basics", "Customer service", "Product knowledge", "POS systems"],
+              "projects": ["Sales simulation", "Customer service project", "Product presentation"],
+              "resources": ["Sales courses", "Customer service training", "Product training"],
+              "milestones": ["Sales basics", "First sale"]
+            },
+            {
+              "title": "Management Basics",
+              "duration": "2-4 months",
+              "skills": ["Inventory management", "Team coordination", "Basic accounting", "Reporting"],
+              "projects": ["Inventory audit", "Team project", "Sales report"],
+              "resources": ["Inventory courses", "Team management", "Accounting basics"],
+              "milestones": ["Management skills", "Team coordination"]
+            }
+          ],
+          "certifications": ["Sales Certificate"],
+          "career_paths": ["Sales Associate", "Store Assistant", "Junior Manager"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Commercial Management",
+              "duration": "6-12 months",
+              "skills": ["Sales management", "Negotiation", "Key account management", "Territory management"],
+              "projects": ["Sales territory", "Negotiation simulation", "Account plan"],
+              "resources": ["Sales management", "Negotiation courses", "Account management"],
+              "milestones": ["Sales manager", "Major account win"]
+            },
+            {
+              "title": "Operations & Supply Chain",
+              "duration": "6-12 months",
+              "skills": ["Supply chain", "Logistics", "Procurement", "Distribution"],
+              "projects": ["Supply chain project", "Logistics optimization", "Vendor management"],
+              "resources": ["Supply chain courses", "Logistics training", "Procurement"],
+              "milestones": ["Operations manager", "Efficiency improvement"]
+            }
+          ],
+          "certifications": ["Supply Chain Certificate"],
+          "career_paths": ["Sales Manager", "Operations Manager", "Store Manager"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Strategic Management",
+              "duration": "1-2 years",
+              "skills": ["Regional management", "P&L responsibility", "Strategic planning", "Multi-unit"],
+              "projects": ["Regional turnaround", "New market entry", "Chain expansion"],
+              "resources": ["Strategic management", "P&L courses", "Multi-unit management"],
+              "milestones": ["Regional manager", "Profit improvement"]
+            },
+            {
+              "title": "Executive Leadership",
+              "duration": "1-2 years",
+              "skills": ["General management", "Business development", "M&A", "International"],
+              "projects": ["Business unit leadership", "Acquisition", "International expansion"],
+              "resources": ["Executive MBA", "Business development", "International business"],
+              "milestones": ["General manager", "VP Sales/Operations"]
+            }
+          ],
+          "certifications": ["MBA"],
+          "career_paths": ["Regional Manager", "General Manager", "VP", "CEO Retail"]
+        }
+      }
+    },
+    {
+      "id": "nutrition-sportive",
+      "field": "Nutrition Sportive",
+      "category": "Sport",
+      "bacTypes": ["SPORT"],
+      "aliases": [
+        "nutrition sportive", "sports nutrition", "sport nutritionist",
+        "diététique du sport", "supplementation", "performance nutrition",
+        "التغذية الرياضية", "تغذية الرياضيين", "مكملات غذائية"
+      ],
+      "keywords": [
+        "sports nutrition", "performance nutrition", "supplementation", "hydration",
+        "meal planning for athletes", "body composition", "recovery nutrition"
+      ],
+      "education": ["التغذية الرياضية", "التربية البدنية", "الطب الرياضي", "التغذية"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Growing",
+      "unemployment_risk": "Moderate",
+      "tools": ["Body composition analyzers", "Nutrition software", "Metabolic carts", "Supplement guides"],
+      "skills": [
+        "Sports Nutrition", "Performance Planning", "Supplementation", "Body Composition Analysis",
+        "Hydration Strategies", "Recovery Nutrition", "Weight Management"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "Sports Nutrition Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["Macronutrients for athletes", "Energy systems", "Hydration basics", "Pre/post workout"],
+              "projects": ["Athlete meal plan", "Hydration protocol", "Supplement review"],
+              "resources": ["Sports nutrition courses", "ISSN materials", "Case studies"],
+              "milestones": ["Nutrition assessment", "First athlete client"]
+            },
+            {
+              "title": "Practical Application",
+              "duration": "2-4 months",
+              "skills": ["Meal timing", "Competition nutrition", "Travel nutrition", "Sport-specific"],
+              "projects": ["Competition plan", "Team nutrition", "Weight category plan"],
+              "resources": ["Practical sports nutrition", "Team nutrition", "Weight management"],
+              "milestones": ["Competition support", "Team nutrition plan"]
+            }
+          ],
+          "certifications": ["Sports Nutrition Certificate"],
+          "career_paths": ["Sports Nutrition Student", "Assistant Nutritionist", "Junior Sports Dietitian"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "Advanced Sports Nutrition",
+              "duration": "6-12 months",
+              "skills": ["Periodization", "Supplementation science", "Ergogenic aids", "Lab testing"],
+              "projects": ["Annual nutrition plan", "Supplement protocol", "Research project"],
+              "resources": ["Advanced sports nutrition", "Supplementation courses", "Lab testing"],
+              "milestones": ["Certified specialist", "Elite athlete client"]
+            },
+            {
+              "title": "Professional Practice",
+              "duration": "6-12 months",
+              "skills": ["Team management", "High-performance", "Special populations", "Consulting"],
+              "projects": ["Professional team", "Olympic preparation", "Consulting business"],
+              "resources": ["High-performance courses", "Business skills", "Elite sport"],
+              "milestones": ["Professional team role", "Business launch"]
+            }
+          ],
+          "certifications": ["CISSN", "ISSN-SNS"],
+          "career_paths": ["Sports Nutritionist", "Team Nutritionist", "Performance Dietitian"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Elite Performance",
+              "duration": "1-2 years",
+              "skills": ["Olympic nutrition", "Research", "Program leadership", "Innovation"],
+              "projects": ["Olympic team", "Research program", "National program"],
+              "resources": ["Olympic training", "Research programs", "Leadership"],
+              "milestones": ["Olympic experience", "Research publications"]
+            },
+            {
+              "title": "Leadership & Academia",
+              "duration": "1-2 years",
+              "skills": ["Director", "Policy", "Education", "Industry"],
+              "projects": ["Program directorship", "Policy development", "Academic role"],
+              "resources": ["Leadership courses", "Academic training", "Policy work"],
+              "milestones": ["Director role", "Professor", "Industry leader"]
+            }
+          ],
+          "certifications": ["PhD", "Fellowship"],
+          "career_paths": ["Lead Nutritionist", "Director of Nutrition", "Professor"]
+        }
+      }
+    },
+    {
+      "id": "preparation-physique",
+      "field": "Préparation Physique",
+      "category": "Sport",
+      "bacTypes": ["SPORT"],
+      "aliases": [
+        "préparation physique", "physical preparation", "strength and conditioning",
+        "S&C", "athletic development", "performance training",
+        "الإعداد البدني", "تطوير الأداء", "تقوية ولياقة"
+      ],
+      "keywords": [
+        "strength training", "conditioning", "athletic performance", "periodization",
+        "power development", "speed training", "movement screening", "injury prevention"
+      ],
+      "education": ["الإعداد البدني", "تربية بدنية", "علوم الرياضة", "الطب الرياضي"],
+      "demand_in_tunisia": "Moderate",
+      "future_outlook": "Growing",
+      "unemployment_risk": "Moderate",
+      "tools": ["Strength equipment", "Speed tools", "Monitoring devices", "Video analysis", "Testing equipment"],
+      "skills": [
+        "Strength Training", "Conditioning", "Periodization", "Movement Screening",
+        "Injury Prevention", "Performance Testing", "Program Design"
+      ],
+      "roadmap": {
+        "beginner": {
+          "duration": "3-6 months",
+          "phases": [
+            {
+              "title": "S&C Fundamentals",
+              "duration": "1-2 months",
+              "skills": ["Anatomy", "Biomechanics", "Training principles", "Exercise technique"],
+              "projects": ["Movement screening", "Technique videos", "Basic program"],
+              "resources": ["NSCA materials", "Anatomy courses", "Biomechanics"],
+              "milestones": ["Movement competency", "First program design"]
+            },
+            {
+              "title": "Practical Training",
+              "duration": "2-4 months",
+              "skills": ["Program design", "Coaching technique", "Safety", "Progression"],
+              "projects": ["Group training", "Individual program", "Assessment protocol"],
+              "resources": ["Program design", "Coaching courses", "Safety certification"],
+              "milestones": ["CSCS exam prep", "Client results"]
+            }
+          ],
+          "certifications": ["CPT", "Fitness Certificate"],
+          "career_paths": ["S&C Student", "Assistant Coach", "Fitness Trainer"]
+        },
+        "intermediate": {
+          "duration": "1-2 years",
+          "phases": [
+            {
+              "title": "CSCS & Team S&C",
+              "duration": "6-12 months",
+              "skills": ["CSCS preparation", "Team training", "Periodization", "Sport-specific"],
+              "projects": ["Team program", "Periodized plan", "Testing battery"],
+              "resources": ["CSCS materials", "Team S&C courses", "Sport-specific training"],
+              "milestones": ["CSCS certification", "Team role"]
+            },
+            {
+              "title": "Advanced Methods",
+              "duration": "6-12 months",
+              "skills": ["Olympic lifting", "Plyometrics", "Speed training", "Return to play"],
+              "projects": ["Advanced program", "Rehab integration", "Elite athlete"],
+              "resources": ["Advanced S&C", "Speed training", "Return to play"],
+              "milestones": ["Advanced certification", "Elite team role"]
+            }
+          ],
+          "certifications": ["CSCS", "RSCC"],
+          "career_paths": ["S&C Coach", "Team S&C Coach", "Performance Coach"]
+        },
+        "advanced": {
+          "duration": "2-4 years",
+          "phases": [
+            {
+              "title": "Elite & High Performance",
+              "duration": "1-2 years",
+              "skills": ["Olympic preparation", "Research", "Innovation", "Leadership"],
+              "projects": ["Olympic team", "Research project", "Program development"],
+              "resources": ["High performance", "Research", "Leadership"],
+              "milestones": ["Olympic experience", "Research publication"]
+            },
+            {
+              "title": "Leadership & Direction",
+              "duration": "1-2 years",
+              "skills": ["Department head", "Policy", "Education", "Industry leadership"],
+              "projects": ["S&C department", "National program", "Education program"],
+              "resources": ["Leadership courses", "Academic", "Policy"],
+              "milestones": ["Head of S&C", "National team", "Professor"]
+            }
+          ],
+          "certifications": ["MSCC", "PhD"],
+          "career_paths": ["Head S&C Coach", "Director of Performance", "Professor"]
         }
       }
     }

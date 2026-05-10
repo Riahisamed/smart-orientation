@@ -106,6 +106,15 @@ export class DomainMatcherService {
       normalized = normalized.toLowerCase();
     }
 
+    // Replace & with 'and' for better matching
+    normalized = normalized.replace(/\s*&\s*/g, ' and ');
+
+    // Remove emojis (Unicode emoji ranges)
+    normalized = normalized.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20FF}]/gu, '');
+
+    // Remove special characters but keep alphanumeric, spaces, and accented chars for now
+    normalized = normalized.replace(/[^\w\s\u00C0-\u017F]/g, ' ');
+
     if (rules.remove_accents) {
       normalized = normalized
         .normalize('NFKD')
@@ -122,6 +131,88 @@ export class DomainMatcherService {
     }
 
     return normalized;
+  }
+
+  /**
+   * Normalize string for strict matching
+   * - lowercase
+   * - remove accents
+   * - remove special chars
+   * - trim spaces
+   */
+  private normalizeString(text: string): string {
+    if (!text) return '';
+    return text
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9\s]/g, ' ')    // Remove special chars, keep alphanumeric and spaces
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * STRICT domain matching with priority:
+   * 1. Exact field match (case-insensitive)
+   * 2. Exact alias match (normalized)
+   * 3. Normalized exact field comparison
+   * 4. Keyword fallback (only if no exact matches)
+   * 
+   * Returns exact match or null - NO fuzzy/partial matching
+   */
+  public findDomainStrict(query: string): Domain | null {
+    if (!query || query.trim().length === 0) {
+      return null;
+    }
+
+    const normalizedQuery = this.normalizeString(query);
+
+    // Priority 1: Exact field match (case-insensitive)
+    for (const domain of this.domainsData.domains) {
+      if (domain.field.toLowerCase() === query.toLowerCase()) {
+        return domain;
+      }
+    }
+
+    // Priority 2: Exact alias match (normalized)
+    for (const domain of this.domainsData.domains) {
+      const aliases = this.normalizedAliasesCache.get(domain.field) || [];
+      for (const alias of aliases) {
+        if (alias.toLowerCase() === query.toLowerCase()) {
+          return domain;
+        }
+      }
+      // Also check normalized version
+      for (const alias of aliases) {
+        if (this.normalizeString(alias) === normalizedQuery) {
+          return domain;
+        }
+      }
+    }
+
+    // Priority 3: Normalized exact field comparison
+    for (const domain of this.domainsData.domains) {
+      if (this.normalizeString(domain.field) === normalizedQuery) {
+        return domain;
+      }
+    }
+
+    // Priority 4: Keyword fallback (only if exact matches failed)
+    // Use only for very short queries (1-2 words) that might be keywords
+    const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length > 2);
+    if (queryWords.length <= 2) {
+      for (const domain of this.domainsData.domains) {
+        const keywords = this.normalizedKeywordsCache.get(domain.field) || [];
+        for (const keyword of keywords) {
+          const normalizedKeyword = this.normalizeString(keyword);
+          if (normalizedKeyword === normalizedQuery) {
+            return domain;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   private normalizeArray(arr: string[]): string[] {
@@ -385,6 +476,124 @@ export class DomainMatcherService {
   public quickMatch(query: string): Domain | null {
     const match = this.matchDomain(query);
     return match?.domain || null;
+  }
+
+  /**
+   * Find domain using fuzzy matching with multiple fallback strategies
+   * 1. Exact field match (normalized)
+   * 2. Alias contains query or query contains alias
+   * 3. Keyword contains query or query contains keyword
+   * 4. Fuzzy string similarity
+   * Returns the best matching domain or null
+   */
+  public findDomainFuzzy(query: string): Domain | null {
+    if (!query || query.trim().length === 0) {
+      return null;
+    }
+
+    const normalizedQuery = this.normalizeText(query);
+    
+    // Strategy 1: Exact field match (normalized)
+    const exactMatch = this.getDomainByField(query);
+    if (exactMatch) {
+      return exactMatch;
+    }
+
+    let bestMatch: Domain | null = null;
+    let bestScore = 0;
+
+    for (const domain of this.domainsData.domains) {
+      const normalizedField = this.normalizeText(domain.field);
+      
+      // Strategy 2: Field contains query or query contains field
+      if (normalizedField.includes(normalizedQuery) || normalizedQuery.includes(normalizedField)) {
+        const score = 100 + (normalizedField === normalizedQuery ? 50 : 0);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = domain;
+        }
+      }
+
+      // Strategy 3: Check aliases (partial matching)
+      const aliases = this.normalizedAliasesCache.get(domain.field) || [];
+      for (const alias of aliases) {
+        // Exact alias match
+        if (alias === normalizedQuery) {
+          return domain; // Return immediately on exact alias match
+        }
+        // Alias contains query or query contains alias
+        if (alias.includes(normalizedQuery) || normalizedQuery.includes(alias)) {
+          const score = 80 + Math.min(alias.length, normalizedQuery.length) / Math.max(alias.length, normalizedQuery.length) * 20;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = domain;
+          }
+        }
+      }
+
+      // Strategy 4: Check keywords (partial matching)
+      const keywords = this.normalizedKeywordsCache.get(domain.field) || [];
+      for (const keyword of keywords) {
+        if (keyword.includes(normalizedQuery) || normalizedQuery.includes(keyword)) {
+          const score = 60 + Math.min(keyword.length, normalizedQuery.length) / Math.max(keyword.length, normalizedQuery.length) * 20;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = domain;
+          }
+        }
+      }
+
+      // Strategy 5: Calculate string similarity for fuzzy matching
+      const similarity = this.calculateSimilarity(normalizedQuery, normalizedField);
+      if (similarity > 0.6) { // Threshold for fuzzy match
+        const score = similarity * 70;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = domain;
+        }
+      }
+    }
+
+    return bestMatch;
+  }
+
+  /**
+   * Calculate string similarity using Levenshtein distance
+   * Returns a value between 0 and 1 (1 = exact match)
+   */
+  private calculateSimilarity(str1: string, str2: string): number {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    
+    if (len1 === 0 && len2 === 0) return 1;
+    if (len1 === 0 || len2 === 0) return 0;
+    if (str1 === str2) return 1;
+
+    const matrix: number[][] = [];
+    
+    for (let i = 0; i <= len1; i++) {
+      matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= len2; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,      // deletion
+          matrix[i][j - 1] + 1,      // insertion
+          matrix[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+    
+    const distance = matrix[len1][len2];
+    const maxLen = Math.max(len1, len2);
+    
+    return 1 - distance / maxLen;
   }
 
   // Method to handle comparison queries like "génie civil vs mécanique"

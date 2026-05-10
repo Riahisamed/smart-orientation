@@ -345,6 +345,27 @@ interface MessageWithPrograms extends ChatMessage {
   programs?: ProgramClassification;
 }
 
+interface RoadmapCard {
+  domain: string;
+  field: string;
+  labelFr: string;
+  labelAr: string;
+  icon: string;
+  color: string;
+  description?: string;
+  relevanceScore?: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  demand?: string;
+}
+
+interface RoadmapCardsResponse {
+  title: string;
+  subtitle: string;
+  cards: RoadmapCard[];
+  maxSuggestions: number;
+  personalized: boolean;
+}
+
 interface ChatWidgetProps {
   onClose?: () => void;
   hideHeader?: boolean;
@@ -362,6 +383,9 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const [chatStarted, setChatStarted] = useState(false);
   const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [roadmapCards, setRoadmapCards] = useState<RoadmapCard[]>([]);
+  const [roadmapCardsLoading, setRoadmapCardsLoading] = useState(false);
+  const [showRoadmaps, setShowRoadmaps] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastUserMessage = [...messages].reverse().find((msg) => msg.role === 'user')?.content || '';
@@ -415,6 +439,38 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  // Fetch roadmap cards dynamically from backend based on BAC type and language
+  useEffect(() => {
+    const fetchRoadmapCards = async () => {
+      setRoadmapCardsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          bacType: bac,
+          language: language,
+        });
+        if (interest) {
+          params.append('interest', interest);
+        }
+
+        const res = await fetch(`http://localhost:3001/chatbot/roadmap-cards?${params.toString()}`);
+        if (res.ok) {
+          const data: RoadmapCardsResponse = await res.json();
+          setRoadmapCards(data.cards);
+        } else {
+          console.error('Failed to fetch roadmap cards:', res.status);
+          setRoadmapCards([]);
+        }
+      } catch (error) {
+        console.error('Error fetching roadmap cards:', error);
+        setRoadmapCards([]);
+      } finally {
+        setRoadmapCardsLoading(false);
+      }
+    };
+
+    fetchRoadmapCards();
+  }, [bac, language, interest]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -510,198 +566,13 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
     setInterest('');
   };
 
-  const roadmapCardUi = [
-    {
-      domain: 'frontend',
-      labelFr: 'Front-end',
-      labelAr: 'الواجهة (Front)',
-      icon: '💻',
-      color: '#6366f1',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'backend',
-      labelFr: 'Back-end',
-      labelAr: 'الخلفية (Back)',
-      icon: '⚙️',
-      color: '#22c55e',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'ai',
-      labelFr: 'AI',
-      labelAr: 'الذكاء الاصطناعي',
-      icon: '🤖',
-      color: '#8b5cf6',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'cybersecurity',
-      labelFr: 'Cybersecurity',
-      labelAr: 'الأمن السيبراني',
-      icon: '🛡️',
-      color: '#ef4444',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'data science',
-      labelFr: 'Data Science',
-      labelAr: 'علم البيانات',
-      icon: '📊',
-      color: '#06b6d4',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'genie logiciel',
-      labelFr: 'Génie Logiciel',
-      labelAr: 'هندسة البرمجيات',
-      icon: '🧠',
-      color: '#f59e0b',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'medecine',
-      labelFr: 'Médecine',
-      labelAr: 'الطب',
-      icon: '🩺',
-      color: '#22c55e',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'pharmacie',
-      labelFr: 'Pharmacie',
-      labelAr: 'الصيدلة',
-      icon: '💊',
-      color: '#16a34a',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'biologie',
-      labelFr: 'Biologie',
-      labelAr: 'علم الأحياء',
-      icon: '🧬',
-      color: '#10b981',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'nutrition',
-      labelFr: 'Nutrition',
-      labelAr: 'التغذية',
-      icon: '🥗',
-      color: '#f97316',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'kine',
-      labelFr: 'Kin   é',
-      labelAr: 'علاج طبيعي',
-      icon: '👐',
-      color: '#14b8a6',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'droit',
-      labelFr: 'Droit',
-      labelAr: 'القانون',
-      icon: '⚖️',
-      color: '#3b82f6',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'traduction',
-      labelFr: 'Traduction',
-      labelAr: 'الترجمة',
-      icon: '🌍',
-      color: '#a855f7',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'journalisme',
-      labelFr: 'Journalisme',
-      labelAr: 'الصحافة',
-      icon: '🗞️',
-      color: '#ef4444',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'communication',
-      labelFr: 'Communication',
-      labelAr: 'التواصل',
-      icon: '📣',
-      color: '#f59e0b',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'coaching',
-      labelFr: 'Coaching',
-      labelAr: 'التدريب',
-      icon: '🏋️',
-      color: '#22c55e',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'nutrition sportive',
-      labelFr: 'Nutrition Sportive',
-      labelAr: 'تغذية رياضية',
-      icon: '🥑',
-      color: '#14b8a6',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-    {
-      domain: 'preparation physique',
-      labelFr: 'Préparation Physique',
-      labelAr: 'إعداد بدني',
-      icon: '⏱️',
-      color: '#6366f1',
-      promptTemplate: (d: string) => `roadmap ${d}`,
-    },
-  ];
-
-  const [showRoadmaps, setShowRoadmaps] = useState(false);
   const hideSuggestionChips = showRoadmaps;
-
-  function getRoadmapDomainsByProfile(
-    bacTypeValue: BacType,
-    currentInterest: string,
-    _language: 'fr' | 'ar',
-  ) {
-
-    // Interest is intentionally lightweight: it can enrich ordering,
-    // but base domains must come from bacType.
-    const interestKey = normalizeText(currentInterest);
-
-    const baseByBac: Record<BacType, string[]> = {
-      MATH: ['frontend', 'backend', 'ai', 'cybersecurity', 'data science', 'genie logiciel'],
-      SVT: ['medecine', 'pharmacie', 'biologie', 'nutrition', 'kine'],
-      LETTRES: ['droit', 'traduction', 'journalisme', 'communication'],
-      SPORT: ['coaching', 'nutrition sportive', 'preparation physique'],
-      ECO: ['gestion', 'finance', 'economie', 'marketing'],
-      TECH: ['genie civil', 'mecanique', 'electrique', 'industriel'],
-      INFO: ['informatique', 'developpement', 'reseaux', 'ia'],
-    };
-
-    const base = baseByBac[bacTypeValue] ?? baseByBac.MATH;
-
-    // Small enrichment based on interest id (optional ordering only)
-    const interestBoost: Record<string, Partial<Record<string, number>>> = {
-      tech: { frontend: 3, backend: 2, ai: 3, cybersecurity: 2, 'data science': 2, 'genie logiciel': 2 },
-      health: { medecine: 3, pharmacie: 2, biologie: 2, nutrition: 3, kine: 2 },
-      business: { gestion: 3, finance: 3, economie: 2, marketing: 2 },
-      sport: { coaching: 3, 'nutrition sportive': 3, 'preparation physique': 3 },
-      art: { design: 3, 'communication': 2 },
-    };
-
-    const boost = interestBoost[interestKey] ?? {};
-    return [...base]
-      .sort((a, b) => (boost[b] ?? 0) - (boost[a] ?? 0))
-      .slice(0, 6);
-  };
 
 
   const sendRoadmapPrompt = async (prompt: string) => {
     if (isLoading) return;
 
-    // Keep the existing UX rules: chat must be started + score required
+    // Score required to send message, but roadmaps can be viewed without score
     if (!score) {
       setShowRoadmaps(true);
       return;
@@ -833,8 +704,7 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
   const messageWrapperClasses = hideHeader
     ? 'flex-1 overflow-y-auto bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700'
     : 'space-y-4 max-h-[500px] overflow-y-auto bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700';
-  // Roadmap selector cards are now fetched dynamically from backend (see state+effect below)
-  // so the roadmapCardUi hardcoded array was removed.
+
   return (
 
     <div className={containerClasses}>
@@ -952,7 +822,6 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
           </Card>
         )}
 
-        {chatStarted && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex-1">
               <Label className="text-xs font-semibold text-gray-600 dark:text-gray-400">
@@ -972,15 +841,15 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
               >
                 🗺️ Roadmaps
               </Button>
-              <Button variant="outline" size="sm" onClick={clearChat}>
-                Clear Chat
-              </Button>
+              {chatStarted && (
+                <Button variant="outline" size="sm" onClick={clearChat}>
+                  Clear Chat
+                </Button>
+              )}
             </div>
           </div>
 
-        )}
-
-        {showRoadmaps && chatStarted && (
+        {showRoadmaps && (
           <div className="mt-3 rounded-2xl border border-slate-200/80 bg-white/70 p-3 animate-[fadeIn_0.2s_ease-out] dark:border-slate-700 dark:bg-slate-900/40">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-bold text-slate-900 dark:text-slate-100">🗺️ Roadmaps</p>
@@ -994,29 +863,44 @@ export default function ChatWidget({ onClose, hideHeader = false }: ChatWidgetPr
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {roadmapCards.map((c) => (
-                <button
-                  key={c.domain}
-                  type="button"
-                  onClick={() => {
-                    const prompt = c.promptTemplate(c.domain);
-                    sendRoadmapPrompt(prompt);
-                  }}
-                  className="group rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60"
-                  style={{
-                    borderColor: `${c.color}55`,
-                    background: `linear-gradient(135deg, ${c.color}25 0%, rgba(255,255,255,0) 70%)`,
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl" aria-hidden="true">{c.icon}</span>
-                    <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{isArabic ? c.labelAr : c.labelFr}</span>
+              {roadmapCardsLoading ? (
+                <div className="col-span-full text-center py-4">
+                  <div className="flex gap-2 justify-center">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
                   </div>
-                  <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
-                    Click to ask the chatbot
-                  </div>
-                </button>
-              ))}
+                  <p className="text-xs text-slate-500 mt-2">Loading roadmaps...</p>
+                </div>
+              ) : roadmapCards.length === 0 ? (
+                <div className="col-span-full text-center py-4 text-sm text-slate-500">
+                  {isArabic ? 'لا توجد مسارات متاحة' : 'No roadmaps available for this profile'}
+                </div>
+              ) : (
+                roadmapCards.map((c) => (
+                  <button
+                    key={c.domain}
+                    type="button"
+                    onClick={() => {
+                      const prompt = `roadmap ${c.field}`;
+                      sendRoadmapPrompt(prompt);
+                    }}
+                    className="group rounded-2xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60"
+                    style={{
+                      borderColor: `${c.color}55`,
+                      background: `linear-gradient(135deg, ${c.color}25 0%, rgba(255,255,255,0) 70%)`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl" aria-hidden="true">{c.icon}</span>
+                      <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">{isArabic ? c.labelAr : c.labelFr}</span>
+                    </div>
+                    <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300">
+                      {isArabic ? 'انقر لعرض المسار' : 'Click to see roadmap'}
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           </div>
         )}

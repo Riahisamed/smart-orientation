@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { IntentDetectorService } from './intent-detector.service';
+import { ProfileFilterService, StudentProfile } from './services/profile-filter.service';
 
 export type AdmissionLevel = 'safe' | 'possible' | 'hard';
 export type ProgramDomain = 'tech' | 'health' | 'business' | 'sport' | 'art' | 'engineering' | 'letters' | 'other';
@@ -680,7 +681,10 @@ export class RagService {
     letters: [...FIELD_ALIASES.letters],
   };
 
-  constructor(private readonly intentDetector: IntentDetectorService) {
+  constructor(
+    private readonly intentDetector: IntentDetectorService,
+    private readonly profileFilter: ProfileFilterService,
+  ) {
     this.guideData = this.loadJsonFile<GuideProgram[]>('prisma/guide.json', []).map((program) => ({
       ...program,
       domain: this.detectProgramDomain(program),
@@ -725,6 +729,30 @@ export class RagService {
     if (domainJobs) return domainJobs.jobs.slice(0, 3);
     
     return [];
+  }
+
+  // ============================================
+  // 🔍 PROFILE-BASED: get jobs filtered by student profile
+  // ============================================
+  getJobsByFieldAndProfile(detectedField: string | null, profile: StudentProfile): JobData[] {
+    // First check if domain is allowed for this BAC type
+    if (profile.bacType && detectedField) {
+      const isAllowed = this.profileFilter.isDomainAllowed(detectedField, profile.bacType);
+      if (!isAllowed) {
+        this.logger.debug(`Domain ${detectedField} not allowed for BAC ${profile.bacType}`);
+        return [];
+      }
+    }
+    
+    // Return jobs for the allowed domain
+    return this.getJobsByField(detectedField);
+  }
+
+  // ============================================
+  // 🔍 PROFILE-BASED: get recommended domains for student profile
+  // ============================================
+  getRecommendedDomainsForProfile(profile: StudentProfile): string[] {
+    return this.profileFilter.getRecommendedDomainsForProfile(profile);
   }
 
   // ============================================

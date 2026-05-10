@@ -7,6 +7,8 @@ import { ResponseBuilderService } from './response-builder.service';
 import { FIELD_ALIASES, RagService, FieldData, JobData, RankedProgram, detectField, normalizeText } from './rag.service';
 import { MemoryService, ConversationMemory } from './memory.service';
 import { FollowupGenerator } from '../ai/generators/followup.generator';
+import { DynamicRoadmapService } from './services/dynamic-roadmap.service';
+import { DomainMatcherService } from './services/domain-matcher.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -373,6 +375,8 @@ export class ChatbotService {
     private readonly ragService: RagService,
     private readonly memoryService: MemoryService,
     private readonly followupGenerator: FollowupGenerator,
+    private readonly dynamicRoadmap: DynamicRoadmapService,
+    private readonly domainMatcher: DomainMatcherService,
   ) {
     this.conversationMemory = this.memoryService.initializeMemory();
     this.loadFullFieldsData();
@@ -632,6 +636,18 @@ export class ChatbotService {
     const bacType = this.sessionStudentData.bacType;
     const score = this.sessionStudentData.score;
 
+    // Build student profile for profile-based filtering
+    const studentProfile = {
+      bacType,
+      score,
+      interest,
+      language: lang,
+    };
+
+    // NOTE: No strict BAC blocking for general orientation (ask_programs).
+    // Users should see available programs even if domain isn't a perfect BAC match.
+    // BAC filtering is applied strictly only for roadmap requests.
+
     // For LANGUAGES/LETTRES domain, DO NOT map to 'art' interest
     let effectiveInterest = interest;
     if (detectedDomain === 'LANGUAGES') {
@@ -743,6 +759,25 @@ export class ChatbotService {
   private jobsGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
     const domainKey = this.resolveJobsDomain(message, effectiveDomain);
 
+    // Build student profile for profile-based filtering
+    const studentProfile = {
+      bacType: this.sessionStudentData.bacType,
+      score: this.sessionStudentData.score,
+      interest: this.sessionStudentData.interest,
+      language: lang,
+    };
+
+    // NOTE: Soft compatibility for career/jobs (ask_jobs).
+    // Show a warning but do NOT block — users should explore career options freely.
+    // Strict BAC filtering is applied only for roadmap requests.
+    const domainField = this.getEffectiveDomain(message, effectiveDomain);
+    if (studentProfile.bacType && domainField) {
+      const isAllowed = this.ragService['profileFilter'].isDomainAllowed(domainField, studentProfile.bacType);
+      if (!isAllowed) {
+        this.logger.warn(`Domain ${domainField} not allowed for BAC ${studentProfile.bacType} (soft warning)`);
+      }
+    }
+
     // LANGUAGES / LETTRES: Use hardcoded jobs to avoid art fallback
     if (domainKey === 'LANGUAGES' || domainKey === 'LETTERS') {
       return this.formatDomainJobs('LANGUAGES', lang);
@@ -761,9 +796,16 @@ export class ChatbotService {
     const interest = this.resolveEffectiveInterest(message);
     const domain = this.getEffectiveDomain(message, effectiveDomain);
 
-    const jobs = this.ragService.getJobsByField(domainKey);
+    // Update profile with latest interest
+    const updatedProfile = {
+      ...studentProfile,
+      interest: interest || studentProfile.interest,
+    };
 
-    // Fallback via recommendations
+    // Use profile-based filtering for jobs
+    const jobs = this.ragService.getJobsByFieldAndProfile(domainKey, updatedProfile);
+
+    // Fallback via recommendations (also filtered by profile)
     const fallbackJobs: JobData[] = jobs.length > 0 ? jobs : (this.ragService.getRecommendations({
       message,
       bacType: this.sessionStudentData.bacType,
@@ -872,6 +914,19 @@ export class ChatbotService {
 
   private skillsGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
     const domain = this.getEffectiveDomain(message, effectiveDomain);
+
+    // Build student profile for profile-based filtering
+    const studentProfile = {
+      bacType: this.sessionStudentData.bacType,
+      score: this.sessionStudentData.score,
+      interest: this.sessionStudentData.interest,
+      language: lang,
+    };
+
+    // NOTE: No strict BAC blocking for skills (ask_skills).
+    // Skills recommendations are informational and should not block
+    // normal orientation conversations. BAC filtering applied only for roadmaps.
+
     const subDomain = this.detectSkillsSubDomain(message);
     if (subDomain && domain === 'tech') {
       if (subDomain === 'frontend') {
@@ -971,6 +1026,15 @@ export class ChatbotService {
   // ============================================================
   private comparisonGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
     const score = this.sessionStudentData.score;
+    const bacType = this.sessionStudentData.bacType;
+
+    // Build student profile for profile-based filtering
+    const studentProfile = {
+      bacType,
+      score,
+      interest: this.sessionStudentData.interest,
+      language: lang,
+    };
 
     // PART 2 — Use clean comparison entities
     const items = this.extractComparisonEntities(message);
@@ -981,6 +1045,10 @@ export class ChatbotService {
     // No shared interest override — detect each entity's domain separately
     const e1Domain = detectDomain(item1);
     const e2Domain = detectDomain(item2);
+
+    // NOTE: No BAC blocking for comparisons (ask_comparison).
+    // Users should be able to compare any fields freely.
+    // Strict BAC filtering is applied only for roadmap requests.
 
     // Map domain to interest for RAG queries (but bypass session interest)
     const e1Interest = domainToInterest(e1Domain);
@@ -1155,34 +1223,282 @@ export class ChatbotService {
   // ============================================================
   // 🗺️ ROADMAP GENERATOR
   // ============================================================
-  private roadmapGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
-    const domain = this.getEffectiveDomain(message, effectiveDomain);
-    const interest = domainToInterest(domain) || domain;
+  private roadmapGenerator(
+    message: string,
+    lang: 'fr' | 'ar',
+    effectiveDomain?: string | null
+  ): string {
+    // Extract domain name from the message by removing roadmap keywords
+    const roadmapKeywords = ['roadmap', 'parcours', 'chemin', 'path', 'carrière', 'career', 'مسار', 'طريق'];
+    let domainQuery = message.toLowerCase();
+    
+    for (const keyword of roadmapKeywords) {
+      domainQuery = domainQuery.replace(new RegExp(`\\b${keyword}\\b`, 'gi'), '');
+    }
+    domainQuery = domainQuery.trim();
 
-    if (!interest) {
+    // Try multiple strategies to find the domain
+    let matchedDomain: any = null;
+    let domainField: string | null = null;
+
+    // Strategy 1: Use effectiveDomain if provided and try STRICT matching first
+    if (effectiveDomain) {
+      matchedDomain = this.domainMatcher.findDomainStrict(effectiveDomain);
+      // Fallback to fuzzy only if strict fails
+      if (!matchedDomain) {
+        matchedDomain = this.domainMatcher.findDomainFuzzy(effectiveDomain);
+      }
+    }
+
+    // Strategy 2: Try to find domain from the extracted query using STRICT matching
+    if (!matchedDomain && domainQuery) {
+      matchedDomain = this.domainMatcher.findDomainStrict(domainQuery);
+      // Fallback to fuzzy only if strict fails
+      if (!matchedDomain) {
+        matchedDomain = this.domainMatcher.findDomainFuzzy(domainQuery);
+      }
+    }
+
+    // Strategy 3: Try session interest with STRICT matching
+    if (!matchedDomain && this.sessionStudentData.interest) {
+      const interestMatch = this.domainMatcher.findDomainStrict(this.sessionStudentData.interest);
+      if (interestMatch) {
+        matchedDomain = interestMatch;
+      }
+    }
+
+    // Strategy 4: Use effectiveDomain directly as fallback
+    if (!matchedDomain && effectiveDomain) {
+      domainField = effectiveDomain;
+    }
+
+    // If we found a matched domain, use its field name
+    if (matchedDomain) {
+      domainField = matchedDomain.field;
+    }
+
+    if (!domainField) {
       return lang === 'ar'
-        ? '🗺️ **الroadmap:** حدد المجال اللي تحب (مثلاً: "roadmap cyber")'
-        : '🗺️ **Roadmap:** Précise le domaine (ex: "roadmap dev web")';
+        ? '🗺️ **خريطة الطريق:** حدد المجال اللي تحب (مثلاً: "roadmap cyber")'
+        : '🗺️ **Roadmap:** Précise le domaine (ex: "roadmap Cybersecurity")';
     }
 
-    const fullField = this.getFieldByInterest(interest);
-    const fieldName = fullField?.field || domainLabel(effectiveDomain || null, lang) || interest;
-
-    if (lang === 'ar') {
-      return `🗺️ **Roadmap ${fieldName}**\n\n`
-        + `**١. الأساسيات 📚**\n${this.buildLearningOrder(interest, lang)}\n\n`
-        + `**٢. المشاريع 🔨**\n• ابنِ ٢-٣ مشاريع شخصية\n• انشرها على GitHub / منصات\n\n`
-        + `**٣. الشهادات 📜**\n• شهادات مهنية معترف بها\n• منصات: Coursera, Udemy, Google\n\n`
-        + `**٤. التربص 🏢**\n• ابحث عن تربص في شركة\n• تطبيق عملي للمهارات\n\n`
-        + `**٥. التوظيف 🚀**\n• صمم CV محترف\n• قدم على LinkedIn / مواقع توظيف`;
+    // ============================================================
+    // 🚫 STRICT BAC filtering — ONLY for roadmap requests
+    // The incompatibility message MUST only appear when user
+    // explicitly asks for a roadmap in an incompatible domain.
+    // Example: BAC LETTRES asking "roadmap cybersecurity"
+    // ============================================================
+    const bacType = this.sessionStudentData.bacType;
+    if (bacType) {
+      const isAllowed = this.ragService['profileFilter'].isDomainAllowed(domainField, bacType);
+      if (!isAllowed) {
+        this.logger.warn(`Roadmap domain ${domainField} not allowed for BAC ${bacType}`);
+        return lang === 'ar'
+          ? `❌ هذا المجال غير متوافق مع شعبتك (${bacType}). حاول مجال آخر.`
+          : `❌ Ce domaine n'est pas compatible avec ton bac (${bacType}). Essaie un autre domaine.`;
+      }
     }
 
-    return `🗺️ **Roadmap ${fieldName}**\n\n`
-      + `**1. Basics 📚**\n${this.buildLearningOrder(interest, lang)}\n\n`
-      + `**2. Projects 🔨**\n• Build 2-3 personal projects\n• Publish on GitHub/portfolios\n\n`
-      + `**3. Certifications 📜**\n• Get recognized professional certs\n• Platforms: Coursera, Udemy, Google\n\n`
-      + `**4. Internship 🏢**\n• Find an internship/entry position\n• Apply skills in real projects\n\n`
-      + `**5. Job Search 🚀**\n• Build a strong CV\n• Apply on LinkedIn / job platforms`;
+    // Build complete JSON-driven roadmap in required markdown structure.
+    // Wrap everything in try/catch to never return 500
+    try {
+      return this.buildSafeRoadmap(domainField, lang);
+    } catch (error) {
+      console.error('ROADMAP ERROR:', error);
+      this.logger.error(`Roadmap generation failed for ${domainField}: ${error.message}`);
+      
+      // Return generic fallback instead of crashing
+      return lang === 'ar'
+        ? `🗺️ **خريطة الطريق ${domainField}**\n\nعذراً، لم نتمكن من تحميل خريطة الطريق الكاملة.\n\nيرجى المحاولة مرة أخرى أو طرح سؤال عام عن هذا المجال.`
+        : `🗺️ **${domainField} Roadmap**\n\nSorry, we couldn't load the complete roadmap.\n\nPlease try again or ask a general question about this field.`;
+    }
+  }
+
+  /**
+   * Build safe roadmap with normalized data and fallbacks
+   */
+  private buildSafeRoadmap(domainField: string, lang: 'fr' | 'ar'): string {
+    // Generate roadmaps with full error handling
+    let beginner: any, intermediate: any, advanced: any;
+    let finalDomainField = domainField;
+    
+    try {
+      beginner = this.dynamicRoadmap.generateSpecificRoadmap(finalDomainField, 'beginner');
+    } catch (e) {
+      console.error(`Failed to generate beginner roadmap for ${finalDomainField}:`, e);
+      beginner = this.createEmptyRoadmap(finalDomainField, 'beginner');
+    }
+    
+    try {
+      intermediate = this.dynamicRoadmap.generateSpecificRoadmap(finalDomainField, 'intermediate');
+    } catch (e) {
+      console.error(`Failed to generate intermediate roadmap for ${finalDomainField}:`, e);
+      intermediate = this.createEmptyRoadmap(finalDomainField, 'intermediate');
+    }
+    
+    try {
+      advanced = this.dynamicRoadmap.generateSpecificRoadmap(finalDomainField, 'advanced');
+    } catch (e) {
+      console.error(`Failed to generate advanced roadmap for ${finalDomainField}:`, e);
+      advanced = this.createEmptyRoadmap(finalDomainField, 'advanced');
+    }
+
+    // Normalize all roadmap data with safe defaults
+    const safeBeginner = this.normalizeRoadmapData(beginner);
+    const safeIntermediate = this.normalizeRoadmapData(intermediate);
+    const safeAdvanced = this.normalizeRoadmapData(advanced);
+
+    // Load domain data from JSON
+    const domainsFilePath = path.join(process.cwd(), 'data', 'domains.json');
+    let domainFromJson: any = null;
+    try {
+      const domainsRaw = fs.readFileSync(domainsFilePath, 'utf-8');
+      const parsed = JSON.parse(domainsRaw);
+      domainFromJson = (parsed?.domains || []).find((d: any) =>
+        String(d?.field || '').trim() === String(finalDomainField).trim()
+      ) || null;
+    } catch (e) {
+      console.error('Failed to load domain from JSON:', e);
+    }
+
+    // Safe extraction of domain properties
+    const demand = domainFromJson?.demand_in_tunisia || '';
+    const futureOutlook = domainFromJson?.future_outlook || '';
+    const unemploymentRisk = domainFromJson?.unemployment_risk || '';
+    const allSkills = domainFromJson?.skills || [];
+    const allTools = domainFromJson?.tools || [];
+
+    const title = lang === 'ar'
+      ? `# 🚀 ${finalDomainField}`
+      : `# 🚀 ${finalDomainField} Development Roadmap`;
+
+    const overviewHeader = '## 📌 Overview';
+
+    // Safe format phase with full fallbacks
+    const formatPhase = (p: any, emoji: string, levelName: string): string => {
+      // Ensure p has safe defaults
+      const safeP = this.normalizeRoadmapData(p);
+      
+      if (!safeP.phases || safeP.phases.length === 0) {
+        return lang === 'ar'
+          ? `_المحتوى قيد التطوير..._`
+          : `_Content coming soon..._`;
+      }
+
+      const phaseBlocks = safeP.phases.map((ph: any, idx: number) => {
+        const skills = (ph.skills || []).map((s: string) => `• ${s}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
+        const projects = (ph.projects || []).map((s: string) => `• ${s}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
+        const res = (ph.resources || []).map((r: string) => `• ${r}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
+        const ms = (ph.milestones || []).map((m: string) => `• ${m}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
+
+        return (
+          `### ${emoji} ${ph.title || (lang === 'ar' ? `المرحلة ${idx + 1}` : `Phase ${idx + 1}`)}\n` +
+          `* ${lang === 'ar' ? 'المدة' : 'Duration'}: ${ph.duration || (lang === 'ar' ? 'غير محدد' : 'Not specified')}\n\n` +
+          `#### 🧩 ${lang === 'ar' ? 'المهارات' : 'Skills'}\n${skills}\n\n` +
+          `#### 📁 ${lang === 'ar' ? 'المشاريع' : 'Projects'}\n${projects}\n\n` +
+          `#### 📚 ${lang === 'ar' ? 'الموارد' : 'Resources'}\n${res}\n\n` +
+          `#### 🎯 ${lang === 'ar' ? 'الإنجازات' : 'Milestones'}\n${ms}`
+        );
+      });
+
+      return phaseBlocks.join('\n\n');
+    };
+
+    // Safe formatting of lists
+    const coreSkills: string[] = Array.from(new Set(allSkills as string[]));
+    const tools: string[] = Array.from(new Set(allTools as string[]));
+
+    const formatList = (items: string[], emptyMsg: string) => {
+      if (!items || items.length === 0) return `• ${emptyMsg}`;
+      return items.map((s: string) => `• ${s}`).join('\n');
+    };
+
+    // Safe certifications collection
+    const allCertifications: string[] = [
+      ...(safeBeginner.certifications || []),
+      ...(safeIntermediate.certifications || []),
+      ...(safeAdvanced.certifications || []),
+    ];
+    const uniqueCerts: string[] = Array.from(new Set(allCertifications));
+
+    // Safe career paths collection
+    const allCareerPaths: string[] = [
+      ...(safeBeginner.careerPaths || []),
+      ...(safeIntermediate.careerPaths || []),
+      ...(safeAdvanced.careerPaths || []),
+    ];
+    const uniqueCareerPaths: string[] = Array.from(new Set(allCareerPaths));
+
+    const md =
+      `${title}\n\n` +
+      `${overviewHeader}\n\n` +
+      `* ${demand ? `Demand in Tunisia: ${demand}` : 'Demand in Tunisia: —'}\n` +
+      `* ${futureOutlook ? `Future outlook: ${futureOutlook}` : 'Future outlook: —'}\n` +
+      `* ${unemploymentRisk ? `Unemployment risk: ${unemploymentRisk}` : 'Unemployment risk: —'}\n\n` +
+
+      `## 🛠 ${lang === 'ar' ? 'المهارات الأساسية' : 'Core Skills'}\n` +
+      `${formatList(coreSkills, lang === 'ar' ? 'لم يتم تحديد المهارات بعد' : 'No skills specified yet')}\n\n` +
+
+      `## ⚙ ${lang === 'ar' ? 'الأدوات' : 'Tools'}\n` +
+      `${formatList(tools, lang === 'ar' ? 'لم يتم تحديد الأدوات بعد' : 'No tools specified yet')}\n\n` +
+
+      `## 🌱 ${lang === 'ar' ? 'المستوى المبتدئ' : 'Beginner Level'}\n` +
+      `${formatPhase(safeBeginner, '🌱', 'Beginner')}\n\n` +
+
+      `## 🚀 ${lang === 'ar' ? 'المستوى المتوسط' : 'Intermediate Level'}\n` +
+      `${formatPhase(safeIntermediate, '🚀', 'Intermediate')}\n\n` +
+
+      `## 🏆 ${lang === 'ar' ? 'المستوى المتقدم' : 'Advanced Level'}\n` +
+      `${formatPhase(safeAdvanced, '🏆', 'Advanced')}\n\n` +
+
+      `## 🎓 ${lang === 'ar' ? 'الشهادات' : 'Certifications'}\n` +
+      `${formatList(uniqueCerts, lang === 'ar' ? 'الشهادات قيد الإضافة' : 'Certifications coming soon')}\n\n` +
+
+      `## 💼 ${lang === 'ar' ? 'المسارات المهنية' : 'Career Paths'}\n` +
+      `${formatList(uniqueCareerPaths, lang === 'ar' ? 'المسارات قيد الإضافة' : 'Career paths coming soon')}`;
+
+    return md;
+  }
+
+  /**
+   * Create empty roadmap structure as fallback
+   */
+  private createEmptyRoadmap(domain: string, level: string): any {
+    return {
+      domain,
+      level,
+      phases: [],
+      totalDuration: 'TBD',
+      prerequisites: [],
+      certifications: [],
+      careerPaths: [],
+    };
+  }
+
+  /**
+   * Normalize roadmap data with safe defaults
+   */
+  private normalizeRoadmapData(data: any): any {
+    if (!data) {
+      return {
+        phases: [],
+        certifications: [],
+        careerPaths: [],
+        totalDuration: '',
+        prerequisites: [],
+      };
+    }
+
+    return {
+      phases: data.phases || [],
+      certifications: data.certifications || [],
+      careerPaths: data.careerPaths || data.career_paths || [],
+      totalDuration: data.totalDuration || data.duration || '',
+      prerequisites: data.prerequisites || [],
+      domain: data.domain || '',
+      level: data.level || '',
+    };
   }
 
   // ============================================================

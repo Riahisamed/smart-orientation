@@ -9,6 +9,9 @@ import { SafetyRulesService } from './safety-rules.service'
 import { MemoryService } from './memory.service'
 import { StudentModule } from '../student/student.module'
 import { CommonModule } from '../common/common.module'
+import { DomainMatcherService } from './services/domain-matcher.service'
+import { DynamicRoadmapService } from './services/dynamic-roadmap.service'
+import { ProfileFilterService } from './services/profile-filter.service'
 
 // Generators
 import { FollowupGenerator } from '../ai/generators/followup.generator'
@@ -25,6 +28,9 @@ import { FollowupGenerator } from '../ai/generators/followup.generator'
     SafetyRulesService,
     MemoryService,
     FollowupGenerator,
+    DomainMatcherService,
+    DynamicRoadmapService,
+    ProfileFilterService,
   ],
   exports: [
     ChatbotService,
@@ -35,6 +41,9 @@ import { FollowupGenerator } from '../ai/generators/followup.generator'
     SafetyRulesService,
     MemoryService,
     FollowupGenerator,
+    DomainMatcherService,
+    DynamicRoadmapService,
+    ProfileFilterService,
   ],
 })
 export class ChatbotModule {}

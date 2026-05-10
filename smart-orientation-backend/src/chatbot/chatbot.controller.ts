@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Request, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Request, Get, Param, Query } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { ChatbotService } from './chatbot.service';
 import { StudentService } from '../student/student.service';
 import { Public } from '../common/decorators/public.decorator';
+import { DynamicRoadmapService } from './services/dynamic-roadmap.service';
 
 interface ChatRequest {
   message: string;
@@ -26,6 +27,7 @@ export class ChatbotController {
   constructor(
     private readonly chatbotService: ChatbotService,
     private readonly studentService: StudentService,
+    private readonly dynamicRoadmapService: DynamicRoadmapService,
   ) {}
 
   @Post('ask')
@@ -100,5 +102,44 @@ export class ChatbotController {
     } catch (e) {
       return { error: 'i18n not found', lang };
     }
+  }
+
+  @Get('roadmap-cards')
+  @Public()
+  getRoadmapCards(
+    @Query('bacType') bacType: string,
+    @Query('language') language: 'fr' | 'ar' = 'fr',
+    @Query('interest') interest?: string,
+  ) {
+    // Generate personalized roadmap selector config based on BAC type
+    const config = this.dynamicRoadmapService.generatePersonalizedRoadmapSelector(
+      '', // empty message - we just want the cards
+      bacType,
+      undefined,
+      interest,
+    );
+
+    // Map suggestions to the format expected by the frontend
+    // Use domain field as-is for labels (domains.json fields are already descriptive)
+    const cards = config.suggestions.map((suggestion) => ({
+      domain: suggestion.domain,
+      field: suggestion.field,
+      labelFr: suggestion.field,  // Domain names are already descriptive
+      labelAr: suggestion.field,  // Can be enhanced with Arabic translations if available
+      icon: suggestion.icon,
+      color: suggestion.color,
+      description: suggestion.description,
+      relevanceScore: suggestion.relevanceScore,
+      difficulty: suggestion.difficulty,
+      demand: suggestion.demand,
+    }));
+
+    return {
+      title: config.title,
+      subtitle: config.subtitle,
+      cards,
+      maxSuggestions: config.maxSuggestions,
+      personalized: config.personalized,
+    };
   }
 }
