@@ -262,7 +262,7 @@ export default function Chatbot({ studentData, isOpen: externalIsOpen, onClose }
         body: JSON.stringify({
           message: userMsg,
           studentData: studentData,
-          conversationHistory: messages.slice(-5).map(m => ({
+          conversationHistory: messages.slice(-3).map(m => ({
             role: m.role,
             content: m.content
           }))

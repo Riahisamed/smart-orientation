@@ -41,7 +41,7 @@ Provide orientation advice:`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gemma4:e2b',
+        model: 'gemma2:2b',
         prompt: prompt,
         stream: false,
       }),

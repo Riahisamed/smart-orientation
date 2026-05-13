@@ -7,62 +7,59 @@ import { normalizeText } from '../intents/intent.utils';
  */
 const FOLLOWUP_QUESTIONS: Record<string, string[]> = {
   web: [
-    "frontend ولا backend؟",
-    "تحب design ولا logique أكثر؟",
-    "تحب freelance ولا شركة؟",
-    "React ولا Angular؟",
-    "mobile ولا desktop؟",
+    'frontend ولا backend؟',
+    'تحب design ولا logique أكثر؟',
+    'تحب freelance ولا شركة؟',
+    'React ولا Angular؟',
+    'mobile ولا desktop؟',
   ],
   tech: [
-    "dev ولا réseaux؟",
-    "cyber ولا data؟",
-    "ai ولا développement؟",
-    "موبايل ولا ويب؟",
-    "برامج ولا بيانات؟",
+    'dev ولا réseaux؟',
+    'cyber ولا data؟',
+    'ai ولا développement؟',
+    'موبايل ولا ويب؟',
+    'برامج ولا بيانات؟',
   ],
   engineering: [
-    "مدني ولا ميكانيك؟",
-    "كهرباء ولا إلكترونيك؟",
-    "ميدان ولا مكتب؟",
-    "تصميم ولا محلول؟",
+    'مدني ولا ميكانيك؟',
+    'كهرباء ولا إلكترونيك؟',
+    'ميدان ولا مكتب؟',
+    'تصميم ولا محلول؟',
   ],
   health: [
-    "مباشرة مع المرضى ولا مختبر؟",
-    "طب ولا تمريض؟",
-    "علاج طبيعي ولا صيدلة؟",
-    "مستشفى ولا عيادة خاصة؟",
+    'مباشرة مع المرضى ولا مختبر؟',
+    'طب ولا تمريض؟',
+    'علاج طبيعي ولا صيدلة؟',
+    'مستشفى ولا عيادة خاصة؟',
   ],
   business: [
-    "تسويق ولا محاسبة؟",
-    "بنك ولا شركة خاصة؟",
-    "مالية ولا إدارة؟",
-    "تجارة داخلي ولا خارجي؟",
+    'تسويق ولا محاسبة؟',
+    'بنك ولا شركة خاصة؟',
+    'مالية ولا إدارة؟',
+    'تجارة داخلي ولا خارجي؟',
   ],
-  sport: [
-    "تدريب ولا كينو؟",
-    "مدرب ولا مؤهل بدني؟",
-    "نادي ولا مؤسسة؟",
-  ],
+  sport: ['تدريب ولا كينو؟', 'مدرب ولا مؤهل بدني؟', 'نادي ولا مؤسسة؟'],
   general: [
-    "تحب حاجة فيها إبداع ولا منطق؟",
-    "تخدم وحدك ولا مع فريق؟",
-    "تكمل master ولا تخدم مباشرة؟",
-    "remote ولا مكتب؟",
-    "ثابت ولا متغير؟",
-  ]
+    'تحب حاجة فيها إبداع ولا منطق؟',
+    'تخدم وحدك ولا مع فريق؟',
+    'تكمل master ولا تخدم مباشرة؟',
+    'remote ولا مكتب؟',
+    'ثابت ولا متغير؟',
+  ],
 };
 
 @Injectable()
 export class FollowupGenerator {
-
   /**
    * Generate intelligent follow-up question based on current conversation state
    * Never returns same question twice
    */
   generate(state: ConversationState): string | null {
-
     // No follow up for roadmap or final decision stages
-    if (state.conversationStage === 'roadmap' || state.conversationStage === 'final_decision') {
+    if (
+      state.conversationStage === 'roadmap' ||
+      state.conversationStage === 'final_decision'
+    ) {
       return null;
     }
 
@@ -70,8 +67,8 @@ export class FollowupGenerator {
     const availableQuestions = this.getAvailableQuestions(state);
 
     // Filter out already asked questions
-    const unusedQuestions = availableQuestions.filter(question =>
-      !this.wasQuestionAsked(state, question)
+    const unusedQuestions = availableQuestions.filter(
+      (question) => !this.wasQuestionAsked(state, question),
     );
 
     if (unusedQuestions.length === 0) {
@@ -79,7 +76,8 @@ export class FollowupGenerator {
     }
 
     // Pick random question from unused pool for natural variation
-    const selectedQuestion = unusedQuestions[Math.floor(Math.random() * unusedQuestions.length)];
+    const selectedQuestion =
+      unusedQuestions[Math.floor(Math.random() * unusedQuestions.length)];
 
     return selectedQuestion;
   }
@@ -103,12 +101,15 @@ export class FollowupGenerator {
 
     // Add difficulty question only if not already known
     if (state.difficultyPreference === null) {
-      questions.push("تحب حاجة سهلة شوية ولا تحدي؟");
+      questions.push('تحب حاجة سهلة شوية ولا تحدي؟');
     }
 
     // Add work style question only if not already known
-    if (!state.userGoals.includes('freelance') && !state.userGoals.includes('company')) {
-      questions.push("تحب تخدم وحدك ولا في شركة؟");
+    if (
+      !state.userGoals.includes('freelance') &&
+      !state.userGoals.includes('company')
+    ) {
+      questions.push('تحب تخدم وحدك ولا في شركة؟');
     }
 
     // Always add general questions as fallback
@@ -121,13 +122,18 @@ export class FollowupGenerator {
   /**
    * Check if question was already asked in this conversation
    */
-  private wasQuestionAsked(state: ConversationState, question: string): boolean {
+  private wasQuestionAsked(
+    state: ConversationState,
+    question: string,
+  ): boolean {
     const normalizedQuestion = normalizeText(question).slice(0, 25);
 
-    return state.askedQuestions.some(asked => {
+    return state.askedQuestions.some((asked) => {
       const normalizedAsked = normalizeText(asked).slice(0, 25);
-      return normalizedAsked.includes(normalizedQuestion) || normalizedQuestion.includes(normalizedAsked);
+      return (
+        normalizedAsked.includes(normalizedQuestion) ||
+        normalizedQuestion.includes(normalizedAsked)
+      );
     });
   }
-
 }

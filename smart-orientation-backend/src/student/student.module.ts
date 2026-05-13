@@ -8,6 +8,5 @@ import { FiliereModule } from '../filiere/filiere.module';
   controllers: [StudentController],
   providers: [StudentService],
   exports: [StudentService], // 👈 لازم تصدّر باش تستعملها في ChatbotModule
-
 })
 export class StudentModule {}

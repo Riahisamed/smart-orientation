@@ -20,7 +20,12 @@ export type StudentData = {
 export type FilteredRagData = {
   domain?: { name: string; score: number; matchedTerms: string[] };
   field?: FieldData;
-  jobs: { title: string; reason?: string; skills: string[]; unemployment_rate?: number }[];
+  jobs: {
+    title: string;
+    reason?: string;
+    skills: string[];
+    unemployment_rate?: number;
+  }[];
   programs: RankedProgram[];
   intent?: QueryIntent;
 };
@@ -49,7 +54,10 @@ export class ResponseBuilderService {
     return this.normalize(this.getGuideName(program));
   }
 
-  private preparePrograms(programs: RankedProgram[], limit = 3): RankedProgram[] {
+  private preparePrograms(
+    programs: RankedProgram[],
+    limit = 3,
+  ): RankedProgram[] {
     const seen = new Set<string>();
     const deduplicated = programs.filter((program) => {
       const key = this.getProgramDisplayName(program);
@@ -80,21 +88,26 @@ export class ResponseBuilderService {
       `À partir de ton profil (Bac ${bac}, score ${scoreLabel}), voici ce qui ressort.`,
     ];
 
-    const fieldIntros = fieldName !== 'orientation générale' ? [
-      `Tu t'intéresses à ${fieldName}. Avec ton profil (Bac ${bac}, score ${scoreLabel}), voici ce que je constate.`,
-      `Concernant ${fieldName} et ton profil (Bac ${bac}, score ${scoreLabel}), voici mon analyse.`,
-      `Pour ${fieldName} avec tes données (Bac ${bac}, score ${scoreLabel}), voici ce que ça donne.`,
-      `Dans le domaine ${fieldName}, avec Bac ${bac} et score ${scoreLabel}, voici ce qui se dessine.`,
-    ] : [];
+    const fieldIntros =
+      fieldName !== 'orientation générale'
+        ? [
+            `Tu t'intéresses à ${fieldName}. Avec ton profil (Bac ${bac}, score ${scoreLabel}), voici ce que je constate.`,
+            `Concernant ${fieldName} et ton profil (Bac ${bac}, score ${scoreLabel}), voici mon analyse.`,
+            `Pour ${fieldName} avec tes données (Bac ${bac}, score ${scoreLabel}), voici ce que ça donne.`,
+            `Dans le domaine ${fieldName}, avec Bac ${bac} et score ${scoreLabel}, voici ce qui se dessine.`,
+          ]
+        : [];
 
-    const scoreIntros = hasScore ? [
-      `Avec ${score} points en Bac ${bac}, tu as des options intéressantes.`,
-      `Ton score de ${score} en Bac ${bac} ouvre plusieurs pistes.`,
-      `Côté admission avec ${score} en Bac ${bac}, voici la tendance.`,
-    ] : [
-      `Sans score précisé pour ton Bac ${bac}, je te donne une vue générale.`,
-      `Pour Bac ${bac} (score non précisé), voici les orientations possibles.`,
-    ];
+    const scoreIntros = hasScore
+      ? [
+          `Avec ${score} points en Bac ${bac}, tu as des options intéressantes.`,
+          `Ton score de ${score} en Bac ${bac} ouvre plusieurs pistes.`,
+          `Côté admission avec ${score} en Bac ${bac}, voici la tendance.`,
+        ]
+      : [
+          `Sans score précisé pour ton Bac ${bac}, je te donne une vue générale.`,
+          `Pour Bac ${bac} (score non précisé), voici les orientations possibles.`,
+        ];
 
     const intentIntros: Record<string, string[]> = {
       location: [
@@ -137,20 +150,25 @@ export class ResponseBuilderService {
       `Dis-moi ce qui te fait envie, je t'aiderai à y arriver.`,
     ];
 
-    const programClosings = hasPrograms ? [
-      `Compare bien les programmes, leurs scores d'admission et les débouchés avant de choisir.`,
-      `Prends le temps de vérifier les dernières dates d'inscription et les délais.`,
-      `Contacte directement les établissements pour confirmer les informations.`,
-      `Pense à demander l'avis d'étudiants déjà inscrits dans ces filières.`,
-    ] : [
-      `Explore différents domaines pour trouver ce qui te correspond vraiment.`,
-      `N'hésite pas à considérer des parcours qui sortent des sentiers battus.`,
-    ];
+    const programClosings = hasPrograms
+      ? [
+          `Compare bien les programmes, leurs scores d'admission et les débouchés avant de choisir.`,
+          `Prends le temps de vérifier les dernières dates d'inscription et les délais.`,
+          `Contacte directement les établissements pour confirmer les informations.`,
+          `Pense à demander l'avis d'étudiants déjà inscrits dans ces filières.`,
+        ]
+      : [
+          `Explore différents domaines pour trouver ce qui te correspond vraiment.`,
+          `N'hésite pas à considérer des parcours qui sortent des sentiers battus.`,
+        ];
 
-    const fieldClosings = fieldName !== 'orientation générale' ? [
-      `Dans ${fieldName}, l'important est de rester curieux et de pratiquer régulièrement.`,
-      `Pour réussir en ${fieldName}, construis ton réseau et cherche des stages tôt.`,
-    ] : [];
+    const fieldClosings =
+      fieldName !== 'orientation générale'
+        ? [
+            `Dans ${fieldName}, l'important est de rester curieux et de pratiquer régulièrement.`,
+            `Pour réussir en ${fieldName}, construis ton réseau et cherche des stages tôt.`,
+          ]
+        : [];
 
     const intentClosings: Record<string, string[]> = {
       best_chances: [
@@ -197,7 +215,7 @@ export class ResponseBuilderService {
       ],
       skills: [
         'Compétences à développer',
-        'Ce qu\'il faut maîtriser',
+        "Ce qu'il faut maîtriser",
         'Capacités importantes',
         'Savoir-faire nécessaires',
         'Points forts à cultiver',
@@ -209,7 +227,7 @@ export class ResponseBuilderService {
         'Bilan personnalisé',
         'Mon diagnostic',
         'En résumé',
-        'Vue d\'ensemble',
+        "Vue d'ensemble",
       ],
       advice: [
         'Mon conseil',
@@ -238,7 +256,9 @@ export class ResponseBuilderService {
     name?: string;
   }): string[] {
     const { hasScore, score, bac, fieldName, name } = context;
-    const greeting = name ? `${name}،` : ['صديقي،', 'عزيزي،', 'يا طالب،'][this.getRandomInt(0, 2)];
+    const greeting = name
+      ? `${name}،`
+      : ['صديقي،', 'عزيزي،', 'يا طالب،'][this.getRandomInt(0, 2)];
     const scoreText = hasScore ? `${score}` : 'ما عطيتنيش السكور';
 
     const intros = [
@@ -273,19 +293,56 @@ export class ResponseBuilderService {
   private getEmploymentHeaders(lang: 'fr' | 'ar'): Record<string, string[]> {
     if (lang === 'ar') {
       return {
-        careerProspects: ['الآفاق المهنية:', 'المهن المتاحة:', 'واش تنجم تخدم:', 'الوظائف:'],
+        careerProspects: [
+          'الآفاق المهنية:',
+          'المهن المتاحة:',
+          'واش تنجم تخدم:',
+          'الوظائف:',
+        ],
         demandLevel: ['نسبة الطلب:', 'الطلب في السوق:', 'فرص الشغل:'],
-        unemploymentRisk: ['مخاطر البطالة:', 'نسبة البطالة:', 'الخطر متاع البطالة:'],
-        unemploymentRate: ['نسبة البطالة التقريبية:', 'معدل البطالة:', 'نسبة البطالة المتوقعة:'],
-        futureOutlook: ['المستقبل المهني:', 'الأفاق المستقبلية:', 'تطور المجال:'],
+        unemploymentRisk: [
+          'مخاطر البطالة:',
+          'نسبة البطالة:',
+          'الخطر متاع البطالة:',
+        ],
+        unemploymentRate: [
+          'نسبة البطالة التقريبية:',
+          'معدل البطالة:',
+          'نسبة البطالة المتوقعة:',
+        ],
+        futureOutlook: [
+          'المستقبل المهني:',
+          'الأفاق المستقبلية:',
+          'تطور المجال:',
+        ],
       };
     }
     return {
-      careerProspects: ['Débouchés professionnels:', 'Métiers possibles:', 'Carrières:'],
-      demandLevel: ['Demande sur le marché:', 'Niveau de demande:', 'Opportunités:'],
-      unemploymentRisk: ['Risque de chômage:', 'Niveau de risque:', 'Sécurité d\'emploi:'],
-      unemploymentRate: ['Taux de chômage estimé:', 'Chômage moyen:', 'Taux approximatif:'],
-      futureOutlook: ['Perspectives futures:', 'Avenir du secteur:', 'Évolution:'],
+      careerProspects: [
+        'Débouchés professionnels:',
+        'Métiers possibles:',
+        'Carrières:',
+      ],
+      demandLevel: [
+        'Demande sur le marché:',
+        'Niveau de demande:',
+        'Opportunités:',
+      ],
+      unemploymentRisk: [
+        'Risque de chômage:',
+        'Niveau de risque:',
+        "Sécurité d'emploi:",
+      ],
+      unemploymentRate: [
+        'Taux de chômage estimé:',
+        'Chômage moyen:',
+        'Taux approximatif:',
+      ],
+      futureOutlook: [
+        'Perspectives futures:',
+        'Avenir du secteur:',
+        'Évolution:',
+      ],
     };
   }
 
@@ -301,59 +358,91 @@ export class ResponseBuilderService {
       .toLowerCase();
   }
 
-  private translateToArabicCategory(value: string, type: 'demand' | 'risk'): string {
+  private translateToArabicCategory(
+    value: string,
+    type: 'demand' | 'risk',
+  ): string {
     const normalized = this.normalize(value);
     if (type === 'demand') {
-      if (normalized.includes('high') || normalized.includes('eleve') || normalized.includes('très')) return 'مرتفع';
-      if (normalized.includes('moderate') || normalized.includes('moyen')) return 'متوسط';
-      if (normalized.includes('low') || normalized.includes('faible')) return 'منخفض';
+      if (
+        normalized.includes('high') ||
+        normalized.includes('eleve') ||
+        normalized.includes('très')
+      )
+        return 'مرتفع';
+      if (normalized.includes('moderate') || normalized.includes('moyen'))
+        return 'متوسط';
+      if (normalized.includes('low') || normalized.includes('faible'))
+        return 'منخفض';
       return value;
     }
-    if (normalized.includes('low') || normalized.includes('faible')) return 'منخفضة';
-    if (normalized.includes('moderate') || normalized.includes('moyen')) return 'متوسطة';
-    if (normalized.includes('high') || normalized.includes('eleve')) return 'مرتفعة';
+    if (normalized.includes('low') || normalized.includes('faible'))
+      return 'منخفضة';
+    if (normalized.includes('moderate') || normalized.includes('moyen'))
+      return 'متوسطة';
+    if (normalized.includes('high') || normalized.includes('eleve'))
+      return 'مرتفعة';
     return value;
   }
 
   private translateToArabicOutlook(outlook: string): string {
     const normalized = this.normalize(outlook);
-    if (normalized.includes('strong') || normalized.includes('positive')) return 'مبشر';
+    if (normalized.includes('strong') || normalized.includes('positive'))
+      return 'مبشر';
     if (normalized.includes('moderate')) return 'متوسط';
-    if (normalized.includes('weak') || normalized.includes('negative')) return 'ضعيف';
+    if (normalized.includes('weak') || normalized.includes('negative'))
+      return 'ضعيف';
     return outlook;
   }
 
   private translateDemandToFrench(demand: string): string {
     const normalized = this.normalize(demand);
     if (normalized.includes('very high')) return 'Très élevée';
-    if (normalized.includes('high') || normalized.includes('eleve')) return 'Élevée';
-    if (normalized.includes('moderate') || normalized.includes('moyen')) return 'Modérée';
-    if (normalized.includes('low') || normalized.includes('faible')) return 'Faible';
+    if (normalized.includes('high') || normalized.includes('eleve'))
+      return 'Élevée';
+    if (normalized.includes('moderate') || normalized.includes('moyen'))
+      return 'Modérée';
+    if (normalized.includes('low') || normalized.includes('faible'))
+      return 'Faible';
     return demand;
   }
 
   private translateRiskToFrench(risk: string): string {
     const normalized = this.normalize(risk);
-    if (normalized.includes('low') || normalized.includes('faible')) return 'Faible';
-    if (normalized.includes('moderate') || normalized.includes('moyen')) return 'Modéré';
-    if (normalized.includes('high') || normalized.includes('eleve')) return 'Élevé';
+    if (normalized.includes('low') || normalized.includes('faible'))
+      return 'Faible';
+    if (normalized.includes('moderate') || normalized.includes('moyen'))
+      return 'Modéré';
+    if (normalized.includes('high') || normalized.includes('eleve'))
+      return 'Élevé';
     return risk;
   }
 
   // ===== EMPLOYMENT SECTION BUILDER =====
-  private buildEmploymentSection(ragData: FilteredRagData, lang: 'fr' | 'ar'): string {
+  private buildEmploymentSection(
+    ragData: FilteredRagData,
+    lang: 'fr' | 'ar',
+  ): string {
     const headers = this.getEmploymentHeaders(lang);
     const jobs = ragData.jobs.slice(0, 3);
-    const demand = ragData.field?.demand_in_tunisia || (lang === 'ar' ? 'غير محدد' : 'Non précisé');
-    const unemploymentRisk = ragData.field?.unemployment_risk || (lang === 'ar' ? 'غير محدد' : 'Non précisé');
-    const outlook = ragData.field?.future_outlook || (lang === 'ar' ? 'غير محدد' : 'Non précisé');
+    const demand =
+      ragData.field?.demand_in_tunisia ||
+      (lang === 'ar' ? 'غير محدد' : 'Non précisé');
+    const unemploymentRisk =
+      ragData.field?.unemployment_risk ||
+      (lang === 'ar' ? 'غير محدد' : 'Non précisé');
+    const outlook =
+      ragData.field?.future_outlook ||
+      (lang === 'ar' ? 'غير محدد' : 'Non précisé');
 
     const rates = jobs
       .map((j) => j.unemployment_rate)
       .filter((r): r is number => typeof r === 'number' && Number.isFinite(r));
-    const avgRate = rates.length > 0
-      ? Math.round((rates.reduce((a, b) => a + b, 0) / rates.length) * 10) / 10
-      : null;
+    const avgRate =
+      rates.length > 0
+        ? Math.round((rates.reduce((a, b) => a + b, 0) / rates.length) * 10) /
+          10
+        : null;
 
     if (lang === 'ar') {
       const demandAr = this.translateToArabicCategory(demand, 'demand');
@@ -376,7 +465,12 @@ ${this.getRandomElement(headers.futureOutlook)} ${this.translateToArabicOutlook(
     const riskFr = this.translateRiskToFrench(unemploymentRisk);
 
     const jobLines = jobs.length
-      ? jobs.map((job, i) => `${i + 1}. ${job.title} (${job.skills.slice(0, 3).join(', ')})`).join('\n')
+      ? jobs
+          .map(
+            (job, i) =>
+              `${i + 1}. ${job.title} (${job.skills.slice(0, 3).join(', ')})`,
+          )
+          .join('\n')
       : 'Informations non disponibles';
 
     return `${this.getRandomElement(headers.careerProspects)}
@@ -395,31 +489,35 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
 
   private getInstitutionLocation(institution: string): string {
     const locationMap: Record<string, string> = {
-      'INSAT': 'Tunis - Ariana',
-      'ENIT': 'Tunis - El Manar',
-      'ENSI': 'Manouba',
-      'ISG': 'Tunis',
+      INSAT: 'Tunis - Ariana',
+      ENIT: 'Tunis - El Manar',
+      ENSI: 'Manouba',
+      ISG: 'Tunis',
       'ISG Tunis': 'Tunis',
-      'IHEC': 'Carthage',
-      'ISCAE': 'Manouba',
-      'FST': 'Tunis - El Manar',
-      'FSM': 'Monastir',
-      'FSB': 'Bizerte',
-      'FSS': 'Sfax',
-      'FSK': 'Kairouan',
-      'UMA': 'Monastir',
-      'UDL': 'Sousse',
-      'UC': 'Carthage',
-      'UIB': 'Sfax',
-      'ISET': 'Tunis',
-      'ISSAT': 'Sousse',
+      IHEC: 'Carthage',
+      ISCAE: 'Manouba',
+      FST: 'Tunis - El Manar',
+      FSM: 'Monastir',
+      FSB: 'Bizerte',
+      FSS: 'Sfax',
+      FSK: 'Kairouan',
+      UMA: 'Monastir',
+      UDL: 'Sousse',
+      UC: 'Carthage',
+      UIB: 'Sfax',
+      ISET: 'Tunis',
+      ISSAT: 'Sousse',
     };
     return locationMap[institution] || 'Tunisie';
   }
 
-  private calculateDifficultyForGuide(score: number, program: RankedProgram): 'safe' | 'risky' | 'hard' {
+  private calculateDifficultyForGuide(
+    score: number,
+    program: RankedProgram,
+  ): 'safe' | 'risky' | 'hard' {
     const lastScore = program.matchingBac?.lastScore;
-    if (typeof lastScore !== 'number' || !Number.isFinite(lastScore)) return 'hard';
+    if (typeof lastScore !== 'number' || !Number.isFinite(lastScore))
+      return 'hard';
     if (score >= lastScore + 10) return 'safe';
     if (score >= lastScore - 5) return 'risky';
     return 'hard';
@@ -438,19 +536,35 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
     const normalizedTitle = this.normalize(jobTitle);
     const normalizedMessage = this.normalize(userMessage);
 
-    if (normalizedTitle.includes('developpeur') || normalizedTitle.includes('software') || normalizedTitle.includes('data')) {
+    if (
+      normalizedTitle.includes('developpeur') ||
+      normalizedTitle.includes('software') ||
+      normalizedTitle.includes('data')
+    ) {
       return 'technique et créative';
     }
-    if (normalizedTitle.includes('comptable') || normalizedTitle.includes('finance')) {
+    if (
+      normalizedTitle.includes('comptable') ||
+      normalizedTitle.includes('finance')
+    ) {
       return 'stable avec progression';
     }
-    if (normalizedTitle.includes('marketing') || normalizedTitle.includes('commercial')) {
+    if (
+      normalizedTitle.includes('marketing') ||
+      normalizedTitle.includes('commercial')
+    ) {
       return 'dynamique et évolutive';
     }
-    if (normalizedTitle.includes('rh') || normalizedTitle.includes('ressources')) {
+    if (
+      normalizedTitle.includes('rh') ||
+      normalizedTitle.includes('ressources')
+    ) {
       return 'relationnelle et stratégique';
     }
-    if (normalizedMessage.includes('teletravail') || normalizedMessage.includes('remote')) {
+    if (
+      normalizedMessage.includes('teletravail') ||
+      normalizedMessage.includes('remote')
+    ) {
       return 'compatible avec le télétravail';
     }
     return 'avec bonnes perspectives';
@@ -462,7 +576,9 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
     studentData?: StudentData,
     userMessage = '',
   ): string {
-    const hasScore = typeof studentData?.score === 'number' && Number.isFinite(studentData.score);
+    const hasScore =
+      typeof studentData?.score === 'number' &&
+      Number.isFinite(studentData.score);
     const score = hasScore ? Number(studentData?.score) : 0;
     const scoreLabel = hasScore ? String(score) : 'non précisé';
     const bac = studentData?.bacType || 'non précisé';
@@ -471,7 +587,13 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
     const programs = this.preparePrograms(ragData.programs, 3);
     const jobs = ragData.jobs.slice(0, 4);
 
-    const intros = this.getFrenchIntros({ hasScore, score, bac, fieldName, intent: ragData.intent });
+    const intros = this.getFrenchIntros({
+      hasScore,
+      score,
+      bac,
+      fieldName,
+      intent: ragData.intent,
+    });
     const intro = this.getRandomElement(intros);
 
     const headers = this.getFrenchSectionHeaders();
@@ -498,7 +620,8 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
 
     const jobLines = jobs.length
       ? jobs.map((job, index) => {
-          const skills = job.skills?.slice(0, 4).join(', ') || 'compétences à construire';
+          const skills =
+            job.skills?.slice(0, 4).join(', ') || 'compétences à construire';
           const variations = [
             `${index + 1}. ${job.title} — ${job.reason || this.getJobReason(job.title, userMessage)} (Skills: ${skills})`,
             `${index + 1}. ${job.title}: ${job.reason || this.getJobReason(job.title, userMessage)}. Utile: ${skills}.`,
@@ -516,18 +639,26 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
           ];
           return this.getRandomElement(variations);
         })
-      : ['Je n\'ai pas trouvé de programmes à localiser.'];
+      : ["Je n'ai pas trouvé de programmes à localiser."];
 
-    const technicalSkills = 'méthode de travail, logique, recherche et autonomie';
+    const technicalSkills =
+      'méthode de travail, logique, recherche et autonomie';
     const softSkills = 'communication, discipline, organisation';
     const tools = 'outils selon la spécialité';
-    const demand = this.translateDataValue(field?.demand_in_tunisia || 'à comparer selon la filière');
-    const outlook = this.translateDataValue(
-      field?.future_outlook || 'positif si tu développes les bonnes compétences',
+    const demand = this.translateDataValue(
+      field?.demand_in_tunisia || 'à comparer selon la filière',
     );
-    const fieldReason = 'Ta question est générale, donc je compare les programmes accessibles.';
+    const outlook = this.translateDataValue(
+      field?.future_outlook ||
+        'positif si tu développes les bonnes compétences',
+    );
+    const fieldReason =
+      'Ta question est générale, donc je compare les programmes accessibles.';
 
-    const shuffledProgramHeaders = this.shuffleArray(headers.programs).slice(0, 2);
+    const shuffledProgramHeaders = this.shuffleArray(headers.programs).slice(
+      0,
+      2,
+    );
     const shuffledJobHeaders = this.shuffleArray(headers.jobs).slice(0, 2);
     const employmentSection = this.buildEmploymentSection(ragData, 'fr');
 
@@ -542,7 +673,17 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
       shuffledJobHeaders,
       headers,
       adviceClosings,
-      { scoreLabel, bac, fieldName, fieldReason, technicalSkills, softSkills, tools, demand, outlook }
+      {
+        scoreLabel,
+        bac,
+        fieldName,
+        fieldReason,
+        technicalSkills,
+        softSkills,
+        tools,
+        demand,
+        outlook,
+      },
     );
   }
 
@@ -567,9 +708,19 @@ ${this.getRandomElement(headers.futureOutlook)} ${outlook}`;
       tools: string;
       demand: string;
       outlook: string;
-    }
+    },
   ): string {
-    const { scoreLabel, bac, fieldName, fieldReason, technicalSkills, softSkills, tools, demand, outlook } = context;
+    const {
+      scoreLabel,
+      bac,
+      fieldName,
+      fieldReason,
+      technicalSkills,
+      softSkills,
+      tools,
+      demand,
+      outlook,
+    } = context;
 
     // Location response
     if (intent === 'location') {
@@ -605,16 +756,16 @@ ${programLines.join('\n')}
 
 ${this.getRandomElement(headers.analysis)}
 ${this.getRandomElement([
-          'Écart positif large = choix sûr. Écart 0-5 = jouable avec alternative. Écart négatif = difficile.',
-          'Si tu dépasses le score de +10 points: admission probable. Entre 0 et +5: possible mais risqué. En dessous: difficile sans plan B.',
-        ])}
+  'Écart positif large = choix sûr. Écart 0-5 = jouable avec alternative. Écart négatif = difficile.',
+  'Si tu dépasses le score de +10 points: admission probable. Entre 0 et +5: possible mais risqué. En dessous: difficile sans plan B.',
+])}
 
 ${this.getRandomElement(headers.advice)}
 ${this.getRandomElement([
-          'Combine 2 choix sûrs, 2 jouables et 1 ambitieux. Précise ton domaine favori pour affiner.',
-          'Diversifie tes choix avec des options réalistes. Dis-moi ce qui te passionne!',
-        ])}`,
-        `${this.getRandomElement(headers.advice)} ${this.getRandomElement(['Commence par analyser tes chances réalistes.', 'Regarde d\'abord ce qui est accessible.'])}
+  'Combine 2 choix sûrs, 2 jouables et 1 ambitieux. Précise ton domaine favori pour affiner.',
+  'Diversifie tes choix avec des options réalistes. Dis-moi ce qui te passionne!',
+])}`,
+        `${this.getRandomElement(headers.advice)} ${this.getRandomElement(['Commence par analyser tes chances réalistes.', "Regarde d'abord ce qui est accessible."])}
 
 ${programLines.join('\n')}
 
@@ -671,7 +822,8 @@ ${this.getRandomElement(adviceClosings)}`,
 
     // Best choice
     if (intent === 'best_choice') {
-      const firstProgram = programLines[0] || 'un programme proche de ton score';
+      const firstProgram =
+        programLines[0] || 'un programme proche de ton score';
       const choiceTemplates = [
         `${intro}
 
@@ -741,7 +893,7 @@ ${this.getRandomElement(shuffledJobHeaders)}
 ${jobLines.join('\n')}
 
 ${this.getRandomElement(headers.advice)}
-${this.getRandomElement(['Si dev t\'intéresse: commence Python/JS, fais 2 projets, puis compare les filières.', 'Pour avancer: identifie 3 formations, vérifie leurs scores d\'entrée, contacte les étudiants.'])}`,
+${this.getRandomElement(["Si dev t'intéresse: commence Python/JS, fais 2 projets, puis compare les filières.", "Pour avancer: identifie 3 formations, vérifie leurs scores d'entrée, contacte les étudiants."])}`,
         `${this.getRandomElement(['Tu vises', 'Intérêt détecté pour', 'Orientation vers'])} ${fieldName}. ${intro}
 
 ${this.getRandomElement(shuffledProgramHeaders)}
@@ -774,7 +926,7 @@ Tech: ${technicalSkills}
 Soft: ${softSkills}
 
 Pour avancer - ${this.getRandomElement(headers.advice)}
-${this.getRandomElement(['Cible 2-3 programmes avec scores proches des tiens. Compare institutions et débouchés.', 'Privilégie les filières accessibles avec bon potentiel professionnel.'])} ${this.getRandomElement(['Précise ton domaine favori pour affiner!', 'Dis-moi ce qui t\'attire vraiment!'])}`,
+${this.getRandomElement(['Cible 2-3 programmes avec scores proches des tiens. Compare institutions et débouchés.', 'Privilégie les filières accessibles avec bon potentiel professionnel.'])} ${this.getRandomElement(['Précise ton domaine favori pour affiner!', "Dis-moi ce qui t'attire vraiment!"])}`,
       `Analyse de profil - ${this.getRandomElement(headers.analysis)} Bac ${bac}, score ${scoreLabel}
 ${fieldReason}
 
@@ -809,7 +961,9 @@ ${this.getRandomElement(adviceClosings)}`,
     ragData: FilteredRagData,
     studentData?: StudentData,
   ): string {
-    const hasScore = typeof studentData?.score === 'number' && Number.isFinite(studentData.score);
+    const hasScore =
+      typeof studentData?.score === 'number' &&
+      Number.isFinite(studentData.score);
     const score = hasScore ? Number(studentData?.score) : 0;
     const scoreText = hasScore ? `${score}` : 'ما عطيتنيش السكور';
     const name = studentData?.name?.trim();
@@ -818,17 +972,31 @@ ${this.getRandomElement(adviceClosings)}`,
     const programs = this.preparePrograms(ragData.programs, 3);
     const jobs = ragData.jobs.slice(0, 3);
 
-    const intros = this.getArabicIntros({ hasScore, score, bac, fieldName, name });
+    const intros = this.getArabicIntros({
+      hasScore,
+      score,
+      bac,
+      fieldName,
+      name,
+    });
     const intro = this.getRandomElement(intros);
     const closings = this.getArabicAdviceClosings();
 
     const programVariations = programs.map((program) => {
       const lastScore = program.matchingBac?.lastScore;
       const difficulty = this.calculateDifficultyForGuide(score, program);
-      const scorePart = typeof lastScore === 'number' && hasScore
-        ? `آخر score ${lastScore}، الفرق ${(score - lastScore).toFixed(2)}`
-        : typeof lastScore === 'number' ? `آخر score ${lastScore}` : 'آخر score موش واضح';
-      const difficultyAr = difficulty === 'safe' ? 'مضمون' : difficulty === 'risky' ? 'ممكن' : 'صعب';
+      const scorePart =
+        typeof lastScore === 'number' && hasScore
+          ? `آخر score ${lastScore}، الفرق ${(score - lastScore).toFixed(2)}`
+          : typeof lastScore === 'number'
+            ? `آخر score ${lastScore}`
+            : 'آخر score موش واضح';
+      const difficultyAr =
+        difficulty === 'safe'
+          ? 'مضمون'
+          : difficulty === 'risky'
+            ? 'ممكن'
+            : 'صعب';
 
       return [
         `${this.getGuideName(program)} - ${program.institution} - ${scorePart}`,
@@ -838,8 +1006,17 @@ ${this.getRandomElement(adviceClosings)}`,
     });
 
     const programLines = programs.length
-      ? programs.map((_, index) => `${index + 1}. ${this.getRandomElement(programVariations[index])}`).join('\n')
-      : this.getRandomElement(['ما لقيتش فيليات واضحة حسب المعطيات الحالية.', 'ما فماش برامج واضحة بالداتا المتاحة.', 'المعلومات غير كافية باش نحددلك اختيارات.']);
+      ? programs
+          .map(
+            (_, index) =>
+              `${index + 1}. ${this.getRandomElement(programVariations[index])}`,
+          )
+          .join('\n')
+      : this.getRandomElement([
+          'ما لقيتش فيليات واضحة حسب المعطيات الحالية.',
+          'ما فماش برامج واضحة بالداتا المتاحة.',
+          'المعلومات غير كافية باش نحددلك اختيارات.',
+        ]);
 
     const jobReasonsAr = [
       ['التطبيق والمشاريع', 'العمل العملي', 'المشاريع العملية'],
@@ -848,19 +1025,35 @@ ${this.getRandomElement(adviceClosings)}`,
     ];
 
     const jobLines = jobs.length
-      ? jobs.map((job, index) => {
-        const reasonList = jobReasonsAr[index % 3];
-        return this.getRandomElement([
-          `${index + 1}. ${job.title}: مناسب إذا تحب ${this.getRandomElement(reasonList)}`,
-          `${index + 1}. ${job.title} → ${this.getRandomElement(reasonList)}`,
-          `${index + 1}. ${job.title} (يناسب ${this.getRandomElement(reasonList)})`,
+      ? jobs
+          .map((job, index) => {
+            const reasonList = jobReasonsAr[index % 3];
+            return this.getRandomElement([
+              `${index + 1}. ${job.title}: مناسب إذا تحب ${this.getRandomElement(reasonList)}`,
+              `${index + 1}. ${job.title} → ${this.getRandomElement(reasonList)}`,
+              `${index + 1}. ${job.title} (يناسب ${this.getRandomElement(reasonList)})`,
+            ]);
+          })
+          .join('\n')
+      : this.getRandomElement([
+          'كان تحددلي المجال أكثر، نعطيك آفاق مهنية أدق.',
+          'وضحلي شنوة تحب بالضبط، نجم نعاونك أكثر.',
+          'أعطيني تفاصيل أكثر على المجال باش نفهملك.',
         ]);
-      }).join('\n')
-      : this.getRandomElement(['كان تحددلي المجال أكثر، نعطيك آفاق مهنية أدق.', 'وضحلي شنوة تحب بالضبط، نجم نعاونك أكثر.', 'أعطيني تفاصيل أكثر على المجال باش نفهملك.']);
 
     const headersAr = {
-      programs: ['الفيلات/الاختيارات:', 'البرامج المتاحة:', 'الخيارات الممكنة:', 'فيلات تو نجم تلحقها:'],
-      jobs: ['الآفاق المهنية:', 'المهن الممكنة:', 'واش تنجم تخدم:', 'الوظائف المتاحة:'],
+      programs: [
+        'الفيلات/الاختيارات:',
+        'البرامج المتاحة:',
+        'الخيارات الممكنة:',
+        'فيلات تو نجم تلحقها:',
+      ],
+      jobs: [
+        'الآفاق المهنية:',
+        'المهن الممكنة:',
+        'واش تنجم تخدم:',
+        'الوظائف المتاحة:',
+      ],
       advice: ['نصيحتي:', 'الخطوة الجاية:', 'شنوة تعمل:'],
       location: ['المواقع الجغرافية:', 'وين تلقى البرامج:', 'البلاصات:'],
     };

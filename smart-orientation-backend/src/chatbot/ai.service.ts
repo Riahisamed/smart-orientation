@@ -678,7 +678,7 @@ export class AiService {
             ? `Outlook: ${ragData.field.outlook}`
             : undefined,
           ragData.field.skills?.technical?.length
-            ? `Skills: ${ragData.field.skills.technical.slice(0, 5).join(', ')}`
+            ? `Skills: ${ragData.field.skills.technical.slice(0, 3).join(', ')}`
             : undefined,
         ]
           .filter(Boolean)
@@ -689,7 +689,7 @@ export class AiService {
     if (questionType !== 'jobs' && ragData.programs?.length) {
       parts.push(
         `Programs:\n${ragData.programs
-          .slice(0, 3)
+          .slice(0, 2)
           .map((program) => {
             const level = this.classifyProgram(
               ragData.score,
@@ -706,7 +706,7 @@ export class AiService {
     if (questionType !== 'programs' && ragData.jobs?.length) {
       parts.push(
         `Jobs:\n${ragData.jobs
-          .slice(0, 3)
+          .slice(0, 2)
           .map((job) => {
             const unemployment = this.formatUnemployment(
               job.unemploymentRate,
@@ -1443,7 +1443,7 @@ export class AiService {
         (item) =>
           item?.content && ['user', 'assistant', 'system'].includes(item.role),
       )
-      .slice(-5)
+      .slice(-4)
       .map((item) => `${item.role}: ${item.content.trim()}`)
       .join('\n');
   }

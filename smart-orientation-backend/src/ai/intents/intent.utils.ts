@@ -17,18 +17,24 @@ export function normalizeText(text: string): string {
 /**
  * Check if text contains any of the keywords
  */
-export function hasAnyKeyword(normalizedText: string, keywords: string[]): boolean {
-  return keywords.some(keyword =>
-    normalizedText.includes(normalizeText(keyword))
+export function hasAnyKeyword(
+  normalizedText: string,
+  keywords: string[],
+): boolean {
+  return keywords.some((keyword) =>
+    normalizedText.includes(normalizeText(keyword)),
   );
 }
 
 /**
  * Calculate keyword match count
  */
-export function countMatches(normalizedText: string, keywords: string[]): number {
-  return keywords.filter(keyword =>
-    normalizedText.includes(normalizeText(keyword))
+export function countMatches(
+  normalizedText: string,
+  keywords: string[],
+): number {
+  return keywords.filter((keyword) =>
+    normalizedText.includes(normalizeText(keyword)),
   ).length;
 }
 
@@ -53,38 +59,92 @@ export const DOMAIN_MAPPINGS: Array<{ domain: string; aliases: string[] }> = [
   {
     domain: 'tech',
     aliases: [
-      'it', 'tech', 'informatique', 'info', 'dev', 'software', 'programation', 'programming',
-      'اعلامية', 'معلوماتية', 'برمجة', 'web', 'cyber', 'securite', 'data', 'ai', 'ia'
-    ]
+      'it',
+      'tech',
+      'informatique',
+      'info',
+      'dev',
+      'software',
+      'programation',
+      'programming',
+      'اعلامية',
+      'معلوماتية',
+      'برمجة',
+      'web',
+      'cyber',
+      'securite',
+      'data',
+      'ai',
+      'ia',
+    ],
   },
   {
     domain: 'engineering',
     aliases: [
-      'engineering', 'ingenieur', 'genie', 'ingenierie', 'civil', 'mecanique', 'electrique',
-      'هندسة', 'مهندس', 'مدني', 'ميكانيك', 'كهرباء'
-    ]
+      'engineering',
+      'ingenieur',
+      'genie',
+      'ingenierie',
+      'civil',
+      'mecanique',
+      'electrique',
+      'هندسة',
+      'مهندس',
+      'مدني',
+      'ميكانيك',
+      'كهرباء',
+    ],
   },
   {
     domain: 'health',
     aliases: [
-      'health', 'sante', 'medical', 'medecine', 'infirmier', 'pharmacie', 'paramedical',
-      'طب', 'صحة', 'تمريض', 'صيدلة', 'kine', 'kiné', 'علاج طبيعي'
-    ]
+      'health',
+      'sante',
+      'medical',
+      'medecine',
+      'infirmier',
+      'pharmacie',
+      'paramedical',
+      'طب',
+      'صحة',
+      'تمريض',
+      'صيدلة',
+      'kine',
+      'kiné',
+      'علاج طبيعي',
+    ],
   },
   {
     domain: 'business',
     aliases: [
-      'business', 'gestion', 'management', 'finance', 'marketing', 'commerce', 'economie',
-      'اعمال', 'إدارة', 'محاسبة', 'مالية', 'تجارة', 'تسويق'
-    ]
+      'business',
+      'gestion',
+      'management',
+      'finance',
+      'marketing',
+      'commerce',
+      'economie',
+      'اعمال',
+      'إدارة',
+      'محاسبة',
+      'مالية',
+      'تجارة',
+      'تسويق',
+    ],
   },
   {
     domain: 'sport',
     aliases: [
-      'sport', 'education physique', 'coaching', 'entrainement',
-      'رياضة', 'تربية بدنية', 'مدرب', 'كينو'
-    ]
-  }
+      'sport',
+      'education physique',
+      'coaching',
+      'entrainement',
+      'رياضة',
+      'تربية بدنية',
+      'مدرب',
+      'كينو',
+    ],
+  },
 ];
 
 /**

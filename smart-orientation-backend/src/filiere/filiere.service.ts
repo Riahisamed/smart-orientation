@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { exec } from 'child_process'
-import * as fs from 'fs'
-import { BacType } from '@prisma/client'
+import { exec } from 'child_process';
+import * as fs from 'fs';
+import { BacType } from '@prisma/client';
 
 @Injectable()
 export class FiliereService {
-
   constructor(private prisma: PrismaService) {}
 
   private normalizeBacLabel(value: any): string {
@@ -19,31 +18,62 @@ export class FiliereService {
       ?.toUpperCase()
       ?.normalize('NFD')
       ?.replace(/[\u0300-\u036f]/g, '')
-      ?.replace(/[\s._\-/]+/g, '')
+      ?.replace(/[\s._\-/]+/g, '');
   }
 
   private mapBacType(value: any): BacType | null {
-    const normalized = this.normalizeBacLabel(value)
+    const normalized = this.normalizeBacLabel(value);
 
-    if (!normalized) return null
+    if (!normalized) return null;
 
     const aliases: Record<BacType, string[]> = {
-      MATH: ['MATH', 'MATHS', 'MATHEMATIQUE', 'MATHEMATIQUES', 'SCIENCESMATHEMATIQUES', 'رياضيات', 'رياض'],
-      SVT: ['SVT', 'SCIENCESEXPERIMENTALES', 'SCIENCEEXPERIMENTALE', 'SCEXP', 'علومتجريبية'],
-      ECO: ['ECO', 'ECONOMIE', 'ECONOMIEGESTION', 'ECOGESTION', 'اقتصادوتصرف', 'اقتصاد'],
+      MATH: [
+        'MATH',
+        'MATHS',
+        'MATHEMATIQUE',
+        'MATHEMATIQUES',
+        'SCIENCESMATHEMATIQUES',
+        'رياضيات',
+        'رياض',
+      ],
+      SVT: [
+        'SVT',
+        'SCIENCESEXPERIMENTALES',
+        'SCIENCEEXPERIMENTALE',
+        'SCEXP',
+        'علومتجريبية',
+      ],
+      ECO: [
+        'ECO',
+        'ECONOMIE',
+        'ECONOMIEGESTION',
+        'ECOGESTION',
+        'اقتصادوتصرف',
+        'اقتصاد',
+      ],
       TECH: ['TECH', 'TECHNIQUE', 'العلومالتقنية', 'تقنية'],
       INFO: ['INFO', 'INFORMATIQUE', 'علومالاعلامية', 'اعلامية'],
-      LETTRES: ['LETTRES', 'LITTERAIRE', 'LITTERATURE', 'اداب', 'الاداب', 'آداب'],
-      SPORT: ['SPORT', 'رياضة']
-    }
+      LETTRES: [
+        'LETTRES',
+        'LITTERAIRE',
+        'LITTERATURE',
+        'اداب',
+        'الاداب',
+        'آداب',
+      ],
+      SPORT: ['SPORT', 'رياضة'],
+    };
 
-    for (const [bacType, values] of Object.entries(aliases) as [BacType, string[]][]) {
-      if (values.some(v => this.normalizeBacLabel(v) === normalized)) {
-        return bacType
+    for (const [bacType, values] of Object.entries(aliases) as [
+      BacType,
+      string[],
+    ][]) {
+      if (values.some((v) => this.normalizeBacLabel(v) === normalized)) {
+        return bacType;
       }
     }
 
-    return null
+    return null;
   }
 
   // جلب كل الشعب مع معلومات الباك
@@ -51,8 +81,8 @@ export class FiliereService {
     return this.prisma.filiere.findMany({
       include: {
         bacTypes: true,
-        scores: true
-      }
+        scores: true,
+      },
     });
   }
 
@@ -62,8 +92,8 @@ export class FiliereService {
       where: { id },
       include: {
         bacTypes: true,
-        scores: true
-      }
+        scores: true,
+      },
     });
   }
 
@@ -75,17 +105,17 @@ export class FiliereService {
         program: data.program,
         institution: data.institution,
         formula: data.formula,
-        gov: data.gov
-      }
+        gov: data.gov,
+      },
     });
   }
 
   // إضافة معلومات الباك للشعبة
   async addBacInfo(filiereId: number, data: any) {
-    const mappedType = this.mapBacType(data.type)
+    const mappedType = this.mapBacType(data.type);
 
     if (!mappedType) {
-      throw new Error(`Invalid bac type: ${data.type}`)
+      throw new Error(`Invalid bac type: ${data.type}`);
     }
 
     const bacInfo = await this.prisma.filiereBac.create({
@@ -93,110 +123,106 @@ export class FiliereService {
         type: mappedType,
         capacity: data.capacity,
         lastScore: data.lastScore,
-        filiereId: filiereId
-      }
+        filiereId: filiereId,
+      },
     });
 
     await this.prisma.filiereScore.upsert({
       where: {
         filiereId_bacType: {
           filiereId,
-          bacType: mappedType
-        }
+          bacType: mappedType,
+        },
       },
       update: {
-        lastScore: data.lastScore
+        lastScore: data.lastScore,
       },
       create: {
         filiereId,
         bacType: mappedType,
-        lastScore: data.lastScore
-      }
-    })
+        lastScore: data.lastScore,
+      },
+    });
 
-    return bacInfo
+    return bacInfo;
   }
   async importGuide(data: any[]) {
+    // 🧨 نحيو القديم
+    await this.prisma.filiereScore.deleteMany();
+    await this.prisma.filiereBac.deleteMany();
+    await this.prisma.filiere.deleteMany();
 
-  // 🧨 نحيو القديم
-  await this.prisma.filiereScore.deleteMany()
-  await this.prisma.filiereBac.deleteMany()
-  await this.prisma.filiere.deleteMany()
-
-  // 🔄 نعاودو نزرعو
-  for (const item of data) {
-
-    const filiere = await this.prisma.filiere.create({
-      data: {
-        code: item.code,
-        program: item.program,
-        institution: item.institution,
-        formula: item.formula
-      }
-    })
-
-    const scoreByType = new Map<BacType, number | null>()
-
-    for (const bac of item.bacTypes) {
-      const mappedType = this.mapBacType(bac?.type)
-
-      if (!mappedType) continue
-
-      await this.prisma.filiereBac.create({
+    // 🔄 نعاودو نزرعو
+    for (const item of data) {
+      const filiere = await this.prisma.filiere.create({
         data: {
-          type: mappedType,
-          capacity: bac.capacity,
-          lastScore: bac.lastScore,
-          filiereId: filiere.id
+          code: item.code,
+          program: item.program,
+          institution: item.institution,
+          formula: item.formula,
+        },
+      });
+
+      const scoreByType = new Map<BacType, number | null>();
+
+      for (const bac of item.bacTypes) {
+        const mappedType = this.mapBacType(bac?.type);
+
+        if (!mappedType) continue;
+
+        await this.prisma.filiereBac.create({
+          data: {
+            type: mappedType,
+            capacity: bac.capacity,
+            lastScore: bac.lastScore,
+            filiereId: filiere.id,
+          },
+        });
+
+        const existingScore = scoreByType.get(mappedType);
+        const nextScore =
+          typeof bac?.lastScore === 'number' ? bac.lastScore : null;
+
+        if (!scoreByType.has(mappedType) || existingScore == null) {
+          scoreByType.set(mappedType, nextScore);
         }
-      })
+      }
 
-      const existingScore = scoreByType.get(mappedType)
-      const nextScore = typeof bac?.lastScore === 'number' ? bac.lastScore : null
-
-      if (!scoreByType.has(mappedType) || existingScore == null) {
-        scoreByType.set(mappedType, nextScore)
+      for (const [bacType, lastScore] of scoreByType.entries()) {
+        await this.prisma.filiereScore.create({
+          data: {
+            bacType,
+            lastScore,
+            filiereId: filiere.id,
+          },
+        });
       }
     }
 
-    for (const [bacType, lastScore] of scoreByType.entries()) {
-      await this.prisma.filiereScore.create({
-        data: {
-          bacType,
-          lastScore,
-          filiereId: filiere.id
-        }
-      })
-    }
+    return { message: 'Guide imported successfully' };
   }
+  async processPdf(file: Express.Multer.File) {
+    // 1️⃣ نحفظ PDF
+    const filePath = `scripts/${file.originalname}`;
+    fs.writeFileSync(filePath, file.buffer);
 
-  return { message: "Guide imported successfully" }
-}
-async processPdf(file: Express.Multer.File) {
+    // 2️⃣ نشغّل Python
+    await new Promise((resolve, reject) => {
+      exec(`python scripts/convert.py ${filePath}`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(stderr);
+          return reject(error);
+        }
+        resolve(stdout);
+      });
+    });
 
-  // 1️⃣ نحفظ PDF
-  const filePath = `scripts/${file.originalname}`
-  fs.writeFileSync(filePath, file.buffer)
+    // 3️⃣ نقرى JSON
+    const json = JSON.parse(fs.readFileSync('output.json', 'utf-8'));
 
-  // 2️⃣ نشغّل Python
-  await new Promise((resolve, reject) => {
-    exec(`python scripts/convert.py ${filePath}`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(stderr)
-        return reject(error)
-      }
-      resolve(stdout)
-    })
-  })
+    // 4️⃣ نعمل import للـ DB
+    await this.importGuide(json);
 
-  // 3️⃣ نقرى JSON
-  const json = JSON.parse(
-    fs.readFileSync('output.json', 'utf-8')
-  )
-
-  // 4️⃣ نعمل import للـ DB
-  await this.importGuide(json)
-
-  return { message: "PDF processed + DB updated 🔥" }
-}
+    return { message: 'PDF processed + DB updated 🔥' };
+  }
 }

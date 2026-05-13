@@ -9,54 +9,46 @@ import { normalizeText } from '../intents/intent.utils';
  */
 const QUESTION_BANK: Record<string, string[]> = {
   tech: [
-    "تحب frontend ولا backend؟",
-    "تحب design ولا logique أكثر؟",
-    "نشغلك برامج ولا بيانات؟",
-    "تحب تنشئ مواقع ولا تطبيقات موبايل؟",
-    "cyber ولا ai أقرب ليك؟",
+    'تحب frontend ولا backend؟',
+    'تحب design ولا logique أكثر؟',
+    'نشغلك برامج ولا بيانات؟',
+    'تحب تنشئ مواقع ولا تطبيقات موبايل؟',
+    'cyber ولا ai أقرب ليك؟',
   ],
   web: [
-    "frontend ولا backend؟",
-    "تحب design ولا logique؟",
-    "React ولا Angular؟",
-    "تحب تخدم freelance ولا شركة؟",
+    'frontend ولا backend؟',
+    'تحب design ولا logique؟',
+    'React ولا Angular؟',
+    'تحب تخدم freelance ولا شركة؟',
   ],
   engineering: [
-    "تحب مدني ولا ميكانيك؟",
-    "محلول ولا تصميم؟",
-    "باطن ولا سطح؟",
-    "نشغال ميدان ولا مكتب؟",
+    'تحب مدني ولا ميكانيك؟',
+    'محلول ولا تصميم؟',
+    'باطن ولا سطح؟',
+    'نشغال ميدان ولا مكتب؟',
   ],
   health: [
-    "تحب مباشرة مع مريض ولا مختبر؟",
-    "طب ولا تمريض؟",
-    "كمال الجسم ولا علاج؟",
+    'تحب مباشرة مع مريض ولا مختبر؟',
+    'طب ولا تمريض؟',
+    'كمال الجسم ولا علاج؟',
   ],
-  business: [
-    "تسويق ولا محاسبة؟",
-    "بنك ولا شركة؟",
-    "مالية ولا إدارة؟",
-  ],
+  business: ['تسويق ولا محاسبة؟', 'بنك ولا شركة؟', 'مالية ولا إدارة؟'],
   general: [
-    "تحب حاجة فيها إبداع ولا منطق؟",
-    "تخدم وحدك ولا مع فريق؟",
-    "تكمل master ولا تخدم مباشرة؟",
-    "remote ولا مكتب؟",
-  ]
+    'تحب حاجة فيها إبداع ولا منطق؟',
+    'تخدم وحدك ولا مع فريق؟',
+    'تكمل master ولا تخدم مباشرة؟',
+    'remote ولا مكتب؟',
+  ],
 };
 
 @Injectable()
 export class FollowupEngine {
-
-  constructor(
-    private readonly stateService: ConversationStateService,
-  ) {}
+  constructor(private readonly stateService: ConversationStateService) {}
 
   /**
    * Generate intelligent dynamic follow-up question
    */
   generateFollowUp(state: ConversationState): string | null {
-
     // No follow-up for roadmap stage
     if (state.conversationStage === ConversationStage.ROADMAP) {
       return null;
@@ -71,8 +63,8 @@ export class FollowupEngine {
     const availableQuestions = this.getAvailableQuestions(state);
 
     // Filter already asked questions
-    const unusedQuestions = availableQuestions.filter(q =>
-      !this.stateService.wasQuestionAsked(state, q)
+    const unusedQuestions = availableQuestions.filter(
+      (q) => !this.stateService.wasQuestionAsked(state, q),
     );
 
     if (unusedQuestions.length === 0) {
@@ -80,7 +72,8 @@ export class FollowupEngine {
     }
 
     // Pick random question from unused pool for natural variation
-    const selectedQuestion = unusedQuestions[Math.floor(Math.random() * unusedQuestions.length)];
+    const selectedQuestion =
+      unusedQuestions[Math.floor(Math.random() * unusedQuestions.length)];
 
     return selectedQuestion;
   }
@@ -104,12 +97,15 @@ export class FollowupEngine {
 
     // Add difficulty specific questions
     if (state.difficultyPreference === null) {
-      questions.push("تحب حاجة سهلة شوية ولا تحدي؟");
+      questions.push('تحب حاجة سهلة شوية ولا تحدي؟');
     }
 
     // Add goal specific questions
-    if (!state.userGoals.includes('freelance') && !state.userGoals.includes('company')) {
-      questions.push("تحب تخدم وحدك ولا في شركة؟");
+    if (
+      !state.userGoals.includes('freelance') &&
+      !state.userGoals.includes('company')
+    ) {
+      questions.push('تحب تخدم وحدك ولا في شركة؟');
     }
 
     // Always add general questions as fallback

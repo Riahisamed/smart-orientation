@@ -4,7 +4,7 @@ import { RankedProgram } from './program-ranking.service';
 
 /**
  * 🔍 EXPLANATION ENGINE
- * 
+ *
  * Generates human-readable, trust-oriented explanations for recommendations
  * Makes AI transparent and understandable
  */
@@ -20,7 +20,7 @@ export class ExplanationEngineService {
     program: RankedProgram,
     memory: ConversationMemory,
     studentScore: number,
-    language: 'fr' | 'ar' = 'ar'
+    language: 'fr' | 'ar' = 'ar',
   ): string {
     const lines: string[] = [];
     const gap = studentScore - program.lastScore;
@@ -47,9 +47,15 @@ export class ExplanationEngineService {
       // Difficulty explanation
       if (memory.difficulty === 'easy' && program.difficulty === 'easy') {
         lines.push('✅ يتناسب مع تفضيلك للسهولة');
-      } else if (memory.difficulty === 'easy' && program.difficulty === 'challenge') {
+      } else if (
+        memory.difficulty === 'easy' &&
+        program.difficulty === 'challenge'
+      ) {
         lines.push('⚠️ هذا البرنامج صعب ولا يتناسب مع تفضيلك');
-      } else if (memory.difficulty === 'challenge' && program.difficulty === 'challenge') {
+      } else if (
+        memory.difficulty === 'challenge' &&
+        program.difficulty === 'challenge'
+      ) {
         lines.push('✅ يتناسب مع تفضيلك للتحدي');
       }
 
@@ -78,7 +84,7 @@ export class ExplanationEngineService {
       if (gap >= 20) {
         lines.push('✅ Très accessible avec ton score');
       } else if (gap >= 10) {
-        lines.push('✅ Bonne chance d\'admission');
+        lines.push("✅ Bonne chance d'admission");
       } else if (gap >= 5) {
         lines.push('⚠️ Possible mais compétitif');
       } else if (gap >= 0) {
@@ -90,9 +96,15 @@ export class ExplanationEngineService {
       // Difficulty explanation
       if (memory.difficulty === 'easy' && program.difficulty === 'easy') {
         lines.push('✅ Correspond à ta préférence simplicité');
-      } else if (memory.difficulty === 'easy' && program.difficulty === 'challenge') {
+      } else if (
+        memory.difficulty === 'easy' &&
+        program.difficulty === 'challenge'
+      ) {
         lines.push('⚠️ Programme difficile, ne correspond pas');
-      } else if (memory.difficulty === 'challenge' && program.difficulty === 'challenge') {
+      } else if (
+        memory.difficulty === 'challenge' &&
+        program.difficulty === 'challenge'
+      ) {
         lines.push('✅ Correspond à ta préférence challenge');
       }
 
@@ -122,7 +134,7 @@ export class ExplanationEngineService {
   generateComparison(
     program1: RankedProgram,
     program2: RankedProgram,
-    language: 'fr' | 'ar' = 'ar'
+    language: 'fr' | 'ar' = 'ar',
   ): string {
     if (language === 'ar') {
       return `
@@ -182,7 +194,7 @@ ${job.demand === 'High' ? '✅ Ce domaine est très demandé en Tunisie actuelle
    */
   toNaturalResponse(
     programs: RankedProgram[],
-    language: 'fr' | 'ar' = 'ar'
+    language: 'fr' | 'ar' = 'ar',
   ): string {
     const lines: string[] = [];
 
@@ -190,8 +202,9 @@ ${job.demand === 'High' ? '✅ Ce domaine est très demandé en Tunisie actuelle
       lines.push('الخيارات الأنسب لك حالياً:');
       lines.push('');
 
-      programs.forEach(p => {
-        const icon = p.category === 'best' ? '🎯' : p.category === 'backup' ? '🛡️' : '⚡';
+      programs.forEach((p) => {
+        const icon =
+          p.category === 'best' ? '🎯' : p.category === 'backup' ? '🛡️' : '⚡';
         lines.push(`${icon} **${p.name}**`);
         lines.push(`   🏫 ${p.institution}`);
         lines.push(`   ⭐ ${p.finalScore}/20`);
@@ -209,8 +222,9 @@ ${job.demand === 'High' ? '✅ Ce domaine est très demandé en Tunisie actuelle
       lines.push('Les meilleures options pour toi actuellement:');
       lines.push('');
 
-      programs.forEach(p => {
-        const icon = p.category === 'best' ? '🎯' : p.category === 'backup' ? '🛡️' : '⚡';
+      programs.forEach((p) => {
+        const icon =
+          p.category === 'best' ? '🎯' : p.category === 'backup' ? '🛡️' : '⚡';
         lines.push(`${icon} **${p.name}**`);
         lines.push(`   🏫 ${p.institution}`);
         lines.push(`   ⭐ ${p.finalScore}/20`);
@@ -232,7 +246,11 @@ ${job.demand === 'High' ? '✅ Ce domaine est très demandé en Tunisie actuelle
   /**
    * ⚠️ RISK EXPLANATION
    */
-  explainRisk(program: RankedProgram, studentScore: number, language: 'fr' | 'ar' = 'ar'): string {
+  explainRisk(
+    program: RankedProgram,
+    studentScore: number,
+    language: 'fr' | 'ar' = 'ar',
+  ): string {
     const gap = studentScore - program.lastScore;
 
     if (language === 'ar') {

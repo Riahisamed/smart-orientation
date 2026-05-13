@@ -4,17 +4,13 @@ import { ToneVariationService } from './tone-variation.service';
 
 @Injectable()
 export class ResponseHumanizer {
-
-  constructor(
-    private readonly toneVariation: ToneVariationService,
-  ) {}
+  constructor(private readonly toneVariation: ToneVariationService) {}
 
   /**
    * Main humanization function
    * Applies all naturalization layers
    */
   humanizeResponse(response: string, state: ConversationState): string {
-
     // First apply tone and phrase variation
     let result = this.toneVariation.applyVariation(response, state);
 

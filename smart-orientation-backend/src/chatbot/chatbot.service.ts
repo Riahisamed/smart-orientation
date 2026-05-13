@@ -1,14 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OllamaConfigService } from '../common/services/ollama-config.service';
 import { AiMemory, AiService } from './ai.service';
-import { IntentDetectorService, AdvisorIntent } from './intent-detector.service';
+import {
+  IntentDetectorService,
+  AdvisorIntent,
+} from './intent-detector.service';
 import { SafetyRulesService } from './safety-rules.service';
 import { ResponseBuilderService } from './response-builder.service';
-import { FIELD_ALIASES, RagService, FieldData, JobData, RankedProgram, detectField, normalizeText } from './rag.service';
+import {
+  FIELD_ALIASES,
+  RagService,
+  FieldData,
+  JobData,
+  RankedProgram,
+  detectField,
+  normalizeText,
+  getFormulaSearchTerms,
+} from './rag.service';
 import { MemoryService, ConversationMemory } from './memory.service';
 import { FollowupGenerator } from '../ai/generators/followup.generator';
 import { DynamicRoadmapService } from './services/dynamic-roadmap.service';
 import { DomainMatcherService } from './services/domain-matcher.service';
+import { OrientationDatasetService } from './services/orientation-dataset.service';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -26,7 +39,11 @@ type StudentData = {
   difficulty?: 'easy' | 'challenge';
   preferredDomain?: string;
   refinedDomain?: string;
-  journeyStep?: 'identify_interest' | 'refine_domain' | 'suggest_options' | 'give_decision';
+  journeyStep?:
+    | 'identify_interest'
+    | 'refine_domain'
+    | 'suggest_options'
+    | 'give_decision';
   rejectedDomains?: string[];
   lastQuestionsAsked?: string[];
 };
@@ -36,7 +53,11 @@ type FullFieldData = {
   keywords?: string[];
   programs: string[];
   possible_jobs: string[];
-  required_skills: { technical_skills: string[]; soft_skills: string[]; tools_and_technologies: string[]; };
+  required_skills: {
+    technical_skills: string[];
+    soft_skills: string[];
+    tools_and_technologies: string[];
+  };
   demand_in_tunisia: string;
   future_outlook: string;
   unemployment_risk: string;
@@ -55,7 +76,7 @@ function detectLanguage(message: string): 'fr' | 'ar' {
 // IMPORTANT: DOES NOT strip accents (preserves é, è, ê, etc.)
 // ============================================================
 function cleanMessage(raw: string): string {
-  let m = raw
+  const m = raw
     // Remove complete (mon score: XXX) / (score:xxx) etc
     .replace(/\([^)]*(?:score|note|moyenne|معدل)[^)]*\)/gi, '')
     // Remove incomplete score parens: (mon sc...), (mon scor... etc
@@ -84,90 +105,315 @@ function cleanMessage(raw: string): string {
 // ============================================================
 const DOMAIN_KEYWORDS: Record<string, string[]> = {
   HEALTH: [
-    'medecine', 'médecine', 'médecin', 'medical', 'sante', 'santé',
-    'pharmacie', 'pharmacien', 'infirmier', 'infirmiere', 'soignant',
-    'biologie', 'biologiste', 'paramedical', 'paramédical',
-    'dentaire', 'dentiste', 'veterinaire', 'vétérinaire',
-    'hopital', 'hôpital', 'clinique', 'diagnostic', 'chirurgie',
-    'anesthesie', 'radiologie', 'laboratoire medical',
-    'kine', 'kiné', 'kinésithérapeute', 'kinesitherapeute', 'kinésithérapie',
-    'soins', 'patient', 'urgences', 'sang', 'traitement',
-    'طب', 'صحة', 'صيدلة', 'تمريض', 'بيولوجيا', 'علاج', 'مستشفى',
-    'ممرض', 'طبيب', 'صيدلي', 'مخبر', 'تشخيص',
+    'medecine',
+    'médecine',
+    'médecin',
+    'medical',
+    'sante',
+    'santé',
+    'pharmacie',
+    'pharmacien',
+    'infirmier',
+    'infirmiere',
+    'soignant',
+    'biologie',
+    'biologiste',
+    'paramedical',
+    'paramédical',
+    'dentaire',
+    'dentiste',
+    'veterinaire',
+    'vétérinaire',
+    'hopital',
+    'hôpital',
+    'clinique',
+    'diagnostic',
+    'chirurgie',
+    'anesthesie',
+    'radiologie',
+    'laboratoire medical',
+    'kine',
+    'kiné',
+    'kinésithérapeute',
+    'kinesitherapeute',
+    'kinésithérapie',
+    'soins',
+    'patient',
+    'urgences',
+    'sang',
+    'traitement',
+    'طب',
+    'صحة',
+    'صيدلة',
+    'تمريض',
+    'بيولوجيا',
+    'علاج',
+    'مستشفى',
+    'ممرض',
+    'طبيب',
+    'صيدلي',
+    'مخبر',
+    'تشخيص',
   ],
   ENGINEERING: [
-    'ingenieur', 'ingénieur', 'ingenierie', 'ingénierie',
-    'genie', 'génie',
-    'mecanique', 'mécanique',
-    'electrique', 'électrique', 'electronique', 'électronique',
-    'civil', 'industriel', 'production', 'maintenance',
-    'electromecanique', 'électromécanique',
-    'mines', 'ponts', 'geophysique', 'géophysique',
-    'petrole', 'pétrole', 'energie', 'énergie',
-    'automatique', 'robotique',
-    'technologie', 'technology',
-    'هندسة', 'مهندس', 'مدني', 'ميكانيك', 'كهرباء',
-    'إلكترونيك', 'طاقة', 'إنتاج', 'صناعي',
+    'ingenieur',
+    'ingénieur',
+    'ingenierie',
+    'ingénierie',
+    'genie',
+    'génie',
+    'mecanique',
+    'mécanique',
+    'electrique',
+    'électrique',
+    'electronique',
+    'électronique',
+    'civil',
+    'industriel',
+    'production',
+    'maintenance',
+    'electromecanique',
+    'électromécanique',
+    'mines',
+    'ponts',
+    'geophysique',
+    'géophysique',
+    'petrole',
+    'pétrole',
+    'energie',
+    'énergie',
+    'automatique',
+    'robotique',
+    'technologie',
+    'technology',
+    'هندسة',
+    'مهندس',
+    'مدني',
+    'ميكانيك',
+    'كهرباء',
+    'إلكترونيك',
+    'طاقة',
+    'إنتاج',
+    'صناعي',
   ],
   SPORT: [
-    'sport', 'sportif', 'sportive', 'coaching', 'coach',
-    'fitness', 'activite physique', 'activité physique',
-    'eps', 'education physique', 'éducation physique',
-    'entrainement', 'entraînement', 'performance sportive',
-    'athlete', 'athlète', 'football', 'basket', 'tennis',
-    'رياضة', 'الرياضة', 'بدنية', 'تربية بدنية', 'تدريب', 'مدرب',
-    'علاج طبيعي', 'لياقة',
+    'sport',
+    'sportif',
+    'sportive',
+    'coaching',
+    'coach',
+    'fitness',
+    'activite physique',
+    'activité physique',
+    'eps',
+    'education physique',
+    'éducation physique',
+    'entrainement',
+    'entraînement',
+    'performance sportive',
+    'athlete',
+    'athlète',
+    'football',
+    'basket',
+    'tennis',
+    'رياضة',
+    'الرياضة',
+    'بدنية',
+    'تربية بدنية',
+    'تدريب',
+    'مدرب',
+    'علاج طبيعي',
+    'لياقة',
   ],
   LAW: [
-    'droit', 'avocat', 'juridique', 'justice', 'notaire',
-    'magistrat', 'juge', 'tribunal', 'juriste', 'legal',
-    'contentieux', 'loi', 'reglementation', 'réglementation',
-    'compliance', 'قانون', 'عدالة', 'محامي', 'قاضي', 'محكمة',
-    'قضاء', 'موثق', 'عدلي',
+    'droit',
+    'avocat',
+    'juridique',
+    'justice',
+    'notaire',
+    'magistrat',
+    'juge',
+    'tribunal',
+    'juriste',
+    'legal',
+    'contentieux',
+    'loi',
+    'reglementation',
+    'réglementation',
+    'compliance',
+    'قانون',
+    'عدالة',
+    'محامي',
+    'قاضي',
+    'محكمة',
+    'قضاء',
+    'موثق',
+    'عدلي',
   ],
   LANGUAGES: [
-    'lettres', 'lettre', 'litterature', 'littérature',
-    'langues', 'langue', 'traduction', 'traducteur',
-    'communication', 'journalisme', 'journaliste',
-    'redacteur', 'rédacteur', 'redaction', 'rédaction',
-    'enseignement', 'enseignant', 'professeur',
-    'anglais', 'francais', 'français', 'arabe',
-    'espagnol', 'allemand', 'italien',
-    'adab', 'litteraire', 'littéraire',
-    'ترجمة', 'لغات', 'لغة', 'أدب', 'آداب', 'كتابة', 'تحرير',
-    'إعلام', 'صحافة', 'اتصال',
+    'lettres',
+    'lettre',
+    'litterature',
+    'littérature',
+    'langues',
+    'langue',
+    'traduction',
+    'traducteur',
+    'communication',
+    'journalisme',
+    'journaliste',
+    'redacteur',
+    'rédacteur',
+    'redaction',
+    'rédaction',
+    'enseignement',
+    'enseignant',
+    'professeur',
+    'anglais',
+    'francais',
+    'français',
+    'arabe',
+    'espagnol',
+    'allemand',
+    'italien',
+    'adab',
+    'litteraire',
+    'littéraire',
+    'ترجمة',
+    'لغات',
+    'لغة',
+    'أدب',
+    'آداب',
+    'كتابة',
+    'تحرير',
+    'إعلام',
+    'صحافة',
+    'اتصال',
   ],
   BUSINESS: [
-    'business', 'gestion', 'commerce', 'finance', 'marketing',
-    'economie', 'économie', 'comptabilité', 'comptabilite',
-    'management', 'administration', 'ressources humaines', 'rh',
-    'logistique', 'supply chain', 'audit', 'banque', 'assurance',
-    'bourse', 'trading', 'entrepreneur', 'startup', 'investissement',
-    'إدارة', 'تجارة', 'أعمال', 'محاسبة', 'مالية', 'تصرف',
-    'اقتصاد', 'تسويق', 'استثمار', 'بنوك',
+    'business',
+    'gestion',
+    'commerce',
+    'finance',
+    'marketing',
+    'economie',
+    'économie',
+    'comptabilité',
+    'comptabilite',
+    'management',
+    'administration',
+    'ressources humaines',
+    'rh',
+    'logistique',
+    'supply chain',
+    'audit',
+    'banque',
+    'assurance',
+    'bourse',
+    'trading',
+    'entrepreneur',
+    'startup',
+    'investissement',
+    'إدارة',
+    'تجارة',
+    'أعمال',
+    'محاسبة',
+    'مالية',
+    'تصرف',
+    'اقتصاد',
+    'تسويق',
+    'استثمار',
+    'بنوك',
   ],
   ART: [
-    'art', 'arts', 'design', 'architecture', 'architecte',
-    'musique', 'theatre', 'theâtre', 'cinema', 'cinéma',
-    'arts plastiques', 'dessin', 'graphisme', 'graphique',
-    'mode', 'fashion', 'decoration', 'décoration',
-    'création', 'creation', 'artistique',
-    'فن', 'فنون', 'تصميم', 'عمارة', 'موسيقى',
-    'سينما', 'مسرح', 'جرافيك', 'أزياء',
+    'art',
+    'arts',
+    'design',
+    'architecture',
+    'architecte',
+    'musique',
+    'theatre',
+    'theâtre',
+    'cinema',
+    'cinéma',
+    'arts plastiques',
+    'dessin',
+    'graphisme',
+    'graphique',
+    'mode',
+    'fashion',
+    'decoration',
+    'décoration',
+    'création',
+    'creation',
+    'artistique',
+    'فن',
+    'فنون',
+    'تصميم',
+    'عمارة',
+    'موسيقى',
+    'سينما',
+    'مسرح',
+    'جرافيك',
+    'أزياء',
   ],
   IT: [
-    'informatique', 'informatia', 'dev', 'développement',
-    'programmation', 'software', 'logiciel',
-    'reseau', 'réseau', 'reseaux', 'réseaux',
-    'cyber', 'cybersecurite', 'cybersécurité',
-    'data', 'ia', 'ai', 'intelligence artificielle',
-    'web', 'mobile', 'cloud', 'devops', 'fullstack',
-    'frontend', 'backend', 'back-end', 'front-end',
-    'code', 'coding', 'programmeur', 'developer',
-    'it', 'tech',
-    'برمجة', 'اعلامية', 'معلوماتية', 'شبكات',
-    'أمن معلومات', 'تطوير', 'حاسوب', 'تكنولوجيا',
-    'ذكاء اصطناعي', 'بيانات',
+    'informatique',
+    'informatia',
+    'dev',
+    'développement',
+    'programmation',
+    'software',
+    'logiciel',
+    'reseau',
+    'réseau',
+    'reseaux',
+    'réseaux',
+    'cyber',
+    'cybersecurite',
+    'cybersécurité',
+    'data',
+    'ia',
+    'ai',
+    'intelligence artificielle',
+    'web',
+    'mobile',
+    'cloud',
+    'devops',
+    'fullstack',
+    'frontend',
+    'backend',
+    'back-end',
+    'front-end',
+    'code',
+    'coding',
+    'programmeur',
+    'developer',
+    'it',
+    'tech',
+    'برمجة',
+    'اعلامية',
+    'معلوماتية',
+    'شبكات',
+    'أمن معلومات',
+    'تطوير',
+    'حاسوب',
+    'تكنولوجيا',
+    'ذكاء اصطناعي',
+    'بيانات',
+    'العلوم المعلوماتية',
+    'هندسة نظم المعلومات',
+    'الإعلامية',
+    'تقنيات الإعلامية',
+    'تكنولوجيا المعلومات',
+    'علوم وتقنيات المعلومات',
+    'المعلومات والاتصالات',
+    'تكنولوجيا المعلومات والاتصالات',
+    'informatique de gestion',
+    'tic',
+    'systèmes informatiques',
+    'multimédia',
+    'cybersécurité',
   ],
 };
 
@@ -189,8 +435,10 @@ function detectDomain(message?: string): string | null {
       sport: 'SPORT',
       art: 'ART',
       business: 'BUSINESS',
+      letters: 'LANGUAGES',
     };
-    return map[aliasField];
+    const mapped = map[aliasField];
+    if (mapped) return mapped;
   }
 
   const cleaned = cleanMessage(message);
@@ -199,8 +447,14 @@ function detectDomain(message?: string): string | null {
   const normalized = cleaned;
 
   const PRIORITY_ORDER = [
-    'HEALTH', 'ENGINEERING', 'SPORT', 'LAW', 'LANGUAGES',
-    'BUSINESS', 'ART', 'IT',
+    'HEALTH',
+    'ENGINEERING',
+    'SPORT',
+    'LAW',
+    'LANGUAGES',
+    'BUSINESS',
+    'ART',
+    'IT',
   ];
 
   for (const domain of PRIORITY_ORDER) {
@@ -274,58 +528,146 @@ function domainLabel(domain: string | null, lang: 'fr' | 'ar'): string {
     MEDIA: 'إعلام',
     ECONOMY: 'اقتصاد',
   };
-  return lang === 'ar' ? (ar[domain] || domain) : (fr[domain] || domain);
+  return lang === 'ar' ? ar[domain] || domain : fr[domain] || domain;
 }
 
 /** Domain-specific follow-up questions */
 const DOMAIN_FOLLOWUPS: Record<string, { ar: string[]; fr: string[] }> = {
   ART: {
-    ar: ['تحب design graphique ولا architecture؟', 'تحب création ولا multimédia؟', 'تحب رسم ولا تصميم رقمي؟'],
-    fr: ['Tu préfères design graphique ou architecture ?', 'Création ou multimédia ?', 'Dessin ou design numérique ?'],
+    ar: [
+      'تحب design graphique ولا architecture؟',
+      'تحب création ولا multimédia؟',
+      'تحب رسم ولا تصميم رقمي؟',
+    ],
+    fr: [
+      'Tu préfères design graphique ou architecture ?',
+      'Création ou multimédia ?',
+      'Dessin ou design numérique ?',
+    ],
   },
   SPORT: {
-    ar: ['تحب coaching ولا rééducation؟', 'تحب منافسة ولا fitness؟', 'تدريب فردي ولا جماعي؟'],
-    fr: ['Tu préfères coaching ou rééducation ?', 'Compétition ou fitness ?', 'Entraînement individuel ou collectif ?'],
+    ar: [
+      'تحب coaching ولا rééducation؟',
+      'تحب منافسة ولا fitness؟',
+      'تدريب فردي ولا جماعي؟',
+    ],
+    fr: [
+      'Tu préfères coaching ou rééducation ?',
+      'Compétition ou fitness ?',
+      'Entraînement individuel ou collectif ?',
+    ],
   },
   HEALTH: {
-    ar: ['تحب contact مع المرضى ولا مختبر؟', 'تحب médecine ولا paramédical؟', 'مستشفى ولا عيادة خاصة؟'],
-    fr: ['Tu préfères contact patients ou laboratoire ?', 'Médecine ou médical ?', 'Hôpital ou clinique privée ?'],
+    ar: [
+      'تحب contact مع المرضى ولا مختبر؟',
+      'تحب médecine ولا paramédical؟',
+      'مستشفى ولا عيادة خاصة؟',
+    ],
+    fr: [
+      'Tu préfères contact patients ou laboratoire ?',
+      'Médecine ou médical ?',
+      'Hôpital ou clinique privée ?',
+    ],
   },
   IT: {
-    ar: ['تحب web ولا data؟', 'تحب frontend ولا backend؟', 'تطوير ولا أمن معلومات؟'],
-    fr: ['Tu préfères web ou data ?', 'Frontend ou backend ?', 'Développement ou cybersécurité ?'],
+    ar: [
+      'تحب web ولا data؟',
+      'تحب frontend ولا backend؟',
+      'تطوير ولا أمن معلومات؟',
+    ],
+    fr: [
+      'Tu préfères web ou data ?',
+      'Frontend ou backend ?',
+      'Développement ou cybersécurité ?',
+    ],
   },
   LAW: {
-    ar: ['تحب avocat ولا مستشار قانوني؟', 'تحب قانون خاص ولا عام؟', 'محامي ولا موثق؟'],
-    fr: ['Tu préfères avocat ou conseiller juridique ?', 'Droit privé ou public ?', 'Avocat ou notaire ?'],
+    ar: [
+      'تحب avocat ولا مستشار قانوني؟',
+      'تحب قانون خاص ولا عام؟',
+      'محامي ولا موثق؟',
+    ],
+    fr: [
+      'Tu préfères avocat ou conseiller juridique ?',
+      'Droit privé ou public ?',
+      'Avocat ou notaire ?',
+    ],
   },
   LANGUAGES: {
     ar: ['تحب ترجمة ولا تدريس؟', 'تحب صحافة ولا تحرير؟', 'كتابة ولا تواصل؟'],
-    fr: ['Tu préfères traduction ou enseignement ?', 'Journalisme ou rédaction ?', 'Communication ou littérature ?'],
+    fr: [
+      'Tu préfères traduction ou enseignement ?',
+      'Journalisme ou rédaction ?',
+      'Communication ou littérature ?',
+    ],
   },
   BUSINESS: {
-    ar: ['تحب finance ولا marketing؟', 'تحب محاسبة ولا إدارة؟', 'شركة خاصة ولا بنك؟'],
-    fr: ['Tu préfères finance ou marketing ?', 'Comptabilité ou gestion ?', 'Entreprise privée ou banque ?'],
+    ar: [
+      'تحب finance ولا marketing؟',
+      'تحب محاسبة ولا إدارة؟',
+      'شركة خاصة ولا بنك؟',
+    ],
+    fr: [
+      'Tu préfères finance ou marketing ?',
+      'Comptabilité ou gestion ?',
+      'Entreprise privée ou banque ?',
+    ],
   },
   ENGINEERING: {
-    ar: ['تحب mécanique ولا électrique؟', 'تحب مدني ولا صناعي؟', 'تصميم ولا صيانة؟'],
-    fr: ['Tu préfères mécanique ou électrique ?', 'Civil ou industriel ?', 'Conception ou maintenance ?'],
+    ar: [
+      'تحب mécanique ولا électrique؟',
+      'تحب مدني ولا صناعي؟',
+      'تصميم ولا صيانة؟',
+    ],
+    fr: [
+      'Tu préfères mécanique ou électrique ?',
+      'Civil ou industriel ?',
+      'Conception ou maintenance ?',
+    ],
   },
   EDUCATION: {
-    ar: ['تحب تدريس أساسي ولا ثانوي؟', 'تكوين مهني ولا أكاديمي؟', 'تعليم عمومي ولا خصوصي؟'],
-    fr: ['Tu préfères enseignement primaire ou secondaire ?', 'Formation pro ou académique ?', 'Public ou privé ?'],
+    ar: [
+      'تحب تدريس أساسي ولا ثانوي؟',
+      'تكوين مهني ولا أكاديمي؟',
+      'تعليم عمومي ولا خصوصي؟',
+    ],
+    fr: [
+      'Tu préfères enseignement primaire ou secondaire ?',
+      'Formation pro ou académique ?',
+      'Public ou privé ?',
+    ],
   },
   SCIENCE: {
     ar: ['تحب كيمياء ولا بيولوجيا؟', 'تحب بحث ولا تطبيق؟', 'مخبر ولا ميدان؟'],
-    fr: ['Tu préfères chimie ou biologie ?', 'Recherche ou application ?', 'Laboratoire ou terrain ?'],
+    fr: [
+      'Tu préfères chimie ou biologie ?',
+      'Recherche ou application ?',
+      'Laboratoire ou terrain ?',
+    ],
   },
   MEDIA: {
-    ar: ['تحب صحافة ولا إعلام سمعي بصري؟', 'إذاعة ولا تلفزة؟', 'كتابة ولا إنتاج؟'],
-    fr: ['Tu préfères journalisme ou audiovisuel ?', 'Radio ou télévision ?', 'Écriture ou production ?'],
+    ar: [
+      'تحب صحافة ولا إعلام سمعي بصري؟',
+      'إذاعة ولا تلفزة؟',
+      'كتابة ولا إنتاج؟',
+    ],
+    fr: [
+      'Tu préfères journalisme ou audiovisuel ?',
+      'Radio ou télévision ?',
+      'Écriture ou production ?',
+    ],
   },
   ECONOMY: {
-    ar: ['تحب بنوك ولا أسواق مالية؟', 'تحب اقتصاد كلي ولا جزئي؟', 'تحليل ولا استثمار؟'],
-    fr: ['Tu préfères banque ou marchés financiers ?', 'Macroéconomie ou microéconomie ?', 'Analyse ou investissement ?'],
+    ar: [
+      'تحب بنوك ولا أسواق مالية؟',
+      'تحب اقتصاد كلي ولا جزئي؟',
+      'تحليل ولا استثمار؟',
+    ],
+    fr: [
+      'Tu préfères banque ou marchés financiers ?',
+      'Macroéconomie ou microéconomie ?',
+      'Analyse ou investissement ?',
+    ],
   },
 };
 
@@ -335,27 +677,132 @@ const DOMAIN_FOLLOWUPS: Record<string, { ar: string[]; fr: string[] }> = {
 // HEALTH jobs MUST be medical only
 // ENGINEERING jobs MUST be civil, mécanique, électrique, industriel
 // ============================================================
-const DOMAIN_JOBS: Record<string, { title: string; description: string; skills: string[]; demand: string; unemployment_rate: number }[]> = {
+const DOMAIN_JOBS: Record<
+  string,
+  {
+    title: string;
+    description: string;
+    skills: string[];
+    demand: string;
+    unemployment_rate: number;
+  }[]
+> = {
   LANGUAGES: [
-    { title: 'Traducteur', description: 'Traduction de textes entre plusieurs langues', skills: ['Maîtrise linguistique', 'Rédaction', 'Recherche terminologique'], demand: 'Medium', unemployment_rate: 8 },
-    { title: 'Enseignant', description: 'Enseignement des langues dans des établissements scolaires ou centres', skills: ['Pédagogie', 'Communication', 'Patience'], demand: 'High', unemployment_rate: 5 },
-    { title: 'Journaliste', description: 'Rédaction d\'articles, reportages et enquêtes pour médias', skills: ['Rédaction', 'Investigation', 'Communication'], demand: 'Medium', unemployment_rate: 10 },
-    { title: 'Rédacteur', description: 'Création de contenu écrit pour divers supports', skills: ['Écriture', 'Synthèse', 'Créativité'], demand: 'Medium', unemployment_rate: 7 },
-    { title: 'Chargé de communication', description: 'Gestion de la communication interne et externe', skills: ['Communication', 'Rédaction', 'Relation publique'], demand: 'High', unemployment_rate: 6 },
+    {
+      title: 'Traducteur',
+      description: 'Traduction de textes entre plusieurs langues',
+      skills: [
+        'Maîtrise linguistique',
+        'Rédaction',
+        'Recherche terminologique',
+      ],
+      demand: 'Medium',
+      unemployment_rate: 8,
+    },
+    {
+      title: 'Enseignant',
+      description:
+        'Enseignement des langues dans des établissements scolaires ou centres',
+      skills: ['Pédagogie', 'Communication', 'Patience'],
+      demand: 'High',
+      unemployment_rate: 5,
+    },
+    {
+      title: 'Journaliste',
+      description: "Rédaction d'articles, reportages et enquêtes pour médias",
+      skills: ['Rédaction', 'Investigation', 'Communication'],
+      demand: 'Medium',
+      unemployment_rate: 10,
+    },
+    {
+      title: 'Rédacteur',
+      description: 'Création de contenu écrit pour divers supports',
+      skills: ['Écriture', 'Synthèse', 'Créativité'],
+      demand: 'Medium',
+      unemployment_rate: 7,
+    },
+    {
+      title: 'Chargé de communication',
+      description: 'Gestion de la communication interne et externe',
+      skills: ['Communication', 'Rédaction', 'Relation publique'],
+      demand: 'High',
+      unemployment_rate: 6,
+    },
   ],
   HEALTH: [
-    { title: 'Médecin', description: 'Soins médicaux et diagnostic des patients', skills: ['Diagnostic', 'Soins cliniques', 'Empathie'], demand: 'High', unemployment_rate: 2 },
-    { title: 'Pharmacien', description: 'Délivrance de médicaments et conseil pharmaceutique', skills: ['Pharmacologie', 'Conseil', 'Gestion'], demand: 'High', unemployment_rate: 3 },
-    { title: 'Infirmier', description: 'Soins infirmiers et suivi des patients', skills: ['Soins', 'Suivi patient', 'Travail d\'équipe'], demand: 'High', unemployment_rate: 4 },
-    { title: 'Biologiste médical', description: 'Analyses biologiques en laboratoire', skills: ['Analyse', 'Biologie', 'Précision'], demand: 'Medium', unemployment_rate: 5 },
-    { title: 'Kinésithérapeute', description: 'Rééducation fonctionnelle des patients', skills: ['Rééducation', 'Anatomie', 'Suivi'], demand: 'High', unemployment_rate: 4 },
+    {
+      title: 'Médecin',
+      description: 'Soins médicaux et diagnostic des patients',
+      skills: ['Diagnostic', 'Soins cliniques', 'Empathie'],
+      demand: 'High',
+      unemployment_rate: 2,
+    },
+    {
+      title: 'Pharmacien',
+      description: 'Délivrance de médicaments et conseil pharmaceutique',
+      skills: ['Pharmacologie', 'Conseil', 'Gestion'],
+      demand: 'High',
+      unemployment_rate: 3,
+    },
+    {
+      title: 'Infirmier',
+      description: 'Soins infirmiers et suivi des patients',
+      skills: ['Soins', 'Suivi patient', "Travail d'équipe"],
+      demand: 'High',
+      unemployment_rate: 4,
+    },
+    {
+      title: 'Biologiste médical',
+      description: 'Analyses biologiques en laboratoire',
+      skills: ['Analyse', 'Biologie', 'Précision'],
+      demand: 'Medium',
+      unemployment_rate: 5,
+    },
+    {
+      title: 'Kinésithérapeute',
+      description: 'Rééducation fonctionnelle des patients',
+      skills: ['Rééducation', 'Anatomie', 'Suivi'],
+      demand: 'High',
+      unemployment_rate: 4,
+    },
   ],
   ENGINEERING: [
-    { title: 'Ingénieur mécanique', description: 'Conception et maintenance de systèmes mécaniques', skills: ['Mécanique', 'CAO/DAO', 'Résistance des matériaux'], demand: 'High', unemployment_rate: 3 },
-    { title: 'Ingénieur civil', description: 'Conception et réalisation d\'infrastructures (ponts, routes, bâtiments)', skills: ['Génie civil', 'BTP', 'Calcul de structures'], demand: 'High', unemployment_rate: 3 },
-    { title: 'Ingénieur électrique', description: 'Conception de systèmes électriques et électroniques', skills: ['Électrotechnique', 'Automatisme', 'Schémas électriques'], demand: 'High', unemployment_rate: 4 },
-    { title: 'Ingénieur industriel', description: 'Optimisation des processus de production en industrie', skills: ['Gestion de production', 'Lean manufacturing', 'Supply chain'], demand: 'High', unemployment_rate: 4 },
-    { title: 'Ingénieur en maintenance', description: 'Gestion et optimisation de la maintenance industrielle', skills: ['Maintenance', 'GMAO', 'Fiabilité'], demand: 'Medium', unemployment_rate: 5 },
+    {
+      title: 'Ingénieur mécanique',
+      description: 'Conception et maintenance de systèmes mécaniques',
+      skills: ['Mécanique', 'CAO/DAO', 'Résistance des matériaux'],
+      demand: 'High',
+      unemployment_rate: 3,
+    },
+    {
+      title: 'Ingénieur civil',
+      description:
+        "Conception et réalisation d'infrastructures (ponts, routes, bâtiments)",
+      skills: ['Génie civil', 'BTP', 'Calcul de structures'],
+      demand: 'High',
+      unemployment_rate: 3,
+    },
+    {
+      title: 'Ingénieur électrique',
+      description: 'Conception de systèmes électriques et électroniques',
+      skills: ['Électrotechnique', 'Automatisme', 'Schémas électriques'],
+      demand: 'High',
+      unemployment_rate: 4,
+    },
+    {
+      title: 'Ingénieur industriel',
+      description: 'Optimisation des processus de production en industrie',
+      skills: ['Gestion de production', 'Lean manufacturing', 'Supply chain'],
+      demand: 'High',
+      unemployment_rate: 4,
+    },
+    {
+      title: 'Ingénieur en maintenance',
+      description: 'Gestion et optimisation de la maintenance industrielle',
+      skills: ['Maintenance', 'GMAO', 'Fiabilité'],
+      demand: 'Medium',
+      unemployment_rate: 5,
+    },
   ],
 };
 
@@ -377,6 +824,7 @@ export class ChatbotService {
     private readonly followupGenerator: FollowupGenerator,
     private readonly dynamicRoadmap: DynamicRoadmapService,
     private readonly domainMatcher: DomainMatcherService,
+    private readonly orientationDataset: OrientationDatasetService,
   ) {
     this.conversationMemory = this.memoryService.initializeMemory();
     this.loadFullFieldsData();
@@ -394,17 +842,22 @@ export class ChatbotService {
           this.logger.log(`Loaded ${this.fullFieldsData.length} fields`);
           return;
         }
-      } catch { /* next */ }
+      } catch {
+        /* next */
+      }
     }
   }
 
   private getFieldByInterest(interest: string): FullFieldData | undefined {
     const map: Record<string, string> = {
-      tech: 'IT', sport: 'Sport', health: 'Medical / Health',
-      business: 'Business / Management', art: 'Arts & Design',
+      tech: 'IT',
+      sport: 'Sport',
+      health: 'Medical / Health',
+      business: 'Business / Management',
+      art: 'Arts & Design',
     };
     const name = map[interest];
-    return name ? this.fullFieldsData.find(f => f.field === name) : undefined;
+    return name ? this.fullFieldsData.find((f) => f.field === name) : undefined;
   }
 
   // ============================================================
@@ -435,7 +888,10 @@ export class ChatbotService {
       const rejected = this.getMemory().rejectedDomains || [];
       if (!rejected.includes(detectedDomain)) {
         const interestValue = domainToInterest(detectedDomain);
-        if (interestValue && this.sessionStudentData.interest !== interestValue) {
+        if (
+          interestValue &&
+          this.sessionStudentData.interest !== interestValue
+        ) {
           this.sessionStudentData.interest = interestValue;
         }
         this.sessionStudentData.preferredDomain = detectedDomain;
@@ -443,8 +899,15 @@ export class ChatbotService {
     }
 
     // Extract from memory
-    const extractedIntent = this.memoryService.extractFromMessage(userMessage, this.conversationMemory);
-    this.conversationMemory = this.memoryService.updateMemory(this.conversationMemory, extractedIntent, userMessage);
+    const extractedIntent = this.memoryService.extractFromMessage(
+      userMessage,
+      this.conversationMemory,
+    );
+    this.conversationMemory = this.memoryService.updateMemory(
+      this.conversationMemory,
+      extractedIntent,
+      userMessage,
+    );
 
     // Rejection
     if (advisorIntent === 'rejection') {
@@ -489,15 +952,31 @@ export class ChatbotService {
   // ============================================================
   // 🚨 REJECTION HANDLER
   // ============================================================
+
   private handleRejection(message: string, lang: 'fr' | 'ar'): string {
     const normalized = message.toLowerCase().trim();
     const rejectedDomains: string[] = [];
     const map: Record<string, string> = {
-      réseaux: 'tech', reseau: 'tech', network: 'tech', cyber: 'tech',
-      informatique: 'tech', dev: 'tech', sport: 'sport',
-      kine: 'sport', kiné: 'sport', médecine: 'health', medecine: 'health',
-      santé: 'health', sante: 'health', business: 'business', commerce: 'business',
-      art: 'art', design: 'art', برمجة: 'tech', رياضة: 'sport', طب: 'health',
+      réseaux: 'tech',
+      reseau: 'tech',
+      network: 'tech',
+      cyber: 'tech',
+      informatique: 'tech',
+      dev: 'tech',
+      sport: 'sport',
+      kine: 'sport',
+      kiné: 'sport',
+      médecine: 'health',
+      medecine: 'health',
+      santé: 'health',
+      sante: 'health',
+      business: 'business',
+      commerce: 'business',
+      art: 'art',
+      design: 'art',
+      برمجة: 'tech',
+      رياضة: 'sport',
+      طب: 'health',
     };
     for (const [term, domain] of Object.entries(map)) {
       if (normalized.includes(term) && !rejectedDomains.includes(domain)) {
@@ -506,9 +985,9 @@ export class ChatbotService {
     }
     if (rejectedDomains.length > 0) {
       const existing = new Set(this.sessionStudentData.rejectedDomains || []);
-      rejectedDomains.forEach(d => existing.add(d));
+      rejectedDomains.forEach((d) => existing.add(d));
       this.sessionStudentData.rejectedDomains = Array.from(existing);
-      rejectedDomains.forEach(d => {
+      rejectedDomains.forEach((d) => {
         if (this.sessionStudentData.interest === d) {
           this.sessionStudentData.interest = undefined;
           this.sessionStudentData.preferredDomain = undefined;
@@ -518,7 +997,7 @@ export class ChatbotService {
         ? `تمام، نحّينا ${rejectedDomains.join('، ')} من الاختيارات 👍`
         : `D'accord, j'ai retiré ${rejectedDomains.join(', ')} des options 👍`;
     }
-    return lang === 'ar' ? 'تمام 👍' : 'D\'accord 👍';
+    return lang === 'ar' ? 'تمام 👍' : "D'accord 👍";
   }
 
   // ============================================================
@@ -533,15 +1012,23 @@ export class ChatbotService {
     if (programs.length === 0) return programs;
 
     const domainKey = domain.toUpperCase();
-    const aliasField = detectField(domain) || (
-      domainKey === 'ENGINEERING' ? 'engineering' :
-      domainKey === 'IT' || domainKey === 'TECH' ? 'it' :
-      domainKey === 'HEALTH' ? 'health' :
-      domainKey === 'SPORT' ? 'sport' :
-      domainKey === 'ART' || domainKey === 'DESIGN' ? 'art' :
-      domainKey === 'BUSINESS' ? 'business' :
-      null
-    );
+    const aliasField =
+      detectField(domain) ||
+      (domainKey === 'ENGINEERING'
+        ? 'engineering'
+        : domainKey === 'IT' || domainKey === 'TECH'
+          ? 'it'
+          : domainKey === 'HEALTH'
+            ? 'health'
+            : domainKey === 'SPORT'
+              ? 'sport'
+              : domainKey === 'ART' || domainKey === 'DESIGN'
+                ? 'art'
+                : domainKey === 'BUSINESS'
+                  ? 'business'
+                  : domainKey === 'LANGUAGES' || domainKey === 'LETTERS'
+                    ? 'letters'
+                    : null);
 
     if (aliasField) {
       const aliases = FIELD_ALIASES[aliasField];
@@ -551,11 +1038,15 @@ export class ChatbotService {
           ${program.name || ''}
           ${program.institution || ''}
           ${program.formula || ''}
+          ${getFormulaSearchTerms(program.formula)}
           ${program.domain || ''}
         `);
 
-        return aliases.some((alias) => searchableText.includes(normalizeText(alias))) ||
-          normalizeText(program.domain || '') === normalizeText(aliasField);
+        return (
+          aliases.some((alias) =>
+            searchableText.includes(normalizeText(alias)),
+          ) || normalizeText(program.domain || '') === normalizeText(aliasField)
+        );
       });
 
       if (filtered.length > 0) return filtered;
@@ -563,7 +1054,7 @@ export class ChatbotService {
 
     // HEALTH domain: ONLY health/biomedical programs
     if (domainKey === 'HEALTH') {
-      return programs.filter(p => {
+      return programs.filter((p) => {
         const haystack = [p.name, p.program, p.formula, p.domain]
           .filter(Boolean)
           .join(' ')
@@ -571,67 +1062,170 @@ export class ChatbotService {
           .normalize('NFKD')
           .replace(/[\u0300-\u036f]/g, '');
         // MUST contain health keywords
-        const healthMatch = /\b(biologie|sante|medical|medecine|pharmacie|dentaire|infirmier|soins|paramedical|veterinaire|anesthesie|radiologie|chirurgie|laboratoire|kin[eé]|clinique|hopital|patient|diagnostic|traitement)\b/i.test(haystack);
+        const healthMatch =
+          /\b(biologie|sante|medical|medecine|pharmacie|dentaire|infirmier|soins|paramedical|veterinaire|anesthesie|radiologie|chirurgie|laboratoire|kin[eé]|clinique|hopital|patient|diagnostic|traitement)\b/i.test(
+            haystack,
+          );
         // MUST NOT contain IT keywords
-        const itMatch = /\b(informatique|developpement|programmation|reseau|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|dev|code)\b/i.test(haystack);
+        const itMatch =
+          /\b(informatique|developpement|programmation|reseau|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|dev|code)\b/i.test(
+            haystack,
+          );
         return healthMatch && !itMatch;
       });
     }
 
-    // LANGUAGES domain: ONLY language/literature/communication programs
-    if (domainKey === 'LANGUAGES') {
-      return programs.filter(p => {
-        const haystack = [p.name, p.program, p.formula, p.domain]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .normalize('NFKD')
-          .replace(/[\u0300-\u036f]/g, '');
-        const langMatch = /\b(langues|traduction|lettres|litterature|journalisme|communication|enseignement|anglais|francais|arabe|redaction|traducteur|enseignant)\b/i.test(haystack);
-        const artMatch = /\b(design|architecture|graphisme|mode|cinema|musique|theatre)\b/i.test(haystack);
+    // LANGUAGES domain: match letters aliases + formula hints (Arabic titles are not Latin word-boundary friendly)
+    if (domainKey === 'LANGUAGES' || domainKey === 'LETTERS') {
+      const aliases = FIELD_ALIASES.letters;
+      return programs.filter((p) => {
+        const searchableText = normalizeText(`
+          ${p.program || ''}
+          ${p.name || ''}
+          ${p.institution || ''}
+          ${p.formula || ''}
+          ${getFormulaSearchTerms(p.formula)}
+          ${p.domain || ''}
+        `);
+        const langMatch =
+          aliases.some((alias) =>
+            searchableText.includes(normalizeText(alias)),
+          ) || normalizeText(p.domain || '') === normalizeText('letters');
+        const artMatch =
+          /\b(design|architecture|graphisme|mode|cinema|musique|theatre)\b/i.test(
+            searchableText,
+          );
         return langMatch && !artMatch;
       });
     }
 
     // ART domain: ONLY art/design programs
     if (domainKey === 'ART') {
-      return programs.filter(p => {
+      return programs.filter((p) => {
         const haystack = [p.name, p.program, p.formula, p.domain]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
           .normalize('NFKD')
           .replace(/[\u0300-\u036f]/g, '');
-        return /\b(art|design|architecture|graphisme|graphique|mode|cinema|audiovisuel|musique|theatre|beaux-arts|decoration|creation)\b/i.test(haystack);
+        return /\b(art|design|architecture|graphisme|graphique|mode|cinema|audiovisuel|musique|theatre|beaux-arts|decoration|creation)\b/i.test(
+          haystack,
+        );
       });
     }
 
     // ENGINEERING domain: ONLY engineering programs
     if (domainKey === 'ENGINEERING') {
-      return programs.filter(p => {
+      return programs.filter((p) => {
         const haystack = [p.name, p.program, p.formula, p.domain]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
           .normalize('NFKD')
           .replace(/[\u0300-\u036f]/g, '');
-        const engMatch = /\b(genie|génie|ingenieur|ingénieur|mecanique|mécanique|electrique|électrique|civil|industriel|production|maintenance|electromecanique|robotique|automatique|energie)\b/i.test(haystack);
-        const sportMatch = /\b(sport|coaching|fitness|eps|football|basket|tennis|entrainement)\b/i.test(haystack);
+        const engMatch =
+          /\b(genie|génie|ingenieur|ingénieur|mecanique|mécanique|electrique|électrique|civil|industriel|production|maintenance|electromecanique|robotique|automatique|energie)\b/i.test(
+            haystack,
+          );
+        const sportMatch =
+          /\b(sport|coaching|fitness|eps|football|basket|tennis|entrainement)\b/i.test(
+            haystack,
+          );
         return engMatch && !sportMatch;
+      });
+    }
+
+    // IT/INFO domain: ONLY IT/info programs
+    if (domainKey === 'IT' || domainKey === 'TECH' || domainKey === 'INFO') {
+      return programs.filter((p) => {
+        const haystack = [p.name, p.program, p.formula, p.domain]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '');
+        const itMatch =
+          /\b(informatique|developpement|programmation|reseau|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|dev|code|tech|it|genie logiciel|systeme|base de donnees|cloud)\b/i.test(
+            haystack,
+          );
+        const nonItMatch =
+          /\b(genie civil|genie mecanique|genie electrique|genie industriel|ingenieur civil|ingenieur mecanique|ingenieur electrique|medecine|pharmacie|infirmier|biologie|sport|coaching|fitness|droit|avocat|architecture|lettres|traduction|journalisme)\b/i.test(
+            haystack,
+          );
+        return itMatch && !nonItMatch;
       });
     }
 
     return programs;
   }
 
+  /**
+   * Stale session interest (e.g. IT from an earlier question) + Bac Lettres
+   * yields zero IT programs and a confusing Arabic "no tech programs" message.
+   * Ignore tech unless the user explicitly asks for tech in this message.
+   */
+  private adjustDomainForBac(
+    message: string,
+    detectedDomain: string | null,
+  ): string | null {
+    const base =
+      detectedDomain || this.sessionStudentData.preferredDomain || null;
+    const sessionInterest = this.sessionStudentData.interest;
+
+    const domainForMap =
+      base === 'IT' || base === 'tech'
+        ? 'IT'
+        : sessionInterest === 'tech' && !base
+          ? 'IT'
+          : base;
+    const mapped = domainForMap ? domainToInterest(domainForMap) : undefined;
+    const isTech =
+      sessionInterest === 'tech' ||
+      base === 'IT' ||
+      base === 'tech' ||
+      (typeof base === 'string' && base.toUpperCase() === 'TECH') ||
+      mapped === 'tech';
+
+    if (
+      isTech &&
+      this.isHumanitiesBac(this.sessionStudentData.bacType) &&
+      !this.messageExplicitlyWantsTech(message)
+    ) {
+      return 'LANGUAGES';
+    }
+    return base;
+  }
+
+  private isHumanitiesBac(bacType?: string): boolean {
+    if (!bacType?.trim()) return false;
+    const b = normalizeText(bacType);
+    return (
+      /\b(lettres?|litt[ée]raire|letters?|literature|humanities)\b/i.test(b) ||
+      /(lettres|آداب|أداب|اداب|الآداب|الاداب|adab|lettre)/i.test(bacType)
+    );
+  }
+
+  private messageExplicitlyWantsTech(message: string): boolean {
+    return this.detectDynamicIntent(message) === 'tech';
+  }
+
   // ============================================================
   // 🏫 RECOMMENDATION GENERATOR — programs ONLY (domain-filtered)
   // ============================================================
-  private recommendationGenerator(message: string, lang: 'fr' | 'ar', detectedDomain: string | null): string {
-    const interest = this.resolveEffectiveInterest(message);
+  private recommendationGenerator(
+    message: string,
+    lang: 'fr' | 'ar',
+    detectedDomain: string | null,
+  ): string {
+    const interest = this.resolveInterestIgnoringStaleTech(message);
     const rejected = this.getMemory().rejectedDomains || [];
     const bacType = this.sessionStudentData.bacType;
     const score = this.sessionStudentData.score;
+    const domainAdjusted = this.adjustDomainForBac(message, detectedDomain);
+    const filterDomain =
+      domainAdjusted ??
+      detectedDomain ??
+      this.sessionStudentData.preferredDomain;
 
     // Build student profile for profile-based filtering
     const studentProfile = {
@@ -647,7 +1241,7 @@ export class ChatbotService {
 
     // For LANGUAGES/LETTRES domain, DO NOT map to 'art' interest
     let effectiveInterest = interest;
-    if (detectedDomain === 'LANGUAGES') {
+    if (domainAdjusted === 'LANGUAGES' || detectedDomain === 'LANGUAGES') {
       effectiveInterest = undefined; // Don't use interest to avoid art mapping
     }
 
@@ -656,11 +1250,11 @@ export class ChatbotService {
       bacType,
       score,
       interest: effectiveInterest || undefined,
-      limit: 5,
+      limit: 3,
     });
 
     // Filter out rejected and non-matching domains
-    let programs = (recs.programs || []).filter(p => {
+    let programs = (recs.programs || []).filter((p) => {
       if (p.domain && rejected.includes(p.domain)) return false;
       const pInterest = effectiveInterest;
       if (pInterest && p.domain && p.domain !== pInterest) return false;
@@ -668,14 +1262,29 @@ export class ChatbotService {
     });
 
     // PART 6 — Enforce HEALTH domain filter (strip IT programs)
-    programs = this.enforceDomainPrograms(programs, detectedDomain || this.sessionStudentData.preferredDomain);
+    programs = this.enforceDomainPrograms(programs, filterDomain);
+
+    // 🚫 Filter out impossible programs: diff > 25 → DO NOT DISPLAY
+    // Reuse the same filtering rules working for MATH, LETTRES, ECO:
+    // diff <= 5  → Safe
+    // diff <= 15 → Medium
+    // diff <= 25 → Difficult
+    // diff > 25  → HIDE (impossible admission)
+    if (score) {
+      programs = programs.filter((p) => {
+        const lastScore = p.matchingBac?.lastScore;
+        if (typeof lastScore !== 'number') return true; // keep if no score reference
+        const diff = lastScore - score;
+        return diff <= 25; // diff > 25 is impossible → DO NOT DISPLAY
+      });
+    }
 
     const field = recs.field;
     const blocks: string[] = [];
 
     // If no programs match, return clear message
     if (programs.length === 0) {
-      const domainName = domainLabel(detectedDomain || this.sessionStudentData.preferredDomain || null, lang);
+      const domainName = domainLabel(filterDomain || null, lang);
       if (!domainName) {
         return lang === 'ar'
           ? '❌ لا توجد بيانات كافية لهذا المجال حالياً.'
@@ -689,21 +1298,33 @@ export class ChatbotService {
     // 👤 Student info summary
     if (bacType || score) {
       const infoParts: string[] = [];
-      if (bacType) infoParts.push(lang === 'ar' ? `باك ${bacType}` : `Bac ${bacType}`);
-      if (score) infoParts.push(lang === 'ar' ? `معدل ${score}` : `score ${score}`);
+      if (bacType)
+        infoParts.push(lang === 'ar' ? `باك ${bacType}` : `Bac ${bacType}`);
+      if (score)
+        infoParts.push(lang === 'ar' ? `معدل ${score}` : `score ${score}`);
       blocks.push(`👤 ${infoParts.join(' - ')}`);
     }
 
     // 🏫 Programs
     if (programs.length > 0) {
-      const progLines = programs.slice(0, 4).map(p => {
+      const progLines = programs.slice(0, 4).map((p) => {
         const lastScore = p.matchingBac?.lastScore;
         let level = 'Medium';
         let emoji = '⚡';
         if (score && lastScore) {
-          const gap = score - lastScore;
-          if (gap >= 10) { level = 'Safe'; emoji = '✅'; }
-          else if (gap < -5) { level = 'Difficult'; emoji = '🚀'; }
+          // FIXED: new difficulty thresholds (diff = lastScore - score)
+          // diff <= 5: Safe, diff <= 15: Medium, diff <= 25: Difficult
+          const diff = lastScore - score;
+          if (diff <= 5) {
+            level = 'Safe';
+            emoji = '✅';
+          } else if (diff <= 15) {
+            level = 'Medium';
+            emoji = '⚡';
+          } else {
+            level = 'Difficult';
+            emoji = '🚀';
+          }
         }
         const name = p.name || p.program || '';
         const inst = p.institution ? `@ ${p.institution}` : '';
@@ -717,20 +1338,26 @@ export class ChatbotService {
 
     // ✅ Score compatibility
     if (score && programs.length > 0) {
-      const safeCount = programs.filter(p => {
+      const safeCount = programs.filter((p) => {
         const ls = p.matchingBac?.lastScore;
-        return typeof ls === 'number' && (score - ls) >= 10;
+        return typeof ls === 'number' && (ls - score) <= 5;
       }).length;
       if (safeCount > 0) {
-        blocks.push(lang === 'ar' ? `✅ **التوافق:** معدلك يضمن ${safeCount} برامج` : `✅ **Compatibilité:** ton score sécurise ${safeCount} programme(s)`);
+        blocks.push(
+          lang === 'ar'
+            ? `✅ **التوافق:** معدلك يضمن ${safeCount} برامج`
+            : `✅ **Compatibilité:** ton score sécurise ${safeCount} programme(s)`,
+        );
       }
     }
 
     // 🔮 Future (use domain-specific field data if available)
     if (field) {
-      blocks.push(lang === 'ar'
-        ? `🔮 **المستقبل:** ${field.future_outlook}\n📈 **الطلب:** ${field.demand_in_tunisia}\n⚠️ **البطالة:** ${field.unemployment_risk}`
-        : `🔮 **Perspectives:** ${field.future_outlook}\n📈 **Demande:** ${field.demand_in_tunisia}\n⚠️ **Chômage:** ${field.unemployment_risk}`);
+      blocks.push(
+        lang === 'ar'
+          ? `🔮 **المستقبل:** ${field.future_outlook}\n📈 **الطلب:** ${field.demand_in_tunisia}\n⚠️ **البطالة:** ${field.unemployment_risk}`
+          : `🔮 **Perspectives:** ${field.future_outlook}\n📈 **Demande:** ${field.demand_in_tunisia}\n⚠️ **Chômage:** ${field.unemployment_risk}`,
+      );
     }
 
     // Follow-up (domain-aware)
@@ -739,7 +1366,10 @@ export class ChatbotService {
   }
 
   /** Get the effective domain (from whichever source) */
-  private getEffectiveDomain(message: string, detectedDomain?: string | null): string | null {
+  private getEffectiveDomain(
+    message: string,
+    detectedDomain?: string | null,
+  ): string | null {
     if (detectedDomain) {
       const interest = domainToInterest(detectedDomain);
       return interest || detectedDomain;
@@ -753,14 +1383,20 @@ export class ChatbotService {
   // rédacteur, communication — NEVER designer, UX/UI, architecte
   // ENGINEERING returns: ingénieur mécanique, civil, électrique, etc.
   // ============================================================
-  private jobsGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
-    const domainKey = this.resolveJobsDomain(message, effectiveDomain);
+  private jobsGenerator(
+    message: string,
+    lang: 'fr' | 'ar',
+    effectiveDomain?: string | null,
+  ): string {
+    const adjusted = this.adjustDomainForBac(message, effectiveDomain ?? null);
+    const domainKey = this.resolveJobsDomain(message, adjusted);
 
     // Build student profile for profile-based filtering
+    const interestForProfile = this.resolveInterestIgnoringStaleTech(message);
     const studentProfile = {
       bacType: this.sessionStudentData.bacType,
       score: this.sessionStudentData.score,
-      interest: this.sessionStudentData.interest,
+      interest: interestForProfile,
       language: lang,
     };
 
@@ -769,9 +1405,14 @@ export class ChatbotService {
     // Strict BAC filtering is applied only for roadmap requests.
     const domainField = this.getEffectiveDomain(message, effectiveDomain);
     if (studentProfile.bacType && domainField) {
-      const isAllowed = this.ragService['profileFilter'].isDomainAllowed(domainField, studentProfile.bacType);
+      const isAllowed = this.ragService['profileFilter'].isDomainAllowed(
+        domainField,
+        studentProfile.bacType,
+      );
       if (!isAllowed) {
-        this.logger.warn(`Domain ${domainField} not allowed for BAC ${studentProfile.bacType} (soft warning)`);
+        this.logger.warn(
+          `Domain ${domainField} not allowed for BAC ${studentProfile.bacType} (soft warning)`,
+        );
       }
     }
 
@@ -790,26 +1431,29 @@ export class ChatbotService {
       return this.formatDomainJobs('ENGINEERING', lang);
     }
 
-    const interest = this.resolveEffectiveInterest(message);
-    const domain = this.getEffectiveDomain(message, effectiveDomain);
-
-    // Update profile with latest interest
+    const interest = interestForProfile;
     const updatedProfile = {
       ...studentProfile,
-      interest: interest || studentProfile.interest,
+      interest: interest || undefined,
     };
 
     // Use profile-based filtering for jobs
-    const jobs = this.ragService.getJobsByFieldAndProfile(domainKey, updatedProfile);
+    const jobs = this.ragService.getJobsByFieldAndProfile(
+      domainKey,
+      updatedProfile,
+    );
 
     // Fallback via recommendations (also filtered by profile)
-    const fallbackJobs: JobData[] = jobs.length > 0 ? jobs : (this.ragService.getRecommendations({
-      message,
-      bacType: this.sessionStudentData.bacType,
-      score: this.sessionStudentData.score,
-      interest: interest || undefined,
-      limit: 5,
-    }).jobs || []);
+    const fallbackJobs: JobData[] =
+      jobs.length > 0
+        ? jobs
+        : this.ragService.getRecommendations({
+            message,
+            bacType: this.sessionStudentData.bacType,
+            score: this.sessionStudentData.score,
+            interest: interest || undefined,
+            limit: 5,
+          }).jobs || [];
 
     if (fallbackJobs.length === 0) {
       return lang === 'ar'
@@ -821,9 +1465,11 @@ export class ChatbotService {
     const jobsToShow = fallbackJobs.slice(0, 3);
 
     if (jobsToShow.length > 0) {
-      const jobBlocks = jobsToShow.map(j => {
+      const jobBlocks = jobsToShow.map((j) => {
         const salary = j.salary_level
-          ? (lang === 'ar' ? `💰 **الراتب:** ${this.salaryLabel(j.salary_level, lang)}` : `💰 **Salaire:** ${this.salaryLabel(j.salary_level, lang)}`)
+          ? lang === 'ar'
+            ? `💰 **الراتب:** ${this.salaryLabel(j.salary_level, lang)}`
+            : `💰 **Salaire:** ${this.salaryLabel(j.salary_level, lang)}`
           : '';
         if (lang === 'ar') {
           return `🛡️ **${j.title}**\n📌 ${j.description || ''}\n📈 **الطلب:** ${j.demand || 'Medium'}\n⚠️ **البطالة:** ${j.unemployment_rate !== undefined ? `${j.unemployment_rate}%` : '?'}\n🛠 **المهارات:** ${j.skills?.slice(0, 5).join(', ') || ''}\n${salary}`;
@@ -840,14 +1486,29 @@ export class ChatbotService {
    * Resolve the domain for jobs queries.
    * Special case: "carrière en technologie" → ENGINEERING
    */
-  private resolveJobsDomain(message: string, effectiveDomain?: string | null): string {
-    const domainKey = (effectiveDomain || this.sessionStudentData.preferredDomain || '').toUpperCase();
-
-    // PART 4: Career + technology → engineering jobs
-    const careerTerms = /carrière|carriere|débouchés|debouches|métiers|metiers|opportunités|opportunites|travail/i;
+  private resolveJobsDomain(
+    message: string,
+    effectiveDomain?: string | null,
+  ): string {
+    // PART 4: explicit "carrière… technologie" → engineering (before session defaults)
+    const careerTerms =
+      /carrière|carriere|débouchés|debouches|métiers|metiers|opportunités|opportunites|travail/i;
     const techTerms = /technologie|technology/i;
     if (careerTerms.test(message) && techTerms.test(message)) {
       return 'ENGINEERING';
+    }
+
+    if (effectiveDomain === 'LANGUAGES') {
+      return 'LANGUAGES';
+    }
+
+    let domainKey = (
+      effectiveDomain ||
+      this.sessionStudentData.preferredDomain ||
+      ''
+    ).toUpperCase();
+    if (domainKey === 'TECH') {
+      domainKey = 'IT';
     }
 
     return domainKey;
@@ -870,7 +1531,7 @@ export class ChatbotService {
       blocks.push(`💼 **Métiers ${domainName}**\n`);
     }
 
-    const jobBlocks = jobs.slice(0, 4).map(j => {
+    const jobBlocks = jobs.slice(0, 4).map((j) => {
       if (lang === 'ar') {
         return `🛡️ **${j.title}**\n📌 ${j.description || ''}\n📈 **الطلب:** ${j.demand || 'Medium'}\n⚠️ **البطالة:** ${j.unemployment_rate !== undefined ? `${j.unemployment_rate}%` : '?'}\n🛠 **المهارات:** ${j.skills?.slice(0, 5).join(', ') || ''}`;
       }
@@ -885,7 +1546,15 @@ export class ChatbotService {
   // 🛠 SKILLS GENERATOR
   // ============================================================
   private readonly frontendSkills = {
-    tech: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Tailwind CSS', 'Git/GitHub'],
+    tech: [
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'TypeScript',
+      'React',
+      'Tailwind CSS',
+      'Git/GitHub',
+    ],
     tools: ['VSCode', 'Figma basics', 'Chrome DevTools'],
     projects: ['Landing page', 'Dashboard', 'Portfolio'],
     nextStep: 'freelance or internship',
@@ -900,8 +1569,10 @@ export class ChatbotService {
 
   private detectSkillsSubDomain(message: string): string | null {
     const m = message.toLowerCase();
-    if (/(frontend|front-end|front|react|ui|ux|html|css)/i.test(m)) return 'frontend';
-    if (/(backend|back-end|back|node|express|api|sql)/i.test(m)) return 'backend';
+    if (/(frontend|front-end|front|react|ui|ux|html|css)/i.test(m))
+      return 'frontend';
+    if (/(backend|back-end|back|node|express|api|sql)/i.test(m))
+      return 'backend';
     if (/(cyber|sécurité|security|hack|pentest)/i.test(m)) return 'cyber';
     if (/(data|machine learning|ai|analyse)/i.test(m)) return 'data';
     if (/(mobile|ios|android|app)/i.test(m)) return 'mobile';
@@ -909,7 +1580,11 @@ export class ChatbotService {
     return null;
   }
 
-  private skillsGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+  private skillsGenerator(
+    message: string,
+    lang: 'fr' | 'ar',
+    effectiveDomain?: string | null,
+  ): string {
     const domain = this.getEffectiveDomain(message, effectiveDomain);
 
     // Build student profile for profile-based filtering
@@ -927,10 +1602,18 @@ export class ChatbotService {
     const subDomain = this.detectSkillsSubDomain(message);
     if (subDomain && domain === 'tech') {
       if (subDomain === 'frontend') {
-        return this.formatSkillsResponse('Frontend Developer', this.frontendSkills, lang);
+        return this.formatSkillsResponse(
+          'Frontend Developer',
+          this.frontendSkills,
+          lang,
+        );
       }
       if (subDomain === 'backend') {
-        return this.formatSkillsResponse('Backend Developer', this.backendSkills, lang);
+        return this.formatSkillsResponse(
+          'Backend Developer',
+          this.backendSkills,
+          lang,
+        );
       }
     }
 
@@ -938,7 +1621,7 @@ export class ChatbotService {
     if (!interest && !domain) {
       return lang === 'ar'
         ? '❌ ما عنديش معلومات كافية. حدد المجال اللي تحب.'
-        : '❌ Pas assez d\'informations. Précise le domaine.';
+        : "❌ Pas assez d'informations. Précise le domaine.";
     }
 
     const fullField = this.getFieldByInterest(interest || domain || '');
@@ -948,68 +1631,187 @@ export class ChatbotService {
         : '❌ Compétences non disponibles pour ce domaine.';
     }
 
-    const techSkills = fullField.required_skills?.technical_skills?.slice(0, 6) || [];
-    const softSkills = fullField.required_skills?.soft_skills?.slice(0, 5) || [];
-    const tools = fullField.required_skills?.tools_and_technologies?.slice(0, 5) || [];
+    const techSkills =
+      fullField.required_skills?.technical_skills?.slice(0, 6) || [];
+    const softSkills =
+      fullField.required_skills?.soft_skills?.slice(0, 5) || [];
+    const tools =
+      fullField.required_skills?.tools_and_technologies?.slice(0, 5) || [];
     const fieldName = fullField.field;
 
-    const learningOrder = this.buildLearningOrder(interest || domain || '', lang);
+    const learningOrder = this.buildLearningOrder(
+      interest || domain || '',
+      lang,
+    );
 
     const result: string[] = [];
     if (lang === 'ar') {
       result.push(`🛠 **مهارات ${fieldName}**\n`);
-      result.push(`**🔧 تقنية:**\n${techSkills.map(s => `• ${s}`).join('\n')}\n`);
-      result.push(`**🤝 لطيفة:**\n${softSkills.map(s => `• ${s}`).join('\n')}\n`);
-      result.push(`**⚙️ تكنولوجيات:**\n${tools.map(s => `• ${s}`).join('\n')}\n`);
+      result.push(
+        `**🔧 تقنية:**\n${techSkills.map((s) => `• ${s}`).join('\n')}\n`,
+      );
+      result.push(
+        `**🤝 لطيفة:**\n${softSkills.map((s) => `• ${s}`).join('\n')}\n`,
+      );
+      result.push(
+        `**⚙️ تكنولوجيات:**\n${tools.map((s) => `• ${s}`).join('\n')}\n`,
+      );
       if (learningOrder) result.push(`**📚 ترتيب التعلم:**\n${learningOrder}`);
     } else {
       result.push(`🛠 **Compétences ${fieldName}**\n`);
-      result.push(`**🔧 Techniques:**\n${techSkills.map(s => `• ${s}`).join('\n')}\n`);
-      result.push(`**🤝 Humaines:**\n${softSkills.map(s => `• ${s}`).join('\n')}\n`);
-      result.push(`**⚙️ Technologies:**\n${tools.map(s => `• ${s}`).join('\n')}\n`);
-      if (learningOrder) result.push(`**📚 Ordre d\'apprentissage:**\n${learningOrder}`);
+      result.push(
+        `**🔧 Techniques:**\n${techSkills.map((s) => `• ${s}`).join('\n')}\n`,
+      );
+      result.push(
+        `**🤝 Humaines:**\n${softSkills.map((s) => `• ${s}`).join('\n')}\n`,
+      );
+      result.push(
+        `**⚙️ Technologies:**\n${tools.map((s) => `• ${s}`).join('\n')}\n`,
+      );
+      if (learningOrder)
+        result.push(`**📚 Ordre d\'apprentissage:**\n${learningOrder}`);
     }
 
     return result.join('\n');
   }
 
-  private formatSkillsResponse(title: string, skills: { tech: string[]; tools: string[]; projects: string[]; nextStep: string }, lang: 'fr' | 'ar'): string {
+  private formatSkillsResponse(
+    title: string,
+    skills: {
+      tech: string[];
+      tools: string[];
+      projects: string[];
+      nextStep: string;
+    },
+    lang: 'fr' | 'ar',
+  ): string {
     if (lang === 'ar') {
-      return `🎨 **${title}**\n\n` +
-        `🛠 **لازم تتعلم:**\n${skills.tech.map(s => `• ${s}`).join('\n')}\n\n` +
-        `⚙️ **أدوات:**\n${skills.tools.map(s => `• ${s}`).join('\n')}\n\n` +
-        `📁 **مشاريع:**\n${skills.projects.map(s => `• ${s}`).join('\n')}\n\n` +
-        `🚀 **الخطوة الجاية:**\n${skills.nextStep}`;
+      return (
+        `🎨 **${title}**\n\n` +
+        `🛠 **لازم تتعلم:**\n${skills.tech.map((s) => `• ${s}`).join('\n')}\n\n` +
+        `⚙️ **أدوات:**\n${skills.tools.map((s) => `• ${s}`).join('\n')}\n\n` +
+        `📁 **مشاريع:**\n${skills.projects.map((s) => `• ${s}`).join('\n')}\n\n` +
+        `🚀 **الخطوة الجاية:**\n${skills.nextStep}`
+      );
     }
-    return `🎨 **${title}**\n\n` +
-      `🛠 **Skills:**\n${skills.tech.map(s => `• ${s}`).join('\n')}\n\n` +
-      `⚙️ **Tools:**\n${skills.tools.map(s => `• ${s}`).join('\n')}\n\n` +
-      `📁 **Projects:**\n${skills.projects.map(s => `• ${s}`).join('\n')}\n\n` +
-      `🚀 **Next step:**\n${skills.nextStep}`;
+    return (
+      `🎨 **${title}**\n\n` +
+      `🛠 **Skills:**\n${skills.tech.map((s) => `• ${s}`).join('\n')}\n\n` +
+      `⚙️ **Tools:**\n${skills.tools.map((s) => `• ${s}`).join('\n')}\n\n` +
+      `📁 **Projects:**\n${skills.projects.map((s) => `• ${s}`).join('\n')}\n\n` +
+      `🚀 **Next step:**\n${skills.nextStep}`
+    );
   }
 
-  private buildLearningOrder(interestOrDomain: string, lang: 'fr' | 'ar'): string {
+  private buildLearningOrder(
+    interestOrDomain: string,
+    lang: 'fr' | 'ar',
+  ): string {
     const interest = domainToInterest(interestOrDomain) || interestOrDomain;
     const orders: Record<string, string[]> = {
-      tech: ['1. أساسيات البرمجة', '2. تطوير ويب (HTML, CSS, JS)', '3. إطار عمل (React, Angular)', '4. Backend + قاعدة بيانات', '5. مشاريع شخصية'],
-      sport: ['1. علوم الرياضة', '2. تشريح وفسيولوجيا', '3. تدريب عملي', '4. شهادة تخصص', '5. تطبيق مع أندية'],
-      health: ['1. علوم أساسية (بيولوجيا، كيمياء)', '2. دراسة طبية', '3. تخصص', '4. تربص عملي', '5. ممارسة'],
-      business: ['1. أساسيات الإدارة', '2. محاسبة / تمويل', '3. تسويق', '4. خبرة ميدانية', '5. تخصص (MBA...)'],
-      art: ['1. أساسيات التصميم', '2. أدوات (Photoshop, Figma)', '3. مشاريع', '4. معرض أعمال (Portfolio)', '5. تخصص'],
-      languages: ['1. إتقان لغة أجنبية', '2. دراسة لغوية معمقة', '3. تخصص (ترجمة / صحافة / تدريس)', '4. تطبيق عملي', '5. شهادة مهنية'],
-      engineering: ['1. أساسيات الرياضيات والفيزياء', '2. تخصص هندسي', '3. مشاريع تطبيقية', '4. تربص ميداني', '5. شهادة مهنية'],
+      tech: [
+        '1. أساسيات البرمجة',
+        '2. تطوير ويب (HTML, CSS, JS)',
+        '3. إطار عمل (React, Angular)',
+        '4. Backend + قاعدة بيانات',
+        '5. مشاريع شخصية',
+      ],
+      sport: [
+        '1. علوم الرياضة',
+        '2. تشريح وفسيولوجيا',
+        '3. تدريب عملي',
+        '4. شهادة تخصص',
+        '5. تطبيق مع أندية',
+      ],
+      health: [
+        '1. علوم أساسية (بيولوجيا، كيمياء)',
+        '2. دراسة طبية',
+        '3. تخصص',
+        '4. تربص عملي',
+        '5. ممارسة',
+      ],
+      business: [
+        '1. أساسيات الإدارة',
+        '2. محاسبة / تمويل',
+        '3. تسويق',
+        '4. خبرة ميدانية',
+        '5. تخصص (MBA...)',
+      ],
+      art: [
+        '1. أساسيات التصميم',
+        '2. أدوات (Photoshop, Figma)',
+        '3. مشاريع',
+        '4. معرض أعمال (Portfolio)',
+        '5. تخصص',
+      ],
+      languages: [
+        '1. إتقان لغة أجنبية',
+        '2. دراسة لغوية معمقة',
+        '3. تخصص (ترجمة / صحافة / تدريس)',
+        '4. تطبيق عملي',
+        '5. شهادة مهنية',
+      ],
+      engineering: [
+        '1. أساسيات الرياضيات والفيزياء',
+        '2. تخصص هندسي',
+        '3. مشاريع تطبيقية',
+        '4. تربص ميداني',
+        '5. شهادة مهنية',
+      ],
     };
     const order = orders[interest];
     if (!order) return '';
     if (lang !== 'ar') {
       const en: Record<string, string[]> = {
-        tech: ['1. Programming basics', '2. Web dev (HTML, CSS, JS)', '3. Framework (React, Angular)', '4. Backend + DB', '5. Personal projects'],
-        sport: ['1. Sport science', '2. Anatomy/physiology', '3. Practical training', '4. Certification', '5. Apply with clubs'],
-        health: ['1. Basic sciences', '2. Medical study', '3. Specialization', '4. Internship', '5. Practice'],
-        business: ['1. Management basics', '2. Accounting/finance', '3. Marketing', '4. Field experience', '5. Specialization (MBA...)'],
-        art: ['1. Design basics', '2. Tools (Photoshop, Figma)', '3. Projects', '4. Portfolio', '5. Specialization'],
-        languages: ['1. Master a foreign language', '2. Advanced language study', '3. Specialize (translation/journalism/teaching)', '4. Practical application', '5. Professional certification'],
-        engineering: ['1. Math and physics basics', '2. Engineering specialization', '3. Applied projects', '4. Field internship', '5. Professional certification'],
+        tech: [
+          '1. Programming basics',
+          '2. Web dev (HTML, CSS, JS)',
+          '3. Framework (React, Angular)',
+          '4. Backend + DB',
+          '5. Personal projects',
+        ],
+        sport: [
+          '1. Sport science',
+          '2. Anatomy/physiology',
+          '3. Practical training',
+          '4. Certification',
+          '5. Apply with clubs',
+        ],
+        health: [
+          '1. Basic sciences',
+          '2. Medical study',
+          '3. Specialization',
+          '4. Internship',
+          '5. Practice',
+        ],
+        business: [
+          '1. Management basics',
+          '2. Accounting/finance',
+          '3. Marketing',
+          '4. Field experience',
+          '5. Specialization (MBA...)',
+        ],
+        art: [
+          '1. Design basics',
+          '2. Tools (Photoshop, Figma)',
+          '3. Projects',
+          '4. Portfolio',
+          '5. Specialization',
+        ],
+        languages: [
+          '1. Master a foreign language',
+          '2. Advanced language study',
+          '3. Specialize (translation/journalism/teaching)',
+          '4. Practical application',
+          '5. Professional certification',
+        ],
+        engineering: [
+          '1. Math and physics basics',
+          '2. Engineering specialization',
+          '3. Applied projects',
+          '4. Field internship',
+          '5. Professional certification',
+        ],
       };
       return (en[interest] || []).join('\n');
     }
@@ -1021,7 +1823,11 @@ export class ChatbotService {
   // For EACH entity: search separately, compute independently
   // NEVER reuse first entity values
   // ============================================================
-  private comparisonGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+  private comparisonGenerator(
+    message: string,
+    lang: 'fr' | 'ar',
+    effectiveDomain?: string | null,
+  ): string {
     const score = this.sessionStudentData.score;
     const bacType = this.sessionStudentData.bacType;
 
@@ -1057,32 +1863,32 @@ export class ChatbotService {
       message: item1,
       bacType: this.sessionStudentData.bacType,
       score,
-      interest: e1Interest,  // Entity-specific interest, NOT session interest
+      interest: e1Interest, // Entity-specific interest, NOT session interest
       limit: 3,
     });
     const recs2 = this.ragService.getRecommendations({
       message: item2,
       bacType: this.sessionStudentData.bacType,
       score,
-      interest: e2Interest,  // Entity-specific interest, NOT session interest
+      interest: e2Interest, // Entity-specific interest, NOT session interest
       limit: 3,
     });
 
     // Apply domain enforcement for each entity
-    let prog1Entities = (recs1.programs || []);
+    let prog1Entities = recs1.programs || [];
     if (e1Domain) {
       prog1Entities = this.enforceDomainPrograms(prog1Entities, e1Domain);
     }
-    let prog2Entities = (recs2.programs || []);
+    let prog2Entities = recs2.programs || [];
     if (e2Domain) {
       prog2Entities = this.enforceDomainPrograms(prog2Entities, e2Domain);
     }
 
     const field1 = recs1.field;
     const field2 = recs2.field;
-    // Use first matching program from each entity's independent results
-    const prog1 = (prog1Entities.filter(p => p.domain !== 'other')[0] || prog1Entities[0]);
-    const prog2 = (prog2Entities.filter(p => p.domain !== 'other')[0] || prog2Entities[0]);
+    // Use BEST matching program from each entity's independent results
+    const prog1 = this.findBestMatchingProgram(prog1Entities, e1Domain);
+    const prog2 = this.findBestMatchingProgram(prog2Entities, e2Domain);
 
     const score1 = prog1?.matchingBac?.lastScore;
     const score2 = prog2?.matchingBac?.lastScore;
@@ -1095,16 +1901,22 @@ export class ChatbotService {
       blocks.push(`**1️⃣ ${item1}**`);
       if (score1 !== undefined) blocks.push(`📊 **آخر score:** ${score1}`);
       if (prog1?.name) blocks.push(`🏫 ${prog1.name}@${prog1.institution}`);
-      if (field1?.future_outlook) blocks.push(`📈 **المستقبل:** ${field1.future_outlook}`);
-      if (field1?.demand_in_tunisia) blocks.push(`📈 **الطلب:** ${field1.demand_in_tunisia}`);
-      if (field1?.unemployment_risk) blocks.push(`⚠️ **البطالة:** ${field1.unemployment_risk}`);
+      if (field1?.future_outlook)
+        blocks.push(`📈 **المستقبل:** ${field1.future_outlook}`);
+      if (field1?.demand_in_tunisia)
+        blocks.push(`📈 **الطلب:** ${field1.demand_in_tunisia}`);
+      if (field1?.unemployment_risk)
+        blocks.push(`⚠️ **البطالة:** ${field1.unemployment_risk}`);
 
       blocks.push(`\n**2️⃣ ${item2}**`);
       if (score2 !== undefined) blocks.push(`📊 **آخر score:** ${score2}`);
       if (prog2?.name) blocks.push(`🏫 ${prog2.name}@${prog2.institution}`);
-      if (field2?.future_outlook) blocks.push(`📈 **المستقبل:** ${field2.future_outlook}`);
-      if (field2?.demand_in_tunisia) blocks.push(`📈 **الطلب:** ${field2.demand_in_tunisia}`);
-      if (field2?.unemployment_risk) blocks.push(`⚠️ **البطالة:** ${field2.unemployment_risk}`);
+      if (field2?.future_outlook)
+        blocks.push(`📈 **المستقبل:** ${field2.future_outlook}`);
+      if (field2?.demand_in_tunisia)
+        blocks.push(`📈 **الطلب:** ${field2.demand_in_tunisia}`);
+      if (field2?.unemployment_risk)
+        blocks.push(`⚠️ **البطالة:** ${field2.unemployment_risk}`);
 
       // INDEPENDENT comparison logic:
       if (score !== undefined && score1 != null && score2 != null) {
@@ -1113,12 +1925,18 @@ export class ChatbotService {
         if (gap1 >= 0 && gap2 >= 0) {
           blocks.push(`\n🎯 **الخلاصة:** بمعدل ${score}، التخصصين متاحين لك.`);
         } else if (gap1 >= 0 && gap2 < 0) {
-          blocks.push(`\n🎯 **الخلاصة:** بمعدل ${score}، ${item1} أضمن من ${item2}.`);
+          blocks.push(
+            `\n🎯 **الخلاصة:** بمعدل ${score}، ${item1} أضمن من ${item2}.`,
+          );
         } else if (gap2 >= 0 && gap1 < 0) {
-          blocks.push(`\n🎯 **الخلاصة:** بمعدل ${score}، ${item2} أضمن من ${item1}.`);
+          blocks.push(
+            `\n🎯 **الخلاصة:** بمعدل ${score}، ${item2} أضمن من ${item1}.`,
+          );
         } else {
           const closer = gap1 > gap2 ? item1 : item2;
-          blocks.push(`\n🎯 **الخلاصة:** ${closer} أقرب لمعدلك (فرق ${Math.abs(Math.min(gap1, gap2))} نقطة).`);
+          blocks.push(
+            `\n🎯 **الخلاصة:** ${closer} أقرب لمعدلك (فرق ${Math.abs(Math.min(gap1, gap2))} نقطة).`,
+          );
         }
       }
     } else {
@@ -1127,34 +1945,132 @@ export class ChatbotService {
       blocks.push(`**1️⃣ ${item1}**`);
       if (score1 !== undefined) blocks.push(`📊 **Dernier score:** ${score1}`);
       if (prog1?.name) blocks.push(`🏫 ${prog1.name}@${prog1.institution}`);
-      if (field1?.future_outlook) blocks.push(`📈 **Avenir:** ${field1.future_outlook}`);
-      if (field1?.demand_in_tunisia) blocks.push(`📈 **Demande:** ${field1.demand_in_tunisia}`);
-      if (field1?.unemployment_risk) blocks.push(`⚠️ **Chômage:** ${field1.unemployment_risk}`);
+      if (field1?.future_outlook)
+        blocks.push(`📈 **Avenir:** ${field1.future_outlook}`);
+      if (field1?.demand_in_tunisia)
+        blocks.push(`📈 **Demande:** ${field1.demand_in_tunisia}`);
+      if (field1?.unemployment_risk)
+        blocks.push(`⚠️ **Chômage:** ${field1.unemployment_risk}`);
 
       blocks.push(`\n**2️⃣ ${item2}**`);
       if (score2 !== undefined) blocks.push(`📊 **Dernier score:** ${score2}`);
       if (prog2?.name) blocks.push(`🏫 ${prog2.name}@${prog2.institution}`);
-      if (field2?.future_outlook) blocks.push(`📈 **Avenir:** ${field2.future_outlook}`);
-      if (field2?.demand_in_tunisia) blocks.push(`📈 **Demande:** ${field2.demand_in_tunisia}`);
-      if (field2?.unemployment_risk) blocks.push(`⚠️ **Chômage:** ${field2.unemployment_risk}`);
+      if (field2?.future_outlook)
+        blocks.push(`📈 **Avenir:** ${field2.future_outlook}`);
+      if (field2?.demand_in_tunisia)
+        blocks.push(`📈 **Demande:** ${field2.demand_in_tunisia}`);
+      if (field2?.unemployment_risk)
+        blocks.push(`⚠️ **Chômage:** ${field2.unemployment_risk}`);
 
       if (score != null && score1 != null && score2 != null) {
         const gap1 = score - score1;
         const gap2 = score - score2;
         if (gap1 >= 0 && gap2 >= 0) {
-          blocks.push(`\n🎯 **Conclusion:** Avec ${score}, les deux sont accessibles.`);
+          blocks.push(
+            `\n🎯 **Conclusion:** Avec ${score}, les deux sont accessibles.`,
+          );
         } else if (gap1 >= 0 && gap2 < 0) {
-          blocks.push(`\n🎯 **Conclusion:** Avec ${score}, ${item1} est plus sûr que ${item2}.`);
+          blocks.push(
+            `\n🎯 **Conclusion:** Avec ${score}, ${item1} est plus sûr que ${item2}.`,
+          );
         } else if (gap2 >= 0 && gap1 < 0) {
-          blocks.push(`\n🎯 **Conclusion:** Avec ${score}, ${item2} est plus sûr que ${item1}.`);
+          blocks.push(
+            `\n🎯 **Conclusion:** Avec ${score}, ${item2} est plus sûr que ${item1}.`,
+          );
         } else {
           const closer = gap1 > gap2 ? item1 : item2;
-          blocks.push(`\n🎯 **Conclusion:** ${closer} est plus proche de ton score (écart ${Math.abs(Math.min(gap1, gap2))} pts).`);
+          blocks.push(
+            `\n🎯 **Conclusion:** ${closer} est plus proche de ton score (écart ${Math.abs(Math.min(gap1, gap2))} pts).`,
+          );
         }
       }
     }
 
     return blocks.join('\n');
+  }
+
+  // ============================================================
+  // HELPER: findBestMatchingProgram()
+  // Find the BEST program for domain comparison
+  // Priority: 1) Programs with real admission scores, 2) Domain-relevant programs, 3) Any available program
+  // ============================================================
+  private findBestMatchingProgram(
+    programs: any[],
+    domain?: string | null,
+  ): any | null {
+    if (!programs || programs.length === 0) return null;
+
+    // Filter out 'other' domain programs first
+    const relevantPrograms = programs.filter((p) => p.domain !== 'other');
+    const candidates = relevantPrograms.length > 0 ? relevantPrograms : programs;
+
+    // Priority 1: Programs with real admission scores
+    const programsWithScores = candidates.filter(
+      (p) => p.matchingBac?.lastScore !== undefined && p.matchingBac?.lastScore !== null,
+    );
+
+    if (programsWithScores.length > 0) {
+      // Sort by score (highest first) to get the most competitive/relevant program
+      return programsWithScores.sort((a, b) => 
+        (b.matchingBac?.lastScore || 0) - (a.matchingBac?.lastScore || 0)
+      )[0];
+    }
+
+    // Priority 2: Domain-relevant programs (check program name and institution)
+    if (domain) {
+      const domainKeywords = this.getDomainKeywords(domain);
+      const domainRelevant = candidates.filter((p) => {
+        const searchText = `${p.program || ''} ${p.name || ''} ${p.institution || ''}`.toLowerCase();
+        return domainKeywords.some((keyword) => searchText.includes(keyword.toLowerCase()));
+      });
+
+      if (domainRelevant.length > 0) {
+        return domainRelevant[0];
+      }
+    }
+
+    // Priority 3: First available program
+    return candidates[0];
+  }
+
+  // ============================================================
+  // HELPER: getDomainKeywords()
+  // Get relevant keywords for a domain to help with program matching
+  // ============================================================
+  private getDomainKeywords(domain: string): string[] {
+    const keywordMap: Record<string, string[]> = {
+      HEALTH: [
+        'médecine', 'medecine', 'santé', 'sante', 'pharmacie', 'infirmier', 
+        'dentaire', 'biologie', 'soins', 'طب', 'صحة', 'صيدلة', 'تمريض'
+      ],
+      IT: [
+        'informatique', 'informatia', 'développement', 'programmation', 'software',
+        'réseau', 'data', 'cyber', 'web', 'mobile', 'اعلامية', 'معلوماتية', 'برمجة'
+      ],
+      BUSINESS: [
+        'gestion', 'business', 'commerce', 'finance', 'marketing', 'économie',
+        'comptabilité', 'management', 'إدارة', 'تجارة', 'اقتصاد'
+      ],
+      ENGINEERING: [
+        'ingénieur', 'génie', 'mécanique', 'électrique', 'civil', 'industriel',
+        'هندسة', 'مهندس', 'ميكانيك', 'كهرباء'
+      ],
+      LAW: [
+        'droit', 'avocat', 'justice', 'juridique', 'قانون', 'محامي', 'عدالة'
+      ],
+      LANGUAGES: [
+        'lettres', 'langues', 'traduction', 'français', 'anglais', 'arabe',
+        'لغات', 'ترجمة', 'آداب'
+      ],
+      ART: [
+        'art', 'design', 'architecture', 'musique', 'cinéma', 'فن', 'تصميم'
+      ],
+      SPORT: [
+        'sport', 'éducation physique', 'kine', 'coaching', 'رياضة', 'تربية بدنية'
+      ]
+    };
+
+    return keywordMap[domain] || [];
   }
 
   // ============================================================
@@ -1170,9 +2086,19 @@ export class ChatbotService {
     // Step 2: Remove comparison verbs
     let m = cleaned;
     const comparisonVerbs = [
-      'قارن', 'قارن بين', 'مقارنة', 'comparer', 'compare',
-      'comparaison', 'فرق بين', 'difference', 'différence',
-      'خير بين', 'أفضل', 'افضل', 'الفرق',
+      'قارن',
+      'قارن بين',
+      'مقارنة',
+      'comparer',
+      'compare',
+      'comparaison',
+      'فرق بين',
+      'difference',
+      'différence',
+      'خير بين',
+      'أفضل',
+      'افضل',
+      'الفرق',
     ];
     for (const verb of comparisonVerbs) {
       m = m.replace(verb, '');
@@ -1180,34 +2106,78 @@ export class ChatbotService {
 
     // Step 3: Split ONLY using separators
     const separators = /(?:ou|ou bien|vs|versus|\/|ولا|walou|أو|او|or|\|)/i;
-    let parts = m.split(separators)
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
+    let parts = m
+      .split(separators)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
 
     // Step 4: Remove stop words
     const stopWords = [
-      'entre', 'between', 'et', 'and', 'و', 'مع', 'بين',
-      'comparer', 'compare', 'مقارنة', 'قارن',
-      'الفرق', 'difference', 'فرق',
+      'entre',
+      'between',
+      'et',
+      'and',
+      'و',
+      'مع',
+      'بين',
+      'comparer',
+      'compare',
+      'مقارنة',
+      'قارن',
+      'الفرق',
+      'difference',
+      'فرق',
     ];
-    parts = parts.filter(p => !stopWords.includes(p));
+    parts = parts.filter((p) => !stopWords.includes(p));
 
     // Step 5: If we still don't have 2 items, try to find known entities
     if (parts.length < 2) {
       const knownItems = [
-        'medecine', 'médecine', 'pharmacie', 'infirmier',
-        'informatique', 'web', 'data', 'dev', 'reseaux', 'réseaux', 'cyber',
-        'sport', 'kine', 'kiné', 'coaching',
-        'business', 'commerce', 'gestion', 'finance', 'marketing',
-        'art', 'design', 'architecture',
-        'droit', 'avocat', 'notaire',
-        'lettres', 'traduction', 'journalisme',
-        'genie civil', 'génie civil', 'mecanique', 'mécanique',
-        'industriel', 'electrique', 'électrique',
-        'math', 'physique', 'chimie', 'biologie',
-        'frontend', 'backend', 'mobile',
+        'medecine',
+        'médecine',
+        'pharmacie',
+        'infirmier',
+        'informatique',
+        'web',
+        'data',
+        'dev',
+        'reseaux',
+        'réseaux',
+        'cyber',
+        'sport',
+        'kine',
+        'kiné',
+        'coaching',
+        'business',
+        'commerce',
+        'gestion',
+        'finance',
+        'marketing',
+        'art',
+        'design',
+        'architecture',
+        'droit',
+        'avocat',
+        'notaire',
+        'lettres',
+        'traduction',
+        'journalisme',
+        'genie civil',
+        'génie civil',
+        'mecanique',
+        'mécanique',
+        'industriel',
+        'electrique',
+        'électrique',
+        'math',
+        'physique',
+        'chimie',
+        'biologie',
+        'frontend',
+        'backend',
+        'mobile',
       ];
-      const found = knownItems.filter(i => {
+      const found = knownItems.filter((i) => {
         return cleaned.includes(i);
       });
       if (found.length >= 2) return found.slice(0, 2);
@@ -1223,14 +2193,26 @@ export class ChatbotService {
   private roadmapGenerator(
     message: string,
     lang: 'fr' | 'ar',
-    effectiveDomain?: string | null
+    effectiveDomain?: string | null,
   ): string {
     // Extract domain name from the message by removing roadmap keywords
-    const roadmapKeywords = ['roadmap', 'parcours', 'chemin', 'path', 'carrière', 'career', 'مسار', 'طريق'];
+    const roadmapKeywords = [
+      'roadmap',
+      'parcours',
+      'chemin',
+      'path',
+      'carrière',
+      'career',
+      'مسار',
+      'طريق',
+    ];
     let domainQuery = message.toLowerCase();
-    
+
     for (const keyword of roadmapKeywords) {
-      domainQuery = domainQuery.replace(new RegExp(`\\b${keyword}\\b`, 'gi'), '');
+      domainQuery = domainQuery.replace(
+        new RegExp(`\\b${keyword}\\b`, 'gi'),
+        '',
+      );
     }
     domainQuery = domainQuery.trim();
 
@@ -1258,7 +2240,9 @@ export class ChatbotService {
 
     // Strategy 3: Try session interest with STRICT matching
     if (!matchedDomain && this.sessionStudentData.interest) {
-      const interestMatch = this.domainMatcher.findDomainStrict(this.sessionStudentData.interest);
+      const interestMatch = this.domainMatcher.findDomainStrict(
+        this.sessionStudentData.interest,
+      );
       if (interestMatch) {
         matchedDomain = interestMatch;
       }
@@ -1288,9 +2272,14 @@ export class ChatbotService {
     // ============================================================
     const bacType = this.sessionStudentData.bacType;
     if (bacType) {
-      const isAllowed = this.ragService['profileFilter'].isDomainAllowed(domainField, bacType);
+      const isAllowed = this.ragService['profileFilter'].isDomainAllowed(
+        domainField,
+        bacType,
+      );
       if (!isAllowed) {
-        this.logger.warn(`Roadmap domain ${domainField} not allowed for BAC ${bacType}`);
+        this.logger.warn(
+          `Roadmap domain ${domainField} not allowed for BAC ${bacType}`,
+        );
         return lang === 'ar'
           ? `❌ هذا المجال غير متوافق مع شعبتك (${bacType}). حاول مجال آخر.`
           : `❌ Ce domaine n'est pas compatible avec ton bac (${bacType}). Essaie un autre domaine.`;
@@ -1302,9 +2291,12 @@ export class ChatbotService {
     try {
       return this.buildSafeRoadmap(domainField, lang);
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
       console.error('ROADMAP ERROR:', error);
-      this.logger.error(`Roadmap generation failed for ${domainField}: ${error.message}`);
-      
+      this.logger.error(
+        `Roadmap generation failed for ${domainField}: ${errMsg}`,
+      );
+
       // Return generic fallback instead of crashing
       return lang === 'ar'
         ? `🗺️ **خريطة الطريق ${domainField}**\n\nعذراً، لم نتمكن من تحميل خريطة الطريق الكاملة.\n\nيرجى المحاولة مرة أخرى أو طرح سؤال عام عن هذا المجال.`
@@ -1318,26 +2310,44 @@ export class ChatbotService {
   private buildSafeRoadmap(domainField: string, lang: 'fr' | 'ar'): string {
     // Generate roadmaps with full error handling
     let beginner: any, intermediate: any, advanced: any;
-    let finalDomainField = domainField;
-    
+    const finalDomainField = domainField;
+
     try {
-      beginner = this.dynamicRoadmap.generateSpecificRoadmap(finalDomainField, 'beginner');
+      beginner = this.dynamicRoadmap.generateSpecificRoadmap(
+        finalDomainField,
+        'beginner',
+      );
     } catch (e) {
-      console.error(`Failed to generate beginner roadmap for ${finalDomainField}:`, e);
+      console.error(
+        `Failed to generate beginner roadmap for ${finalDomainField}:`,
+        e,
+      );
       beginner = this.createEmptyRoadmap(finalDomainField, 'beginner');
     }
-    
+
     try {
-      intermediate = this.dynamicRoadmap.generateSpecificRoadmap(finalDomainField, 'intermediate');
+      intermediate = this.dynamicRoadmap.generateSpecificRoadmap(
+        finalDomainField,
+        'intermediate',
+      );
     } catch (e) {
-      console.error(`Failed to generate intermediate roadmap for ${finalDomainField}:`, e);
+      console.error(
+        `Failed to generate intermediate roadmap for ${finalDomainField}:`,
+        e,
+      );
       intermediate = this.createEmptyRoadmap(finalDomainField, 'intermediate');
     }
-    
+
     try {
-      advanced = this.dynamicRoadmap.generateSpecificRoadmap(finalDomainField, 'advanced');
+      advanced = this.dynamicRoadmap.generateSpecificRoadmap(
+        finalDomainField,
+        'advanced',
+      );
     } catch (e) {
-      console.error(`Failed to generate advanced roadmap for ${finalDomainField}:`, e);
+      console.error(
+        `Failed to generate advanced roadmap for ${finalDomainField}:`,
+        e,
+      );
       advanced = this.createEmptyRoadmap(finalDomainField, 'advanced');
     }
 
@@ -1352,9 +2362,11 @@ export class ChatbotService {
     try {
       const domainsRaw = fs.readFileSync(domainsFilePath, 'utf-8');
       const parsed = JSON.parse(domainsRaw);
-      domainFromJson = (parsed?.domains || []).find((d: any) =>
-        String(d?.field || '').trim() === String(finalDomainField).trim()
-      ) || null;
+      domainFromJson =
+        (parsed?.domains || []).find(
+          (d: any) =>
+            String(d?.field || '').trim() === String(finalDomainField).trim(),
+        ) || null;
     } catch (e) {
       console.error('Failed to load domain from JSON:', e);
     }
@@ -1366,9 +2378,10 @@ export class ChatbotService {
     const allSkills = domainFromJson?.skills || [];
     const allTools = domainFromJson?.tools || [];
 
-    const title = lang === 'ar'
-      ? `# 🚀 ${finalDomainField}`
-      : `# 🚀 ${finalDomainField} Development Roadmap`;
+    const title =
+      lang === 'ar'
+        ? `# 🚀 ${finalDomainField}`
+        : `# 🚀 ${finalDomainField} Development Roadmap`;
 
     const overviewHeader = '## 📌 Overview';
 
@@ -1376,7 +2389,7 @@ export class ChatbotService {
     const formatPhase = (p: any, emoji: string, levelName: string): string => {
       // Ensure p has safe defaults
       const safeP = this.normalizeRoadmapData(p);
-      
+
       if (!safeP.phases || safeP.phases.length === 0) {
         return lang === 'ar'
           ? `_المحتوى قيد التطوير..._`
@@ -1384,10 +2397,18 @@ export class ChatbotService {
       }
 
       const phaseBlocks = safeP.phases.map((ph: any, idx: number) => {
-        const skills = (ph.skills || []).map((s: string) => `• ${s}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
-        const projects = (ph.projects || []).map((s: string) => `• ${s}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
-        const res = (ph.resources || []).map((r: string) => `• ${r}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
-        const ms = (ph.milestones || []).map((m: string) => `• ${m}`).join('\n') || (lang === 'ar' ? '• —' : '• —');
+        const skills =
+          (ph.skills || []).map((s: string) => `• ${s}`).join('\n') ||
+          (lang === 'ar' ? '• —' : '• —');
+        const projects =
+          (ph.projects || []).map((s: string) => `• ${s}`).join('\n') ||
+          (lang === 'ar' ? '• —' : '• —');
+        const res =
+          (ph.resources || []).map((r: string) => `• ${r}`).join('\n') ||
+          (lang === 'ar' ? '• —' : '• —');
+        const ms =
+          (ph.milestones || []).map((m: string) => `• ${m}`).join('\n') ||
+          (lang === 'ar' ? '• —' : '• —');
 
         return (
           `### ${emoji} ${ph.title || (lang === 'ar' ? `المرحلة ${idx + 1}` : `Phase ${idx + 1}`)}\n` +
@@ -1433,25 +2454,18 @@ export class ChatbotService {
       `* ${demand ? `Demand in Tunisia: ${demand}` : 'Demand in Tunisia: —'}\n` +
       `* ${futureOutlook ? `Future outlook: ${futureOutlook}` : 'Future outlook: —'}\n` +
       `* ${unemploymentRisk ? `Unemployment risk: ${unemploymentRisk}` : 'Unemployment risk: —'}\n\n` +
-
       `## 🛠 ${lang === 'ar' ? 'المهارات الأساسية' : 'Core Skills'}\n` +
       `${formatList(coreSkills, lang === 'ar' ? 'لم يتم تحديد المهارات بعد' : 'No skills specified yet')}\n\n` +
-
       `## ⚙ ${lang === 'ar' ? 'الأدوات' : 'Tools'}\n` +
       `${formatList(tools, lang === 'ar' ? 'لم يتم تحديد الأدوات بعد' : 'No tools specified yet')}\n\n` +
-
       `## 🌱 ${lang === 'ar' ? 'المستوى المبتدئ' : 'Beginner Level'}\n` +
       `${formatPhase(safeBeginner, '🌱', 'Beginner')}\n\n` +
-
       `## 🚀 ${lang === 'ar' ? 'المستوى المتوسط' : 'Intermediate Level'}\n` +
       `${formatPhase(safeIntermediate, '🚀', 'Intermediate')}\n\n` +
-
       `## 🏆 ${lang === 'ar' ? 'المستوى المتقدم' : 'Advanced Level'}\n` +
       `${formatPhase(safeAdvanced, '🏆', 'Advanced')}\n\n` +
-
       `## 🎓 ${lang === 'ar' ? 'الشهادات' : 'Certifications'}\n` +
       `${formatList(uniqueCerts, lang === 'ar' ? 'الشهادات قيد الإضافة' : 'Certifications coming soon')}\n\n` +
-
       `## 💼 ${lang === 'ar' ? 'المسارات المهنية' : 'Career Paths'}\n` +
       `${formatList(uniqueCareerPaths, lang === 'ar' ? 'المسارات قيد الإضافة' : 'Career paths coming soon')}`;
 
@@ -1501,30 +2515,39 @@ export class ChatbotService {
   // ============================================================
   // 💰 SALARY GENERATOR
   // ============================================================
-  private salaryGenerator(message: string, lang: 'fr' | 'ar', effectiveDomain?: string | null): string {
+  private salaryGenerator(
+    message: string,
+    lang: 'fr' | 'ar',
+    effectiveDomain?: string | null,
+  ): string {
     const domain = this.getEffectiveDomain(message, effectiveDomain);
 
     const jobs = this.ragService.getJobsByField(domain || null);
-    
+
     if (jobs.length === 0) {
       return lang === 'ar'
         ? '💰 ما عنديش معلومات رواتب لهذا المجال.'
-        : '💰 Pas d\'infos salaires pour ce domaine.';
+        : "💰 Pas d'infos salaires pour ce domaine.";
     }
 
     const blocks: string[] = [];
     if (lang === 'ar') blocks.push('💰 **الرواتب في هذا المجال:**\n');
     else blocks.push('💰 **Salaires dans ce domaine:**\n');
 
-    jobs.slice(0, 3).forEach(j => {
+    jobs.slice(0, 3).forEach((j) => {
       const salary = j.salary_level
         ? this.salaryLabel(j.salary_level, lang)
-        : lang === 'ar' ? '800 - 1500 دينار' : '800 - 1500 DT';
-      const senior = j.senior_salary || (lang === 'ar' ? '2000+ دينار' : '2000+ DT');
+        : lang === 'ar'
+          ? '800 - 1500 دينار'
+          : '800 - 1500 DT';
+      const senior =
+        j.senior_salary || (lang === 'ar' ? '2000+ دينار' : '2000+ DT');
       if (lang === 'ar') {
         blocks.push(`**${j.title}**\n• مبتدئ: ${salary}\n• خبير: ${senior}\n`);
       } else {
-        blocks.push(`**${j.title}**\n• Junior: ${salary}\n• Senior: ${senior}\n`);
+        blocks.push(
+          `**${j.title}**\n• Junior: ${salary}\n• Senior: ${senior}\n`,
+        );
       }
     });
 
@@ -1543,7 +2566,10 @@ export class ChatbotService {
   // ============================================================
   // 🧠 DOMAIN-AWARE FOLLOW-UP
   // ============================================================
-  private buildDomainFollowUp(domainOrInterest: string | null | undefined, lang: 'fr' | 'ar'): string {
+  private buildDomainFollowUp(
+    domainOrInterest: string | null | undefined,
+    lang: 'fr' | 'ar',
+  ): string {
     if (!domainOrInterest) {
       return lang === 'ar' ? 'شنو المجال اللي تحب؟' : 'Quel domaine veux-tu ?';
     }
@@ -1561,16 +2587,20 @@ export class ChatbotService {
       languages: 'LANGUAGES',
       engineering: 'ENGINEERING',
     };
-    
-    const domainKey = interestToDomain[domainOrInterest] || domainOrInterest.toUpperCase();
+
+    const domainKey =
+      interestToDomain[domainOrInterest] || domainOrInterest.toUpperCase();
     const followups = DOMAIN_FOLLOWUPS[domainKey] || {
       ar: ['تحب نشوفلك برامج ولا خدمات؟'],
       fr: ['Tu veux voir des programmes ou des métiers ?'],
     };
 
     const questions = followups[lang === 'ar' ? 'ar' : 'fr'];
-    const fresh = questions.filter(q => !asked.includes(q));
-    const chosen = fresh.length > 0 ? fresh[Math.floor(Math.random() * fresh.length)] : questions[0];
+    const fresh = questions.filter((q) => !asked.includes(q));
+    const chosen =
+      fresh.length > 0
+        ? fresh[Math.floor(Math.random() * fresh.length)]
+        : questions[0];
     this.trackAskedQuestion(chosen);
 
     return `👉 ${chosen}`;
@@ -1598,7 +2628,11 @@ export class ChatbotService {
   }
 
   private getJourneyStep(): AiMemory['journeyStep'] {
-    if (!this.sessionStudentData.interest && !this.sessionStudentData.preferredDomain) return 'identify_interest';
+    if (
+      !this.sessionStudentData.interest &&
+      !this.sessionStudentData.preferredDomain
+    )
+      return 'identify_interest';
     if (!this.sessionStudentData.refinedDomain) return 'refine_domain';
     if (!this.sessionStudentData.difficulty) return 'suggest_options';
     return 'give_decision';
@@ -1607,9 +2641,40 @@ export class ChatbotService {
   private resolveEffectiveInterest(message: string): string | undefined {
     const rejected = this.getMemory().rejectedDomains || [];
     const explicitInterest = this.detectDynamicIntent(message);
-    if (explicitInterest) return rejected.includes(explicitInterest) ? undefined : explicitInterest;
-    const memInterest = this.sessionStudentData.interest || this.sessionStudentData.preferredDomain;
-    return (memInterest && !rejected.includes(memInterest)) ? memInterest : undefined;
+    if (explicitInterest)
+      return rejected.includes(explicitInterest) ? undefined : explicitInterest;
+    const memInterest =
+      this.sessionStudentData.interest ||
+      this.sessionStudentData.preferredDomain;
+    return memInterest && !rejected.includes(memInterest)
+      ? memInterest
+      : undefined;
+  }
+
+  /**
+   * Lettres / humanities BAC must not keep a stale tech session when ranking programs/jobs.
+   * Explicit tech keywords in this message still resolve normally.
+   */
+  private resolveInterestIgnoringStaleTech(
+    message: string,
+  ): string | undefined {
+    if (
+      this.isHumanitiesBac(this.sessionStudentData.bacType) &&
+      !this.messageExplicitlyWantsTech(message)
+    ) {
+      return undefined;
+    }
+    return this.resolveEffectiveInterest(message);
+  }
+
+  private memoryInterestLooksTech(interest: string | null): boolean {
+    if (!interest?.trim()) return false;
+    const x = interest.trim().toUpperCase();
+    return (
+      x === 'IT' ||
+      x === 'TECH' ||
+      /INFO|INFORMATIQUE|CYBER|DATA|DEV|WEB/i.test(interest)
+    );
   }
 
   private detectDynamicIntent(message: string): string | null {
@@ -1618,17 +2683,102 @@ export class ChatbotService {
     if (field) return field === 'it' ? 'tech' : field;
 
     const m = normalizeText(message);
-    const h = (k: string[]) => k.some(kw => m.includes(normalizeText(kw)));
-    if (h(['informatique', 'informatia', 'dev', 'développement', 'programmation', 'software', 'réseau', 'reseau', 'cyber', 'data', 'ia', 'ai', 'it', 'tech', 'coding', 'برمجة', 'تكنولوجيا', 'ديف', 'اعلامية', 'معلوماتية', 'frontend', 'backend', 'fullstack', 'web', 'mobile'])) return 'tech';
-    if (h(['sport', 'kiné', 'kine', 'football', 'basket', 'tennis', 'رياضة', 'سبور', 'تدريب'])) return 'sport';
-    if (h(['médecine', 'medecine', 'santé', 'sante', 'pharmacie', 'infirmier', 'طب', 'صحة', 'تمريض'])) return 'health';
-    if (h(['business', 'gestion', 'commerce', 'finance', 'marketing', 'économie', 'economie', 'comptabilité', 'comptabilite', 'تجارة', 'أعمال', 'محاسبة'])) return 'business';
-    if (h(['art', 'design', 'architecture', 'graphisme', 'mode', 'فن', 'تصميم', 'عمارة'])) return 'art';
+    const h = (k: string[]) => k.some((kw) => m.includes(normalizeText(kw)));
+    if (
+      h([
+        'informatique',
+        'informatia',
+        'dev',
+        'développement',
+        'programmation',
+        'software',
+        'réseau',
+        'reseau',
+        'cyber',
+        'data',
+        'ia',
+        'ai',
+        'it',
+        'tech',
+        'coding',
+        'برمجة',
+        'تكنولوجيا',
+        'ديف',
+        'اعلامية',
+        'معلوماتية',
+        'frontend',
+        'backend',
+        'fullstack',
+        'web',
+        'mobile',
+      ])
+    )
+      return 'tech';
+    if (
+      h([
+        'sport',
+        'kiné',
+        'kine',
+        'football',
+        'basket',
+        'tennis',
+        'رياضة',
+        'سبور',
+        'تدريب',
+      ])
+    )
+      return 'sport';
+    if (
+      h([
+        'médecine',
+        'medecine',
+        'santé',
+        'sante',
+        'pharmacie',
+        'infirmier',
+        'طب',
+        'صحة',
+        'تمريض',
+      ])
+    )
+      return 'health';
+    if (
+      h([
+        'business',
+        'gestion',
+        'commerce',
+        'finance',
+        'marketing',
+        'économie',
+        'economie',
+        'comptabilité',
+        'comptabilite',
+        'تجارة',
+        'أعمال',
+        'محاسبة',
+      ])
+    )
+      return 'business';
+    if (
+      h([
+        'art',
+        'design',
+        'architecture',
+        'graphisme',
+        'mode',
+        'فن',
+        'تصميم',
+        'عمارة',
+      ])
+    )
+      return 'art';
     return null;
   }
 
   private isGreeting(message: string): boolean {
-    return /^(salut|bonjour|hello|hi|hey|صباح|مساء|سلام|bienvenue|اهلا)/i.test(message.toLowerCase().trim());
+    return /^(salut|bonjour|hello|hi|hey|صباح|مساء|سلام|bienvenue|اهلا)/i.test(
+      message.toLowerCase().trim(),
+    );
   }
 
   // ============================================================
@@ -1639,7 +2789,10 @@ export class ChatbotService {
     const r: Partial<StudentData> = {};
     const m = message.toLowerCase();
     const sc = m.match(/(?:score|note|moyenne|معدل)\s*[:\\-]*\s*(\d+)/i);
-    if (sc) { const n = Number(sc[1]); if (n > 0 && n < 1000) r.score = n; }
+    if (sc) {
+      const n = Number(sc[1]);
+      if (n > 0 && n < 1000) r.score = n;
+    }
     const bc = m.match(/\b(?:bac|baccalaureat)\s*[:\\-]*\s*([\w\-]+)/i);
     if (bc) r.bacType = bc[1].trim();
     return r;
@@ -1647,25 +2800,76 @@ export class ChatbotService {
 
   private mergeSessionStudentData(incoming?: Partial<StudentData>): void {
     if (!incoming) return;
-    if (typeof incoming.score === 'number' && Number.isFinite(incoming.score)) this.sessionStudentData.score = incoming.score;
-    if (incoming.bacType?.trim()) this.sessionStudentData.bacType = incoming.bacType.trim();
-    if (incoming.interest?.trim()) this.sessionStudentData.interest = incoming.interest.trim();
-    if (incoming.difficulty) this.sessionStudentData.difficulty = incoming.difficulty;
-    if (incoming.refinedDomain?.trim()) this.sessionStudentData.refinedDomain = incoming.refinedDomain.trim();
-    if (incoming.journeyStep) this.sessionStudentData.journeyStep = incoming.journeyStep;
-    if (incoming.preferredDomain?.trim()) { this.sessionStudentData.preferredDomain = incoming.preferredDomain.trim(); this.sessionStudentData.interest = incoming.preferredDomain.trim(); }
-    if (incoming.rejectedDomains?.length) { const es = new Set(this.sessionStudentData.rejectedDomains || []); incoming.rejectedDomains.forEach(d => { if (d.trim()) es.add(d.trim()); }); this.sessionStudentData.rejectedDomains = Array.from(es); }
-    if (incoming.name?.trim()) this.sessionStudentData.name = incoming.name.trim();
-    if (incoming.selectedFiliere?.trim()) this.sessionStudentData.selectedFiliere = incoming.selectedFiliere.trim();
+    if (typeof incoming.score === 'number' && Number.isFinite(incoming.score))
+      this.sessionStudentData.score = incoming.score;
+    if (incoming.bacType?.trim()) {
+      const nextBac = incoming.bacType.trim();
+      const prevBac = this.sessionStudentData.bacType?.trim();
+      if (prevBac && normalizeText(prevBac) !== normalizeText(nextBac)) {
+        this.sessionStudentData.interest = undefined;
+        this.sessionStudentData.preferredDomain = undefined;
+        this.sessionStudentData.refinedDomain = undefined;
+        this.conversationMemory.interest = null;
+        this.conversationMemory.domain = null;
+        this.conversationMemory.subInterest = null;
+        this.conversationMemory.preferredTrack = null;
+        this.conversationMemory.preferredFields = [];
+        this.conversationMemory.rejectedTracks = [];
+      }
+      this.sessionStudentData.bacType = nextBac;
+    }
+    if (incoming.interest?.trim())
+      this.sessionStudentData.interest = incoming.interest.trim();
+    if (incoming.difficulty)
+      this.sessionStudentData.difficulty = incoming.difficulty;
+    if (incoming.refinedDomain?.trim())
+      this.sessionStudentData.refinedDomain = incoming.refinedDomain.trim();
+    if (incoming.journeyStep)
+      this.sessionStudentData.journeyStep = incoming.journeyStep;
+    if (incoming.preferredDomain?.trim()) {
+      this.sessionStudentData.preferredDomain = incoming.preferredDomain.trim();
+      this.sessionStudentData.interest = incoming.preferredDomain.trim();
+    }
+    if (incoming.rejectedDomains?.length) {
+      const es = new Set(this.sessionStudentData.rejectedDomains || []);
+      incoming.rejectedDomains.forEach((d) => {
+        if (d.trim()) es.add(d.trim());
+      });
+      this.sessionStudentData.rejectedDomains = Array.from(es);
+    }
+    if (incoming.name?.trim())
+      this.sessionStudentData.name = incoming.name.trim();
+    if (incoming.selectedFiliere?.trim())
+      this.sessionStudentData.selectedFiliere = incoming.selectedFiliere.trim();
     if (incoming.language) this.sessionStudentData.language = incoming.language;
   }
 
   private syncMemoryToSessionData(): void {
     const m = this.conversationMemory;
-    if (m.interest && !this.sessionStudentData.interest) { this.sessionStudentData.interest = m.interest; this.sessionStudentData.preferredDomain = m.interest; }
-    if ((m.difficulty === 'easy' || m.difficulty === 'challenge') && !this.sessionStudentData.difficulty) this.sessionStudentData.difficulty = m.difficulty;
-    if (m.preferredTrack && !this.sessionStudentData.refinedDomain) this.sessionStudentData.refinedDomain = m.preferredTrack;
-    if (m.rejectedTracks.length > 0) { const cr = this.sessionStudentData.rejectedDomains || []; const nr = m.rejectedTracks.filter(r => !cr.includes(r)); if (nr.length > 0) this.sessionStudentData.rejectedDomains = [...cr, ...nr]; }
+    if (m.interest && !this.sessionStudentData.interest) {
+      if (
+        this.isHumanitiesBac(this.sessionStudentData.bacType) &&
+        this.memoryInterestLooksTech(m.interest)
+      ) {
+        /* do not inject IT into Lettres session */
+      } else {
+        this.sessionStudentData.interest = m.interest;
+        this.sessionStudentData.preferredDomain = m.interest;
+      }
+    }
+    if (
+      (m.difficulty === 'easy' || m.difficulty === 'challenge') &&
+      !this.sessionStudentData.difficulty
+    )
+      this.sessionStudentData.difficulty = m.difficulty;
+    if (m.preferredTrack && !this.sessionStudentData.refinedDomain)
+      this.sessionStudentData.refinedDomain = m.preferredTrack;
+    if (m.rejectedTracks.length > 0) {
+      const cr = this.sessionStudentData.rejectedDomains || [];
+      const nr = m.rejectedTracks.filter((r) => !cr.includes(r));
+      if (nr.length > 0)
+        this.sessionStudentData.rejectedDomains = [...cr, ...nr];
+    }
   }
 
   resetMemory(): void {

@@ -6,15 +6,14 @@ import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('skill')
 export class SkillController {
-
   constructor(private skillService: SkillService) {}
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ADMIN')
-@Post()
-create(@Body() body: any) {
-  return this.skillService.create(body.name);
-}
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Post()
+  create(@Body() body: any) {
+    return this.skillService.create(body.name);
+  }
   @Get()
   findAll() {
     return this.skillService.findAll();

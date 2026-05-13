@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common'
-import { OllamaConfigService } from './services/ollama-config.service'
+import { Module } from '@nestjs/common';
+import { OllamaConfigService } from './services/ollama-config.service';
 
 @Module({
   providers: [OllamaConfigService],

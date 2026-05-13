@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BAC_DOMAINS, BacType } from './bac-domain-mapping';
 
-
 export interface StudentProfile {
   bacType?: string;
   score?: number;
@@ -79,10 +78,19 @@ export class ProfileFilterService {
   /**
    * Filter jobs by domain and BAC type.
    */
-  filterJobsByProfile(jobs: any[], domainField: string, profile: StudentProfile): any[] {
+  filterJobsByProfile(
+    jobs: any[],
+    domainField: string,
+    profile: StudentProfile,
+  ): any[] {
     // First check if domain is allowed for this BAC
-    if (profile.bacType && !this.isDomainAllowed(domainField, profile.bacType)) {
-      this.logger.debug(`Domain ${domainField} not allowed for BAC ${profile.bacType}`);
+    if (
+      profile.bacType &&
+      !this.isDomainAllowed(domainField, profile.bacType)
+    ) {
+      this.logger.debug(
+        `Domain ${domainField} not allowed for BAC ${profile.bacType}`,
+      );
       return [];
     }
 
@@ -94,10 +102,19 @@ export class ProfileFilterService {
   /**
    * Filter guide programs by domain and BAC type.
    */
-  filterProgramsByProfile(programs: any[], domainField: string, profile: StudentProfile): any[] {
+  filterProgramsByProfile(
+    programs: any[],
+    domainField: string,
+    profile: StudentProfile,
+  ): any[] {
     // First check if domain is allowed for this BAC
-    if (profile.bacType && !this.isDomainAllowed(domainField, profile.bacType)) {
-      this.logger.debug(`Domain ${domainField} not allowed for BAC ${profile.bacType}`);
+    if (
+      profile.bacType &&
+      !this.isDomainAllowed(domainField, profile.bacType)
+    ) {
+      this.logger.debug(
+        `Domain ${domainField} not allowed for BAC ${profile.bacType}`,
+      );
       return [];
     }
 
@@ -120,23 +137,25 @@ export class ProfileFilterService {
    */
   getRecommendedDomainsForProfile(profile: StudentProfile): string[] {
     const allowedDomains = this.getAllowedDomainsForBac(profile.bacType);
-    
+
     if (!profile.interest) {
       return allowedDomains;
     }
 
     // Prioritize domains matching the interest
     const normalizedInterest = this.normalizeString(profile.interest);
-    
+
     return allowedDomains.sort((a, b) => {
       const normalizedA = this.normalizeString(a);
       const normalizedB = this.normalizeString(b);
-      
-      const aMatchesInterest = normalizedA.includes(normalizedInterest) || 
-                              normalizedInterest.includes(normalizedA);
-      const bMatchesInterest = normalizedB.includes(normalizedInterest) || 
-                              normalizedInterest.includes(normalizedB);
-      
+
+      const aMatchesInterest =
+        normalizedA.includes(normalizedInterest) ||
+        normalizedInterest.includes(normalizedA);
+      const bMatchesInterest =
+        normalizedB.includes(normalizedInterest) ||
+        normalizedInterest.includes(normalizedB);
+
       if (aMatchesInterest && !bMatchesInterest) return -1;
       if (bMatchesInterest && !aMatchesInterest) return 1;
       return 0;
@@ -146,7 +165,10 @@ export class ProfileFilterService {
   /**
    * Validate that a student's profile is complete enough for recommendations.
    */
-  validateProfile(profile: StudentProfile): { valid: boolean; missing: string[] } {
+  validateProfile(profile: StudentProfile): {
+    valid: boolean;
+    missing: string[];
+  } {
     const missing: string[] = [];
 
     if (!profile.bacType) {
@@ -177,7 +199,15 @@ export class ProfileFilterService {
   private normalizeBacType(bacType?: string): BacType | undefined {
     if (!bacType) return undefined;
     const normalized = bacType.trim().toUpperCase();
-    const validTypes: BacType[] = ['MATH', 'INFO', 'SVT', 'ECO', 'LETTRES', 'SPORT', 'TECH'];
+    const validTypes: BacType[] = [
+      'MATH',
+      'INFO',
+      'SVT',
+      'ECO',
+      'LETTRES',
+      'SPORT',
+      'TECH',
+    ];
     return validTypes.find((t) => t === normalized);
   }
 
@@ -187,7 +217,7 @@ export class ProfileFilterService {
       .toLowerCase()
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '') // Remove accents
-      .replace(/[^a-z0-9\s]/g, ' ')    // Remove special chars
+      .replace(/[^a-z0-9\s]/g, ' ') // Remove special chars
       .replace(/\s+/g, ' ')
       .trim();
   }

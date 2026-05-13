@@ -1,26 +1,17 @@
-# TODO - Dynamic Roadmap System (domains.json)
+# Smart Orientation - PDF & Recommendation Quality Fix
 
-- [ ] Step 1: Implement backend roadmap generation from `smart-orientation-backend/data/domains.json`
-  - [ ] Add helper to load `domains.json` and find domain by `field`/`aliases`/`keywords`
-  - [ ] Build `SpecificRoadmap` (phases/skills/projects/resources/milestones, certifications, career_paths) strictly from JSON
-  - [ ] Ensure roadmap selector filtering by Bac type uses the same domain.field groups derived from domains.json
+## Plan (approved)
+1. Update PDF generator in `smart-orientation-backend/src/reports/reports.service.ts`.
+2. Fix domain filtering for PDF (top 1/2 dominant domains only).
+3. Remove any display of `Domaine: General`.
+4. Make roadmap bullets domain-specific (no generic “commencer par les bases…” template).
+5. Group careers per domain with bullet layout + spacing.
+6. Improve visual readability (section separation, no mixed paragraphs).
+7. Add/format a concise AI summary line (profile-consistent).
 
-- [ ] Step 2: Update backend endpoints/routes
-  - [ ] Ensure `POST /chatbot/roadmap-selector` returns suggestions based on BAC-filtered domains
-  - [ ] Ensure `GET /chatbot/roadmap?domain=...&level=...` returns full roadmap JSON for `RoadmapDisplay.tsx`
-  - [ ] Ensure `POST /chatbot/ask` roadmap intent returns BEAUTIFUL markdown roadmap (no hardcoded text)
+## Progress
+- [x] Implement code changes in reports.service.ts
 
-- [ ] Step 3: Refactor frontend
-  - [ ] Remove `roadmapCardUi` and hardcoded bac→domain mapping from `orientation-frontend/app/components/ChatWidget.tsx`
-  - [ ] Replace with dynamic fetch of roadmap selector cards (keep existing UI styles)
-  - [ ] On card click: close selector + trigger roadmap request automatically
-
-- [ ] Step 4: Validation
-  - [ ] MATH/INFO show only IT-related roadmap domains
-  - [ ] SVT shows only medical roadmap domains
-  - [ ] ECO shows only business/economy/communication roadmap domains
-  - [ ] LETTRES shows only translation/journalism/communication/law
-  - [ ] SPORT shows only coaching/sport nutrition/prep domains
-  - [ ] No static roadmap strings remain in frontend and backend
-
+- [ ] Run backend build/tests
+- [ ] Verify PDF output for a sample student (e.g., Bac MATH)
 

@@ -1,0 +1,3324 @@
+[
+  {
+    "conversation_id": 1,
+    "messages":[
+      
+      {
+        "role": "user",
+        "content": "w chnoua a7sen wehed fihom niveau flous?"
+      },
+      {
+        "role": "assistant",
+        "content": "Généralement, l'Intelligence Artificielle (Data Scientist/ML Engineer) w la Cybersécurité houma les mieux payés tawa. Un expert fihom ynajem yakhlet l des salaires kbar barcha, surtt ken tekhdem en freelance wala m3a des boîtes étrangères."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 2,
+    "messages":[
+      {
+        "role": "user",
+        "content": "brabi ena bac math w nheb na3mel prepa ama khayef"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema! L'orientation lel prepa (math-physique) hiyya choix behi barcha lel bac math, ama s7i7 test7a9 barcha khedma w sacrifice. Kenek wekel 3la rouhek w tnajem tab9a motivé, tnajem tenjah w tousel l a7sen les écoles d'ingénieurs f tounes."
+      },
+      {
+        "role": "user",
+        "content": "chnawa l far9 bin prepa w insat ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'INSAT fiha cycle préparatoire intégré (CBA ou MPI). Ya3ni ta9ra 2 ans w t3addi concours interne bin etalaba mte3 l'INSAT barka. L'avantage mte3ha système lmd mkhallat w fiha barcha pratique. L'IPEIT/IPEST (prepa classique) fiha concours national t3addih m3a tounes kemla bech todkhol l des écoles kima l'ENIT, SUP'COM, ENSI, etc."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 3,
+    "messages":[
+      {
+        "role": "user",
+        "content": "aslema, nheb net3alem programmation ama maanech bac info"
+      },
+      {
+        "role": "assistant",
+        "content": "Marhba! Mouch lezem tkoun bac info bech tet3alem l programmation. Barcha des développeurs tayarate bdew men 0. Tnajem tabda b langage kima Python khater facile à apprendre, wala HTML/CSS ken t7eb l web."
+      },
+      {
+        "role": "user",
+        "content": "min win nabda na9rahom?"
+      },
+      {
+        "role": "assistant",
+        "content": "Tnajem tabda b des plateformes gratuites kima FreeCodeCamp, Codecademy, wala tchouf des tutoriels 3la YouTube. A3mel des petits projets bech tetmarran, l pratique heya asasi f domaine hedha."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 4,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadeh salaire mte3 dev web f tounes ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Salaire mte3 Développeur Web f tounes dépend men l'expérience w les technos eli ta3rafhom. Pour un junior (débutant), le salaire ykoun généralement bin 1200 w 1800 TND net. Un profil intermédiaire (2-3 ans) ynajem yousel bin 2000 w 3000 TND."
+      },
+      {
+        "role": "user",
+        "content": "w senior ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Un profil Senior (5 ans et +) ynajem yekhou bin 3500 w 5000 TND net, w fama chkoun yfout hedha ken yekhdem m3a des boîtes offshores wala fi des postes de lead technique."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 5,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb na9ra cyber securite, chnouma les pre-requis ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema! La cybersécurité domaine passionnant. Behi tkoun 3andek base s7i7a f les réseaux (kima TCP/IP, OSI), les systèmes d'exploitation (surtout Linux), w chwaya programmation kima Python w Bash. Ba3d tnajem todkhol f les concepts mte3 sécurité, cryptographie, w pentesting."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 6,
+    "messages":[
+      {
+        "role": "user",
+        "content": "za3ma l IA bech tfokelna blayesna f l khedma ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Question très pertinente ! L'Intelligence Artificielle mouch bech tfok l khedma, ama bech tbadaleh. Kima ygoulou: \"L'IA ne va pas te remplacer, mais une personne qui utilise l'IA va te remplacer\". L'idéal howa enek tet3alem kifeh tawahed l'IA (kima ChatGPT, Copilot) f khedmtek bech tzid el productivité mte3ek."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 7,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chkounk inti w chnoua tnajem taamel ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema! Ena assistant virtuel mta3 orientation universitaire w professionnelle f Tounes. Najem n3awnek f kol ma ykhos l'orientation ba3d l bac, les filières (informatique, gestion, santé, etc.), les salaires, les carrières, w na3tik des conseils bech tekhtar a7sen thneya l mosta9blek."
+      },
+      {
+        "role": "user",
+        "content": "ey behi, chokran"
+      },
+      {
+        "role": "assistant",
+        "content": "De rien! Hani houni fi ay wa9t ken test7a9 ay ma3louma. Bon courage! 😊"
+      }
+    ],
+    "category": "casual",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 8,
+    "messages":[
+      {
+        "role": "user",
+        "content": "nheb nakra f canada, chnowa ahsen domaine"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken target mte3ek Canada, les domaines les plus demandés w li fihom ashel procédures d'immigration houma: 1) L'Informatique (Génie Logiciel, Data Science, Cybersécurité), 2) La Santé (Infirmiers, soins), 3) Les métiers de l'ingénierie (Mécanique, Civil, Électrique). La tech w l'IT dima to93od numéro 1 ghadi."
+      },
+      {
+        "role": "user",
+        "content": "w gestion zeda مطلوبين ghadi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, f les domaines de gestion fama demande, particulièrement fi l'analyse financière, l'audit, w le supply chain (logistique). Ama l'IT w la Santé yab9aw ashel barcha w fihom opportunités akther l les étrangers."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 9,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena haier barcha mouch aaref chneya nkamal nakra baed l bac"
+      },
+      {
+        "role": "assistant",
+        "content": "C'est tout à fait normal bech tkoun 7ayer fi période kima hethi. Matkhafech! Awal 7aja, a3mél pause w as2el rouhek: Chnouma les matières eli t7ebhom w tjib fihom bel behi? w chnouma l 7ajet eli tet9ala9 w enti ta9ra fihom? W ken t7eb, a3tini chnoua section mte3ek w scorek ta n3awnek nkharjou des idées."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 10,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem, nheb ns2l 3la TBS chnia l afa9 mte3ha"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Tunis Business School (TBS) heya mel a7sen les facultés de business f tounes, w systèmha kemel bl'anglais (système américain). L'afa9 mte3ha mteze barcha; les diplômés mte3ha yeckhdmou fi des multinationales f tounes w lbarra, f des domaines kima la finance, marketing, w business analytics."
+      },
+      {
+        "role": "user",
+        "content": "lezem nkoun tayara fl anglais bech nodkhelha?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, lezem tkoun 3andek niveau behi barcha f l'anglais w la note de bac fiha impact kbir. Fama des tests parfois, w cours mte3ek lkol bech ykounou bl'anglais. Ama ken l'anglais mte3ek mriguel w t7eb l business, c'est un excellent choix."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 11,
+    "messages":[
+      {
+        "role": "user",
+        "content": "شنوا الفرق بين frontend و backend"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema! L'explication simple heya:\n1. **Frontend**: Houwa l wejiha mta3 l site web wala l'application (el 7ajet eli ychoufha l'utilisateur kima l'interface, les boutons, les couleurs). Nesta3mlou fih HTML, CSS, JavaScript.\n2. **Backend**: Houwa el koujina mta3 l site. Fih l base de données (kifeh na5biew l ma3loumet) wel logique (kima kifeh ta3mel login). Nesta3mlou fih Python, Node.js, PHP, Java."
+      },
+      {
+        "role": "user",
+        "content": "w anehou ashel w fih flous akther"
+      },
+      {
+        "role": "assistant",
+        "content": "El Frontend souvent ashel bech tabda fih khater tnajem tchouf résultat khedmtek visuellement directement. Ama bel wa9t ezzouz ywalliw avancés. Niveau salaire ychebhou barcha l b3adh-hom. Le plus demandé w l'a3la salaire houwa le **Full-Stack**, ya3ni wehed ya3raf yakhdem frontend w backend m3a b3adh-hom."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 12,
+    "messages":[
+      {
+        "role": "user",
+        "content": "khouya 3andi bac eco w njib fi moy 11, nheb domaine management aw it"
+      },
+      {
+        "role": "assistant",
+        "content": "Ahlan! B bac éco w moyenne 11, tnajem tamel des filières kima Licence en Sciences de Gestion (ISG, ESC, FSEGT) wala Licence en Informatique de Gestion. Informatique de gestion behya barcha ken t7eb tedmej l'IT w l management m3a b3adh-hom."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 13,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salaire infirmier f tounes kadh?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire mta3 infirmier fi Tounes ykoun généralement bin 900 TND w 1200 TND f l secteur public f l bideyét. F l secteur privé (les cliniques), l salaire ynajem ykoun a9al chwaya fl bideya (700-900 TND) w yetla3 bel ancienneté w les gardes de nuit."
+      },
+      {
+        "role": "user",
+        "content": "yemchiw barcha l allemagne yeakhi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey s7i7! Fama demande kbira barcha 3la les infirmiers twensa f l'Allemagne. Ken ta3mel formation en langue Allemande (niveau B1/B2), les opportunités w les contrats de travail ghadi mawjoudin barcha w l salaire ykoun mofeed barcha."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 14,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bonjour, nheb naamel medecine ama scori tayah, chneya l alternative"
+      },
+      {
+        "role": "assistant",
+        "content": "Bonjour ! Ken scorek maykhaltakch l médecine, fama barcha d'autres alternatives f domaine de la santé fihom mosta9bel behi: \n1) Anesthésie-Réanimation\n2) Radiologie (Imagerie médicale)\n3) Physiothérapie (Kiné)\n4) Biologie Médicale wala Biotechnologie. \nLes filières paramédicales مطلوبين برشا w fihom l'option mta3 l khedma f tounes wala lbarra."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 15,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chneya ahsen ecole d ingenieur informatique fi tounes"
+      },
+      {
+        "role": "assistant",
+        "content": "Fama barcha écoles tayyarat f l'informatique f Tounes. L'ENSI (École Nationale des Sciences de l'Informatique) ma3roufa barcha k'école spécialisée IT. Fama zeda l'INSAT, SUP'COM, w l'ENIT. Kol wehda fiha spécialités w réseau de diplômés kbir. Ken privé, fama zeda l'ESPRIT w Tek-Up."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 16,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena bac lettres najem naamel informatique ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem ! F système l'étatique (facultés publiques), s3ib barcha bech todkhol licence informatique pure b bac lettres, les places sont très limitées wala inexistantes (souvent math, sciences, info, éco). \nAma tnajem t9ra l'informatique wahdek en autodidacte, w fama barcha b bac lettres w wallaw des devloppeurs w designers tayarat b l'auto-formation wala f les centres privés."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 17,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadeh l flous fel marketing digital?"
+      },
+      {
+        "role": "assistant",
+        "content": "Le salaire f l Marketing Digital f Tounes dépend mel poste w l'entreprise. Un community manager wala junior digital marketer يبدا b 800 l 1200 TND. Ama un Digital Marketing Manager wala un expert SEO/Ads ynajem yekhou bin 2000 w 3500+ TND. F domaine hedha, les certifications w les résultats ykabbrou l salaire fisa3."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 18,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chkoune yaaref chnouwa njem nakhdem be licence anglais"
+      },
+      {
+        "role": "assistant",
+        "content": "B licence anglais, fama barcha afa9:\n1) L'enseignement (prof d'anglais fi lycée wala école privée)\n2) Traduction w interprétation\n3) L'industrie du centre d'appels w support client b l'anglais (très demandé)\n4) Rédacteur web (Copywriter) en anglais w la création de contenu.\nTnajem zeda tkamel master w todkhol f la communication wala les relations internationales."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 19,
+    "messages":[
+      {
+        "role": "user",
+        "content": "famma khedma fi l data science f tounes ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey bien sûr ! L'écosystème mta3 Data Science w l'IA 9a3ed ykabber f Tounes. Barcha startups, banques, w des filiales mta3 des multinationales (InstaDeep, Expensya, etc.) dima ylawjou 3la des Data Scientists w des Data Engineers. W zeda fama barcha freelance w khedma à distance (remote) m3a l'Europe w l'Amérique."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 20,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem, nheb nodkhel ll cyber ama maanech math tayara"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Mouch lezem tkoun génie f l math bech ta3mel cybersécurité. La cyber te7taj akther logique, curiosité w de solides bases f l'architecture des systèmes, Linux, w les réseaux. El math lezem akther f des trucs très pointus kima la création d'algorithmes de cryptographie, ama l pentesting (l'اختراق الأخلاقي) w sécurité réseau matetlabch math kbir."
+      },
+      {
+        "role": "user",
+        "content": "ey behi, w kifech nabda?"
+      },
+      {
+        "role": "assistant",
+        "content": "Tabda b tet3alem réseaux (TCP/IP), w t'installi Linux (kima Ubuntu wala Kali). Ba3d tnajem todkhol l des plateformes gratuites mta3 apprentissage kima TryHackMe wala HackTheBox. TryHackMe fih des cours pour les débutants mil sfer. Bon courage!"
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 21,
+    "messages":[
+      {
+        "role": "user",
+        "content": "licence wala prepa, chnia l fark w chkoun khir"
+      },
+      {
+        "role": "assistant",
+        "content": "L'IPEIT/Prépa hiyya formation de 2 ans barcha théorique (math/physique keshin) twaslek l concours national bech todkhol l école d'ingénieurs (diplôme d'ingénieur). \nLa Licence hiyya 3 ans lmd (L1, L2, L3) fi faculté, fiha akther pratique f domaine l'ekhtisass mte3ek.\nMakanch wehed khir mel lekher: Prepa t7adrek l cursus ingénieur, ama tnajem zeda ba3d l licence ta3mel concours sur dossier w todkhol l école d'ingénieurs ken tjib de bonnes moyennes."
+      },
+      {
+        "role": "user",
+        "content": "donc najem nwalli ingenieur bel licence ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey oui exactement! Fama le \"concours sur dossier\". Ken ta9ra licence w tjib mention (parmi les premiers f l promo mte3ek), tnajem tsabeb l dossier mte3ek f les écoles d'ingénieurs w tekmel cycle d'ingénieur (3 ans okhra). Barcha ya3mlouha w tenjah."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 22,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena bac math njib f 16 njem nodkhel l medcine ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Avec 16 de moyenne f lbac Math, 3andek des chances béhyin bech tokhtof médecine, ama ça dépend mel score final w l formule mta3 l'année hedhika w l région mte3ek. Les facultés mta3 l médecine (Tunis, Sousse, Monastir, Sfax) yakhdhou des scores 3alyin, dima e7seb scorek exact b formule l ministère bech tt2aked."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 23,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chneya as3ab l etude f isg wala ihec ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'IHEC (Carthage) w l'ISG (Tunis) l zouz yothbrou mel a7sen les instituts de commerce w gestion f tounes. El IHEC fih réputation annou l'encadrement w les examens s3ab w exigeants chwaya, w système mte3hom strict. L'ISG zeda s3ib ama l'environnement w l culture estudiantine tnajem tkon différente. Ezzouz ykharjou des diplômés tayarat."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 24,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chkoun yaaref l architecture fiha mostakbel ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'architecture domaine passionnant ama l marché f Tounes fih barcha concurrence w saturé chwaya (barcha architectes ykharjou kol 3am). Ama l'opportunités lbarra mawjoudin, surtt fi les pays du Golfe w l'Europe, wala ken tetkasses f des domaines jdud kima l'architecture durable, le BIM w l'urbanisme."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 25,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chnawa njem naamel be bac sc"
+      },
+      {
+        "role": "assistant",
+        "content": "B bac Sciences Expérimentales 3andek barcha choix ! Tnajem ta3mel:\n1) La santé: Médecine, Pharmacie, Dentaire, Prépa Bio-Géo.\n2) Paramédical: Anesthésie, Radiologie, Kinésithérapie.\n3) Ingénierie w IT: Prépa (PC), Licences Info.\n4) Sciences de base: Biologie, Chimie.\nTaba3 l 7aja eli terta7elha akther!"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 26,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salut, zaama ena nheb l jeux video, chnowa nakra"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut ! Ken t7eb le développement de jeux vidéo (Game Dev), a7sen 7aja ta3mel licence fi l'informatique wala Sciences de l'informatique. Tnajem zeda tchouf l'ISAMM wala ISARTS ken t7eb côté design 3D w animation. F l programmation, lezem tet3alem des moteurs de jeux kima Unity (b C#) wala Unreal Engine (b C++)."
+      },
+      {
+        "role": "user",
+        "content": "w fih flous l domaine hedha fi tounes?"
+      },
+      {
+        "role": "assistant",
+        "content": "F Tounes, l'industrie mta3 les jeux vidéo 9a3da tekber chwaya chwaya ama mazalet sghira par rapport l'web dev. L'avantage f domaine hedha houwa l freelance w l khedma en remote m3a des studios lbarra (France, USA) win l salaire ykoun tayara barcha."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 27,
+    "messages":[
+      {
+        "role": "user",
+        "content": "yatik saha khouya 3al ma3loumet"
+      },
+      {
+        "role": "assistant",
+        "content": "Y3aychek! Hani houni fi ay wa9t ken test7a9 7aja. Bon courage f 9raytek w l khedma mte3ek! 💪"
+      }
+    ],
+    "category": "casual",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 28,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb na9ra fel fac w nakdem en meme temps, possible ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, c'est possible ama lezemha barcha tanzim wa9t w discipline. Fama les cours du soir fi barcha des universités privées kima l'ESPRIT. Ken ta9ra f l'étatique en plein temps, tnajem tekhdem freelance wala à temps partiel (kima centre d'appels wala cours de soutien), ama rod belek 3la 9raytek la tet2ather."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 29,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chneya salaire expert comptable ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'expert-comptable f Tounes 3andou un très bon salaire. F l bideya kima collaborateur wala auditeur, l salaire ykoun bin 1500 w 2500 TND. Lamma ywalli associé wala ya7el l cabinet mte3ou, l revenu ynajem yfout barcha l 5000 w 10000 TND par mois, selon l clientèle mte3ou."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 30,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bich ns2lk aal les ecoles de prepa, l'ipest s3iba ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'IPEST (La Marsa) heya as3ab w a9wa prepa f Tounes. Takhou ken les premiers à l'échelle nationale f l bac (math w sc). L rythme de travail f l'IPEST kbir barcha khaterhom y7adhrou mouch ken l concours tounsi, ama zeda les concours français (kima Polytechnique Paris, Centrale). S3iba ama tjib résultats tayarat."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 31,
+    "messages":[
+      {
+        "role": "user",
+        "content": "nheb no5rej lbara ba3d l bac, fech tansahni ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken target mte3ek l'étranger ba3d l bac directement, la France w l'Allemagne houma l ashel f les démarches l twensa. Campus France t7el f octobre/novembre mta3 3am l bac, tnajem tsabeb f les universités ghadi. Pour l'Allemagne, lezemk tabda t7adher l langue allemande (niveau B1/B2) mel tawa. Les domaines IT w ingénierie dima afa9hom ashel ghadi."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 32,
+    "messages":[
+      {
+        "role": "user",
+        "content": "zaama data science fih flous f tunis ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, l Data Science f Tounes fih flous w l salaire yabda mel 1500-2000 TND l les juniors, w yousel l 4000+ TND l les seniors. Fama barcha demande mel les startups IA w les banques w les entreprises offshores li tekhdem m3a l'Europe w tbazzez 3al data."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 33,
+    "messages":[
+      {
+        "role": "user",
+        "content": "slt, ena maghroum b security, najem nbambi bl python ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut ! Ey bien sûr, Python houwa men ahsen les langages lel Cybersécurité w l Hacking (Ethical). Barcha outils mta3 pentesting maktoubin b Python, w tnajem tesna3 bih des scripts mta3 automatisation, scanners, w exploits. Houwa l langage l idéal bech tabda."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 34,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chnia l fark bin license math w license info ?"
+      },
+      {
+        "role": "assistant",
+        "content": "La licence Math mrakza barcha 3la l'analyse, l'algèbre, w la théorie, heya parfaite ken t7eb ta3mel enseignement wala recherche, wala temchi vers data science. \nLa licence Info fiha barcha programmation (Java, Web, Algorithmique, BDD) w tdakhelek l marché de travail mta3 l développement logiciel w tech."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 35,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salut, ena mazelet ki bdit fel fac w hassa rohi theaa, les cours barcha"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut ! Hedha 7ses normal barcha f l'1ère année fac. La transition mel lycée l fac fiha barcha changement. A7sen 7aja ta3melha:\n1. A7dher l les cours w les TDs dima.\n2. Lkhes les cours mte3ek اول بـأول.\n3. A3mel groupe mta3 s7abek tnajmou trajmou w tfehmou b3adhkom.\nMatkhefech, bech testenes b rythme e jdid wa7dek wa7dek."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 36,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bellehi chkoun khir react wala angular?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hedhi question dima tets2el! Ezzouz tayarate. \nReact (mta3 Meta) howa l'akther demandé f l marché mondial w f tounes, facile bech tabda fih, w la communauté mte3ou kbira barcha.\nAngular (mta3 Google) akther \"structuré\" w yesta3mlouh l'entreprises l kbar (Enterprise level apps). Ken t7eb tabda w tal9a khedma fisa3, React houwa a7sen choix tawa."
+      },
+      {
+        "role": "user",
+        "content": "w chnia typescript, lezem ?"
+      },
+      {
+        "role": "assistant",
+        "content": "TypeScript houwa version m7assna mta3 JavaScript tzid les \"types\". Mouch lezem 100% mel lawel, ama wallew les entreprises lkol ya5dmou bih tawa fi React w Angular khater yna9es les bugs. A9ra JavaScript se3a, w mba3ed t3adda l TypeScript."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 37,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena bac sport, najem naamel kiné?"
+      },
+      {
+        "role": "assistant",
+        "content": "La filière Kinésithérapie (Physiothérapie) ta9bel asasan les bacheliers Sciences Expérimentales w Math. B bac Sport, l'accès direct l kiné fi l'étatique s3ib w شبه مستحيل. Ama tnajem ta3mel les Instituts de Sport (ISSEP) w t'kamel f l'entraînement sportif wala l'éducation physique."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 38,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadeh l salaire taa ingenieur genie civil"
+      },
+      {
+        "role": "assistant",
+        "content": "L'Ingénieur Génie Civil débutant f Tounes yekhou généralement bin 1200 w 1600 TND net par mois. M3a l'expérience w ken ywalli chef de projet, l salaire ynajem yfout 2500 TND w yousel l 3500+ TND. Fama zeda barcha ykherjou l l'Afrique subsaharienne wala l Golfe win salaires kbar barcha."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 39,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena thet control baed naamel l reo wala chneya ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, ken ta7t contrôle w tenjah (inchallah!), ta3mel l'orientation mte3ek f la dernière session mta3 l'orientation (session des contrôlés). Les facultés ya3tiw des places réservées lel session heki. Ken majetekch l 7aja eli t7ebha, tnajem ta3mel \"Réorientation\" f mois de Mars/Avril mta3 l 3am l jey (concours de réorientation)."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 40,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem chneya afa9 bac technique"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! B bac technique 3andek barcha afa9 mteza:\n1. Les classes préparatoires techniques (PT) bech twalli ingénieur (mécanique, électrique, etc.).\n2. L'INSAT.\n3. Les ISET (réseau ISET) pour un diplôme en Génie Électrique, Mécanique, Génie Civil, qui sont très demandés f l marché du travail.\n4. L'Informatique w les sciences appliquées."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 41,
+    "messages":[
+      {
+        "role": "user",
+        "content": "belehi nheb nwali UX/UI designer, mnin nbda"
+      },
+      {
+        "role": "assistant",
+        "content": "Bech twalli UX/UI Designer, tabda par:\n1. Tet3alem des outils kima **Figma** (le standard lyoum).\n2. Ta9ra 3la les principes mta3 design (couleurs, typographie, l'espacement).\n3. Tefhem l UX (User Experience): kifeh ykhamem l'utilisateur w l wireframing.\nTnajem tchouf cours gratuit 3la YouTube w ta3mel un compte Figma w tabda tbambi."
+      },
+      {
+        "role": "user",
+        "content": "lzem nkun naaref ncodey?"
+      },
+      {
+        "role": "assistant",
+        "content": "Le, mouch lezem ta3raf t'codey bech tkoun designer. L'UX/UI heya design w conception d'interfaces. Ama, ken ta3raf chwaya HTML w CSS, t3awnek barcha bech tetfehem m3a l'équipe mta3 les développeurs eli bech yrodou l design mte3ek site 79i9i."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 42,
+    "messages":[
+      {
+        "role": "user",
+        "content": "nheb ns2lk 3al metiers eli mayetbadelouch bl IA"
+      },
+      {
+        "role": "assistant",
+        "content": "Les métiers eli l'IA s3ib t3awadh-hom houma eli fihom \"Touche humaine\", intelligence émotionnelle, wala travail manuel complexe. Kima: \n1. Santé (Médecins, Infirmiers, Kiné, Psychologues).\n2. Métiers manuels (Plombier, Électricien, Menuisier).\n3. Éducation w formation.\n4. Les postes stratégiques w de leadership fi les entreprises."
+      }
+    ],
+    "category": "future_jobs",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 43,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem ahsen fac l droit fi tounes"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! L'a7sen w l'akther ma3roufin fi Tounes houma:\n1. Faculté des Sciences Juridiques, Politiques et Sociales de Tunis (FSJPST). \n2. Faculté de Droit et des Sciences Politiques de Tunis (El Manar).\n3. Faculté de Droit de Sousse et celle de Sfax zeda tayyarat barcha."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 44,
+    "messages":[
+      {
+        "role": "user",
+        "content": "andi bac math w nheb data science ama ma nhebech prepa"
+      },
+      {
+        "role": "assistant",
+        "content": "Fhemtk! Ken t7eb Data Science w mat7ebech l prepa classique (IPEIT, IPEST), tnajem ta3mel:\n1. Licence f l'Informatique wala Mathématiques Appliquées (FST, ISI, ISAMM) w ba3d ta3mel Master wela cycle d'ingénieur sur dossier fi l'IA/Data.\n2. L'INSAT (cycle intégré, a9al stress mel prepa classique ama fih khedma).\n3. Les facultés privées kima ESPRIT wala MSB (fiha Business Analytics)."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 45,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bch naamel infirmiere, kadeh l salaire ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire infirmière débutante f Tounes f secteur public ykoun autour de 1000 - 1200 TND avec les primes w les gardes. F l clinique privé l salaire de base ynajem ybda men 700 - 900 TND. L'avantage l kbir howa ennou demandée barcha lbarra (Allemagne, Canada, France) win salaire yousel bin 2000 w 3000 Euros/mois."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 46,
+    "messages":[
+      {
+        "role": "user",
+        "content": "khouya fama chkoun kal l python maach matloub brcha s7i7 ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Le, mouch s7i7 bel kol! Python mezel men akther les langages demandés f l 3alem lyoum. Houwa l'asés mta3 l'Intelligence Artificielle (IA), Data Science, Machine Learning, w zeda l'automatisation w l backend (Django/FastAPI). Bel 3aks, m3a thawret l'IA tawa, l python wela essentiel akther men 9bal."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 47,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kifah nwali pentester ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Bech twalli Pentester (Hacker Éthique):\n1. Et3alem les bases: Réseaux (TCP/IP), w Linux (commandes de base).\n2. Programation: Python wala Bash bech tefhem les scripts.\n3. Pratique 3la plateformes kima TryHackMe w HackTheBox.\n4. Ta3mel des certifications kima l'eJPT wala l'OSCP bech tthabet l niveau mte3ek f marché e choghel."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 48,
+    "messages":[
+      {
+        "role": "user",
+        "content": "aaslema zaama behi l domaine taa logistique ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema! Ey, domaine de la Logistique w l Supply Chain men ahsen les domaines fihom afa9 tawa, w chômage fihom très faible. Kol entreprise kima les usines, les supermarchés, w les sociétés de transport test7a9 wehed ygeri e stock wel l transport. L khedma fih mawjouda barcha."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 49,
+    "messages":[
+      {
+        "role": "user",
+        "content": "andi 12 de moyenne fel bac math, f chnowa najem natma3?"
+      },
+      {
+        "role": "assistant",
+        "content": "B 12 de moyenne f bac Math, tnajem takhlet 3la barcha 7ajet behya:\n1. Les ISET (Informatique, Mécanique, Électrique) li fihom barcha application.\n2. Licence fi l'Informatique wala Mathématiques Appliquées.\n3. Prépa intégrée f b3ath l blayes wala Prépa classique (IPEIK, IPEIG) ken scorek wesel.\nEkhtar enti w chnouwa mayouletek: IT, Engineering, wala Gestion."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 50,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb naamel dentaire ama ykoulou matérielha ghali barcha"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey s7i7, les études de médecine dentaire fihom des frais supplémentaires par rapport lel médecine générale. Lezemk techri l matériel mta3 l travaux pratiques (TP) kima les turbines, micromoteurs, w les outils mta3 sculpter l sneyen. C'est un investissement, ama ba3d f l khedma (ken thel cabinet) traja3 l flous hethika fisa3 w revenu mte3ha behi barcha."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 51,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salaire enseignant f lycee fi tounes"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire prof de l'enseignement secondaire f l'étatique (lycée) yebda approximativement men 1300 l 1500 TND net fl bideya. W yetla3 bel ancienneté w les grades (Professeur principal, etc.). F l privé, l salaire ykoun différent w dépend barcha mel établissement."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 52,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chneya naamel be bac lettres ?"
+      },
+      {
+        "role": "assistant",
+        "content": "B bac lettres 3andek barcha choix:\n1) L'enseignement (Français, Anglais, Arabe, Histoire/Géo).\n2) Droit w Sciences Politiques.\n3) Journalisme w Sciences de l'Information (IPSI).\n4) Langues Appliquées w Traduction.\n5) Les Beaux-Arts w Design.\nKen t7eb l 7fadha w les langues, l'anglais w e droit fihom akther afa9 mta3 khedma."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 53,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bellehi chkoun as3ab html wala css"
+      },
+      {
+        "role": "assistant",
+        "content": "HTML w CSS zewz faciles bech tefhem l base mte3hom. \nHTML ashel, khater howa y7ot l structure mta3 e page (kima taswira houni, ktiba houni).\nCSS f l bideya sehel (tbaddel loun, tkabber l ktiba), ama ywalli complexe chwaya ki t7eb ta3mel des designs avancés, animations, w ta3mel un site responsive (eli yemchi 3al telifoun w pc). \nEl thnin lezmik ta9rahom m3a b3adh-hom."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 54,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena krahet l kraya w nheb nbatel"
+      },
+      {
+        "role": "assistant",
+        "content": "Hedha 7ses yji l barcha la3bed fi période mta3 stress, surtt m3a dhaght l 9raya. Khouth chwaya wa9t l rouhek, arta7, w a3tih el 7a9 la rouhek. \nAmma 9bal matetkhadh ay décision, as2el rouhek: 3lech kraht l 9raya? Kater s3iba? Wala mouch domaine eli t7ebbou? \nTnajem dima ta3mel réorientation l domaine akther pratique wala ta3mel formation professionnelle fisa3 tdakhlek l marché de travail."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 55,
+    "messages":[
+      {
+        "role": "user",
+        "content": "khouya est ce que dev mobile fih 5edma ltaw ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey barcha! Le développement Mobile (Android/iOS) fih dima demande kkbira khater ay entreprise tawa test7a9 application. Tawa les technos kima **Flutter** w **React Native** t3alamhom fisa3 w matloubin barcha khater ykhalik tasna3 application temchi 3al Android w iOS fard wa9t. C'est un excellent choix!"
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 56,
+    "messages":[
+      {
+        "role": "user",
+        "content": "njem nkhdem freelance IA ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Bien sûr! L'IA w l Machine Learning مطلوبين barcha f l freelance 3la des plateformes kima Upwork w Fiverr. Tnajem tekhdem 3la des projets kima la création de chatbots, l'analyse des données (Data Analysis), wala création d'outils automatisés b OpenAI API w Python. Les tarifs fihom a3la mel web dev."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 57,
+    "messages":[
+      {
+        "role": "user",
+        "content": "nheb no5rej france naamel ecole d ingenieur, kifech l procedure"
+      },
+      {
+        "role": "assistant",
+        "content": "Bech ta3mel cycle d'ingénieur f France, 3andek 2 thneyet:\n1. Kenek ta9ra prépa fi Tounes: T3addi les concours français (Centrale, Mines-Ponts, CCINP) men tounes w temchi.\n2. Kenek ta9ra licence (L2/L3): Tnajem tsabeb sur dossier via Campus France (procédure \"Études en France\") wala directement f les sites mta3 les réseaux d'écoles kima INSA, Polytech, wala le réseau n+i."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 58,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salaire pilote fi tunisair ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire pilote de ligne f Tounes dépend de l'ancienneté w grade (Officier Pilote wela Commandant de Bord). Généralement, l salaire d'un pilote yebda men 5000 TND w ynajem yousel w yfout l 10,000 w 15,000 TND net l un Commandant de bord expériementé. Ama l coût mta3 études mta3 pilote ghali barcha mel bideya."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 59,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chnia rayk fel anesthesie-reanimation"
+      },
+      {
+        "role": "assistant",
+        "content": "L'Anesthésie-Réanimation (paramédical) heya men a7sen les filières paramédicales! L'afa9 mte3ha ممتاز barcha, f tounes (les cliniques dima ylawjou 3la des techniciens d'anesthésie) w zid lbarra surtt en Allemagne w la France w le Golfe. Salaire mte3ha dima akber chwaya mel infirmerie classique. Hiya w l'Imagerie Médicale houma l top tawa."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 60,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chkounk ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema ! Ena assistant virtuel mbarmaj bech n3awnek f kol ma ykhos l'orientation universitaire, les filières, les carrières w les salaires f Tounes. Ken 3andek ay sou2el 3la 9raytek wela mosta9blek l mehni, tfadhel! 😊"
+      },
+      {
+        "role": "user",
+        "content": "maaneha enti moch abd"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey exactement, ena programme d'Intelligence Artificielle (bot), ama njewbek b ma3loumet s7a7 w n3awnek kima un conseiller d'orientation. 3andek as2la 3al bac wala l fac tawa ?"
+      }
+    ],
+    "category": "casual",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 61,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb cyber security ama fibeli ychedou lhbs ali ypiratiw"
+      },
+      {
+        "role": "assistant",
+        "content": "Hahaha matkhafech ! Fama far9 kbir bin l \"Hacker l kheyeb\" (Black Hat) eli ypirati bech yesre9, w l \"Hacker l behi\" (Ethical Hacker / White Hat) eli yekhdem f l Cybersécurité. F l khedma hethi, les entreprises houma eli ykhalssouk w ya3tiwek l'autorisation bech tpirati l système mte3hom bech tal9alhom les failles w tsala7hom 9bal mayji l hacker l kheyeb."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 62,
+    "messages":[
+      {
+        "role": "user",
+        "content": "brabi chneya l kraya fi ISIM Monastir ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ISIMM (Institut Supérieur d'Informatique et de Mathématiques de Monastir) ma3roufa barcha w tayyara f domaine l'IT. Ta9ra fiha barcha programmation, algorithmique, réseaux w math. Tkharrej des techniciens w des développeurs behyin, w tnajem tkamel fiha Master wela Cycle d'ingénieur sur dossier. C'est un excellent choix kenek maghroum b l'informatique."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 63,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chneya ahsen des metiers l 2030"
+      },
+      {
+        "role": "assistant",
+        "content": "Pour l'horizon 2030, l'a7sen métiers w eli fihom akther croissance houma:\n1. Intelligence Artificielle w Machine Learning (IA Engineer).\n2. Cybersécurité (Sécuriser l les systèmes interconnectés).\n3. L'énergie renouvelable w l transition écologique (Ingénieurs énergie solaire/éolienne).\n4. La santé w l'accompagnement des personnes âgées (Santé numérique w paramédical).\n5. L'automatisation w la Robotique."
+      }
+    ],
+    "category": "future_jobs",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 64,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadeh salaire mta pharmacien khedam f pharmacie"
+      },
+      {
+        "role": "assistant",
+        "content": "Un pharmacien assistant (eli yekhdem f pharmacie mta3 wehed echer) f Tounes yakhlet généralement bin 1500 w 2000 TND net par mois. Ken yzidouh les gardes de nuit wala de weekend, ynajem yzid chwaya. Bien sûr, l'objectif mta3 barcha houwa bech y7ellou officine mte3hom (sbitar wela privé) w l revenu ghadi ywali kbir barcha."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 65,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb naamel IHEC ama moyeni 12 eco, yekhlet"
+      },
+      {
+        "role": "assistant",
+        "content": "B moyenne 12 f bac Éco, s3ib chwaya bech takhlet 3al IHEC Carthage khaterha tetlab score tayaa (souvent l moyenne 13.5 w 14+ w score fou9 140/150 selon l 3am). Ama tnajem tchouf les autres facultés kima l'ISG, FSEGT, wela ESC li ye9blou b scores a9al chwaya w homa zeda tayarat f l gestion."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 66,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chnia SQL, fch nestaamlouh ?"
+      },
+      {
+        "role": "assistant",
+        "content": "SQL (Structured Query Language) howa langage nesta3mlouh bech na7kiw w nmanipuliw l \"Base de données\" (Database). Ya3ni kima enti f Facebook 3andek les amis, tes messages w tasawrek, hedhom lkol mkhabyin f base de données. B SQL tnajem tzid, tfaskh, wala tlawaj 3la ma3louma (par exemple \"A3tini les utilisateurs lkol li 3morkom fou9 20\"). Matloub barcha f l'IT."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 67,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem chkoun ahsen naamel ecole privee wala fac l idara ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Hedha y3tamed 3la barcha 7ajet.\n- L'étatique (fac l'idara kima l'ISG/IHEC) fiha reconnaissance kbira, barcha rigueur, w gratuité. \n- L'école privée t3awnek f l'encadrement, les stages, w l réseau d'entreprises, w tabda a9al stress f administration.\nKen scorek ywasal l fac étatique tayara (IHEC/ISG/TBS), l'étatique khir. Ken scorek ta7 w 3andek l budget, l privé ykoun alternative behya."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 68,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salut najem nbadel mel fac de science lel prepa f e reorientation ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut! Non, la réorientation l l'IPEIT/IPEST (prepa) f mois de Mars (concours de réorientation) ne peut se faire qu'avec l score mta3 e lbac mte3ek (l'orientation de l'année précédente), mouch b les examens universitaires mte3 e réorientation w aslan les prepas mayhezzouch barcha réo sauf b score mta3 l bac. L'accès l prepa lié asasan bel bac."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 69,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chneya as3ab filiere f tunis"
+      },
+      {
+        "role": "assistant",
+        "content": "Tnajem t9oul as3ab les filières f Tounes houma:\n1. Les classes préparatoires aux études d'ingénieurs (Prépa MP/PC) khater l rythme infernal w l concours national s3ib.\n2. La Médecine w l'Architecture khater la durée d'études tawila w yotlbou barcha 7fadha w khedma de nuit w patience.\nAma bel khedma w e charam, ay filière twalli accessible !"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 70,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kifch na9ra ia w ena mazelt ne9es fl code"
+      },
+      {
+        "role": "assistant",
+        "content": "Kifeh tabda f l'IA:\n1. Awal 7aja, a9ra w et3alem l programmation, w bel thabet **Python**, khater houwa asasi.\n2. Mba3d, et3alem chwaya mathématiques (Probabilité, Statistiques, Algèbre linéaire).\n3. T3adda l les bibliothèques mta3 Python kima Pandas w NumPy bech tmanipli les data.\n4. F l lekher, abda bl Machine Learning m3a Scikit-Learn w ba3d Deep Learning. \nKhoudh wa9tek, tabda b l'étape 1!"
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 71,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb njib 15 f lbac info, andi barcha na9ayes fel math"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken t7eb tjib 15 w 3andek na9ayes f l math, 3andek 2 7loul:\n1. Ekhedm barcha l matières de base mte3ek (Algorithmique, Base de données, TIC) w l matières littéraires (Philo, Français, Anglais) bech t3awedh bihom w ytalla3oulek e score.\n2. L Math f bac info mouch kima bac math, rakkez 3al les exercices mta3 l bac l 9dom, y3awdou yjiw dima dima nafs e les idées w les méthodes."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 72,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kifeh nhaser les salaires mta canada, khir men franca ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Oui, généralement les salaires f l Canada (surtout f les domaines IT w Ingénierie) a3la men la France b barcha. Un dev junior f France yekhou environ 2500-3000 EUR net, w f Canada ynajem yekhou 60K-70K CAD par an (environ 3500-4000 EUR par mois). Ama rod belek, le coût de la vie w les impôts f Canada (surtout l'immobilier) ykoun a3la zeda."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 73,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem ena andi passion ll droit ama smaat el avocats mayekhdmouch, c vrai ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Le, mouch ma yekhdmouch, ama l marché fih barcha \"concurrence\" w saturé chwaya (barcha avocats yetkharjou kol 3am). \nAma ken tekhtar spécialité behya (kima Droit des affaires, Droit de l'informatique, Droit international) w dima t7assen rouhek f les langues w tsou9 rouhek bel behi, tnajem tkoun très successful. Zeda l droit ykhallik takhdem f l'entreprise (Juriste d'entreprise) w hethi fiha khedma."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 74,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb na9ra ISCAE b bardo chneya afa9eha"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ISCAE (Institut Supérieur de Comptabilité et d'Administration des Entreprises) f Bardo heya faculté tayyara barcha w ta3ti des formations solides f l Comptabilité w l Finance. Ken t7eb ta3mel Expert Comptable wala Révision Comptable, c'est l'une des meilleures institutions f tounes w diplômé mte3ha 3andou 9ima kbira fi l marché du travail."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 75,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chkounk ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema, ena AI Assistant bech n3awnek f les choix mta3 orientation mte3ek f Tounes, as2el ay question 3la fac wala spécialité, salaires wela marché de l'emploi."
+      },
+      {
+        "role": "user",
+        "content": "najem ns2lk ala 7aja barcha marat hhh"
+      },
+      {
+        "role": "assistant",
+        "content": "Hhh, wiy bien sûr! As2el 9ad ma t7eb w 7ata w ken t3awed as2la. Ena mawjoud houni bech nfaserlek kol chay b d9i9a w ma nfedehc. Tfadhel, chnouwa eli m7ayrek ?"
+      }
+    ],
+    "category": "casual",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 76,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chkoun ahsn genie civil wala meca"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz fihom l'afa9, ama l far9 mta3 l marché w e domaine de khedma:\n- **Génie Civil**: Khedma f l'immobilier, ponts, bâtiments. F Tounes l demande mte3ou dépend mel secteur mta3 l bni li fih hawat w tal3at. Ama matloub lbarra kima l'Afrique.\n- **Génie Mécanique**: Khedma f les usines, l'automobile, l'aéronautique w conception. Fih stabilité akther chwaya w tnajem takhdem f l'industrie wala conception 3D.\nTaba3 passion mte3ek w e chnowa t7eb tekhdem!"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 77,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena ma naarefch chneya nhab w kraya kraht'ha w nhab naamel business"
+      },
+      {
+        "role": "assistant",
+        "content": "Barcha 3bed ymerou b e chey hedha! Kenek t7eb ta3mel l business mte3ek (entrepreneuriat), mouch dima lezem ta9ra 10 snin f l fac. Tnajem ta3mel formation courte (kima marketing digital, e-commerce, wala design) bech ta5ou les outils eli te7tejom. Ama l'université t3awnek tabni réseau de connaissances w tefhem les bases mta3 l gestion (comptabilité, finance, droit) eli bech t7tajhom bech t'géri chariktek."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 78,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ahla, f thnia developpement chnia les certifications li inajmou yaawnoni barcha ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ahlan! F domaine l développement, les certifications y3awnou barcha bech tzid l valeur mta3 CV mte3ek. Kenek f l Cloud (très demandé tawa), a3mel certifications kima AWS Certified Developer, Azure wala Google Cloud. Kenek java: Oracle Certified Professional. Kenek f e réseaux w DevOps: Docker wala CKA (Kubernetes). \nAma matansaach, l portfolio mte3ek w les projets mte3ek 3la GitHub houma akber certification!"
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 79,
+    "messages":[
+      {
+        "role": "user",
+        "content": "salem andi 14 fel bac w nheb naamel medcine andi el hak?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! B moyenne 14, l médecine f tounes s3iba barcha, presque impossible bech tekhoh b score hetheka (les scores mta3 l médecine ytlobou souvent 17+ wala 18+ w score national 170+). Ama kima 9otlek, tnajem ta3mel des alternatives paramédicales kima l'anesthésie, physiothérapie, imagerie, wala ta9ra médecine f l'étranger ken l budget mte3ek yasma7 (kima l'Europe de l'Est: Roumanie, Russie, etc.)."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 80,
+    "messages":[
+      {
+        "role": "user",
+        "content": "njem nes2lk 3al iset ? behi wala le"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ISET (Institut Supérieur des Études Technologiques) tayara barcha! \nL'avantage mte3ou ennou ykharrej des techniciens supérieurs w licenciés formés sur la pratique, ya3ni takhdem b yedik akther men l théorie. Les diplômés mta3 l'ISET fisa3 yal9aw khedma. W ken tjib de bonnes moyennes ghadi, tnajem tkamel ingéniorat fi les écoles d'ingénieurs (ENIT, ENSI, ENIM, etc.)."
+      },
+      {
+        "role": "user",
+        "content": "merci l information hethi"
+      },
+      {
+        "role": "assistant",
+        "content": "Mrehba bik! Ken test7a9 7aja okhra 3la les ISET wela ay faculté, ana mawjoud. Bon courage !"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 81,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadech salaire data analyst f tunis ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire Data Analyst f Tounes lil débutant ykoun entre 1200 w 1800 TND net par mois. Ken twalli expérimenté wala Data Scientist, l salaire ynajem yetla3 l 2500 TND - 4000+ TND. Kol ma tatla3 f l'expérience w les outils li ta3refhom (SQL, Python, PowerBI, Tableau), salairek ykber."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 82,
+    "messages":[
+      {
+        "role": "user",
+        "content": "zaama ahsen no9ed fl fac nkamal master wla nkhdem w ntamaa b exprience ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hedhi as3ab question! \n- L'expérience f l khedma dima tarba7. Ken 3andek offre khedma behya w fi domaine y3elmek w tetطور fih, a5dem. L'expérience t9ariik 7ajet ma tal9achomch f fac.\n- L'Master ykoun behi kenek t7eb spécialité précise (kima Big Data, Cybersécurité) wala t7eb twalli prof wala tabda recherche. \nFama barcha 3bed tekhdem w t'kamel l'master \"cours du soir\", hethi l'idéal ken tnajem tnsa9 binet-hom."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 83,
+    "messages":[
+      {
+        "role": "user",
+        "content": "nheb no5rej njareb hakki l barra, france wela italie f developpement web"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz fihom demande mteza l les développeurs Web ! \nLa France fiha l'avantage mta3 l langue (ashel barcha l twensa) w l marché de la tech f Paris w Lyon tayara w barcha offres. \nL'Italie 9a3da tlawaj zeda, ama les salaires f l'IT f France dima a3la chwaya mel Italie w l l'intégration f l communauté tech ashel. A7sen 7aja ابعث des CVs l ezzouz w chouf win tjik l'offre l behya."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 84,
+    "messages":[
+      {
+        "role": "user",
+        "content": "slt, ahsen fac pr medecine tunis wala sousse wala sfax wla monastir"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut! Les 4 facultés de médecine f tounes niveau mte3hom t9rib kifkif w tayyarat barcha à l'échelle internationale. L'FMT (Tunis) heya l a9dem w l'akber. Sousse, Monastir w Sfax mhay2in barcha w fihom encadrement behi. Choix mte3ek tawa ydepend men wilaytek (le score ykoun mofeed kenek men nafs l zone à cause de l'affectation régionale w bonus e 7%)."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 85,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena nheb cyber sec, chnowa net3alem linux mtaach"
+      },
+      {
+        "role": "assistant",
+        "content": "F cybersécurité, Linux heya système l'asasi.\nAwal 7aja et3alem l commandes de base mta3 Linux (cd, ls, grep, find, permissions d'utilisateurs). \nMba3ed hebet distribution kima **Kali Linux** wala **Parrot OS**, khater fihom barcha outils mta3 hacking pre-installés (kima Nmap, Metasploit, Wireshark). A3mel machine virtuelle (VMware wala VirtualBox) w abda jarreb fih w t3alem."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 86,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bich ns2l 3ala insat wala esprit w chkoun a7ssen ll theb ytawer f AI w IA ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz top ama l far9 kbir f l'accès:\nL'INSAT heya publique w gratuite, tetlab score behi barcha fl bac, fiha formation thèorique w mathématique s7i7a t3awnek barcha barcha f l'IA w l Machine Learning.\nESPRIT heya privée (bel flous), fiha formation akther pratique w \"project-based\" w 3andhom spécialité Data Science/IA fi les cycles d'ingénieurs w les partenariats mte3hom kbar.\nKen ta5let 3al INSAT, heya prestige w base behya, ken t7eb l pratique directe wala makhlatch l INSAT, ESPRIT excellent choix."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 87,
+    "messages":[
+      {
+        "role": "user",
+        "content": "za3ma bac info mrakza aal web akther wala des applications destkop"
+      },
+      {
+        "role": "assistant",
+        "content": "F bac info, l'accent dima ma7tout 3al les bases mta3 programmation wl algorithmique, mouch kima spécialité (web wela desktop). Ta9ra l'Algorithmique w tpractiqui b Python wala Pascal, w ta9ra l base de données w TIC (HTML/CSS, JavaScript, PHP). Heya t3tik e les bases l zouz, ama fel fac ba3d rakkez enti fi eli t7ab, web wela mobile wela desktop."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 88,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ena kraht l bac w dima njib 9"
+      },
+      {
+        "role": "assistant",
+        "content": "Matfchelech! L bac période fiha barcha dhaght ama c'est pas la fin du monde. B 9 de moyenne, tnajem tenjah ken tzid takhdem 3al les matières de base w ta3mel un bon planning de révision w tkamal b e rachat w tenja7 bel contrôle. W 7ata l9adar allah ma nja7tech, t3awed l 3am w tzid tetsala7. L 9raya lezemha patience, arja3 l aghlatek w a3ref win l mochkla (est-ce que stress wala manque de révision?)."
+      },
+      {
+        "role": "user",
+        "content": "famma barcha hafdha hhhh"
+      },
+      {
+        "role": "assistant",
+        "content": "Hhhh ey na3ref, l 7fadha tfaded w t9ale9. A3mel des résumés sghar w des cartes mentales (mind maps). W hawel tfhem l cours mte3ek f 3oudh l 7fadha chtar chtar. Courage, mazel 3andek l wa9t bech tet7assen."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 89,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadeh salaire expert comptable ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'expert-comptable f Tounes yekhou salaire behi barcha w yet7assen bel wa9t. F début kima collaborateur l salaire bin 1500 w 2500 TND, w ken ywalli chef de mission wala manager yousel l 3500 - 5000+ TND. Ama l big money yji nharet li y7el l cabinet mte3ou (Associé) w ywalli l revenu kbir barcha. L parcours twil ama ykhaless lte3b."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 90,
+    "messages":[
+      {
+        "role": "user",
+        "content": "asslema"
+      },
+      {
+        "role": "assistant",
+        "content": "Ahlan w sahlan! Kifeh najem n3awnek lyoum? 3andek sou2el 3la l'orientation, les facultés wala e carrières w l khedma f tounes ?"
+      },
+      {
+        "role": "user",
+        "content": "ui theb nes2lek andek maamloumet aal flous wla khedma"
+      },
+      {
+        "role": "assistant",
+        "content": "Bien sûr! Najem n3tik les salaires approximatifs f tounes pour différents postes (développeur, médecin, expert comptable, ingénieur, etc.) w chnouma les domaines li fihom akther demandes f marché e choghel tawa. Chnouwa e domaine li yhemek ?"
+      }
+    ],
+    "category": "casual",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 91,
+    "messages":[
+      {
+        "role": "user",
+        "content": "ahla brabi l dev frontend fih khedma fel canada ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ahlan! Ey, le développement Frontend (surtout m3a React, Vue.js wala Angular) ma مطلوب barcha fel Canada. C'est l'un des postes IT les plus demandés ghadi, w les boites tech dima ylawjou 3la des développeurs pour lurs interfaces web. Salaire ykoun autour de 60K l 80K CAD f l début."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 92,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chnawa ahsen theneya bch tet3alem hacking : web wla reseaux wla prog"
+      },
+      {
+        "role": "assistant",
+        "content": "Bech tet3alem l Hacking (Cybersécurité), lezemk ezzouz, ama l tartib yetbadal. A7sen theneya:\n1. **Réseaux (Networking)**: Tefhem l base (TCP/IP, DNS, ports), khater heka kifeh tetwassel les machines.\n2. **Linux & Systèmes**: Kifeh tekhdem l OS.\n3. **Web**: Kifeh l web yemchi (HTTP, bases de données) w l failles (SQL Injection, XSS).\n4. **Programmation (Python/Bash)**: bech t'automatisihom lkol."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 93,
+    "messages":[
+      {
+        "role": "user",
+        "content": "slm! najm naamel prepa mte3 d'ing b 12 d moyenne w bac science ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Avec 12 de moyenne en Bac Sciences, tnajem ta3mel Prépa BG (Biologie-Géologie) eli thzlk l des écoles d'ingénieurs d'agronomie wala biotechnologie. L Prépa classique PC (Physique-Chimie) wela PT (Physique-Technologie) tnajem takhlet 3lihom fi des IPEI de l'intérieur (selon le score de l'année) ama fihom khedma kbira barcha w concurrence."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 94,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kifch na3rf ena netkbaer fl data science wla no, l math ma nefhmlouch barcha"
+      },
+      {
+        "role": "assistant",
+        "content": "L Data Science fih barcha Math, surtt f l Algèbre Linéaire w l Statistiques/Probabilités khater c'est la base de tout modèle d'Intelligence Artificielle. Kenek t'farkas 3la 7aja ma fehéch barcha mathématiques s3ab ama fil IT, tnajem ta3mel **Développement Web** wela **Développement Mobile** wela **DevOps**. Ezzouz fihom programmation w logique sans trop de math complexes."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 95,
+    "messages":[
+      {
+        "role": "user",
+        "content": "yewdi l 9raya m3ach wakkla l khobz w chabeb dima yechki"
+      },
+      {
+        "role": "assistant",
+        "content": "S7i7 w nfhémك barcha. L marché f tounes s3ib w l chômage wjoud, ama l 9raya to93od la base. \nEl 7al mouch enna nsellmou l 9raya, ama l 7al houwa nbadlou l méthode: nakhdmou 3la les \"Soft Skills\" (communication, langues), na3mlou des formations f les domaines elli fihom demande kima l'IT w l Digital w l langues, w nzidou f les stages. Li ya3ref kifeh ybi3 rouhou professionnellement dima yal9a rouhou, 7ata lbarra."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 96,
+    "messages":[
+      {
+        "role": "user",
+        "content": "kadeh salaire prof sport"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire prof de sport (éducation physique) f Tounes f l'enseignement public yebda généralement bin 1300 w 1500 TND net. Tnajem ykoun a3la avec l'ancienneté w ken ykoun prof principal. Fama zeda barcha prof de sport yeckhdmou kima des préparateurs physiques f les clubs wala y7ellou des salles de sport (Gym), win l revenu ynajem ykoun a3la barcha."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 97,
+    "messages":[
+      {
+        "role": "user",
+        "content": "bich ns2k khouya ana andi bac technique w hayer ben l iset w l prepa"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz behyin ama l choix mte3ek depends men chnouwa t7eb w 9adeh tnajem t9ra:\n- **L'ISET**: 3 ans (Licence). Ta9ra pratique barcha, fisa3 tetkharrej w tal9a khedma, w tnajem tkamel ingéniorat sur dossier ba3d.\n- **L Prépa (PT/T)**: 2 ans d'études t9al w théoriques barcha, t3addi concours. Ken tenjah todkhol l cycle ingénieur directement.\nKen t7eb ta9ra tranquille w tbambi l pratique fisa3 = ISET. Ken t7eb l prestige mta3 d'ing w andek l patience mta3 el 7fadha w e stress = Prépa."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 98,
+    "messages":[
+      {
+        "role": "user",
+        "content": "najem ns2lek question personnel ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Hahaha bien sûr, as2el ! Ama raw ena juste programme mta3 Intelligence Artificielle (bot), ma 3andich 7yet personnelle wala afkar ekhra. Ama ken t7eb n3awnek fi 7aja teb3a l'orientation w e ddenya mta3 e l'étudiant, tfadhel!"
+      }
+    ],
+    "category": "casual",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 99,
+    "messages":[
+      {
+        "role": "user",
+        "content": "chnawa ahsan ecole fel dev w IA ken mchit privé?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken mchit Privé f Tounes, a7sen les écoles d'ingénieurs w les plus réputées fi l'informatique w l'IA houma:\n1. **ESPRIT**: La plus grande w fiha réseau kbir w spécialités kima Data Science w IA.\n2. **Tek-Up**: Réputée barcha f l'IT w l cybersécurité w les certifications.\n3. **SESAME** w **EPI**: Zeda des universités fihom formation behya. \nESPRIT w Tek-up houma l'a7sen actuellement f e marché."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 100,
+    "messages":[
+      {
+        "role": "user",
+        "content": "eyh w kifeh ykhaless e freelance fi l web dev l tounsi ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L freelance lel web dev fi Tounes ykhaless bil devise (Euro/USD) ken tekhdem m3a clients lbarra. Salaire wela l revenu dépend menek enti.\nPar exemple, des projets simples (kima site e-commerce b WordPress) tnajem dakhél fihom 500-1000 EUR l wehed. Des devs tayarat yakhdmou full-time en freelance ydakhlou facilement fou9 1500 l 3000 Euros par mois. \nAma l bideya s3iba chwaya lezemek tasna3 compte (Upwork) w tjib les 1ers clients mte3ek."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+
+  {
+    "conversation_id": 101,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem.. rani nkteb w nebki njibt 9.5 w taht controle w baba tayah fia lhak w nhess f rouhi fcholt"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem, walahi 7asses bik w na3ref eli l période hedhi s3iba barcha w fiha stress. L controle mouch 3ib jemla, barcha ness ta7ou controle w nja7ou w 3amlou carrières tayarat. Arta7 lyoum, abki w sayeb l stresse, w ghodwa abda a9ra. Babaek khayef 3lik, nharet li tenja7 taw yefra7 bik. Courage !"
+      },
+      {
+        "role": "user",
+        "content": "zaama najem nkhalet? rani dhayaa fel math"
+      },
+      {
+        "role": "assistant",
+        "content": "Bien sûr tnajem! F l controle, l'objectif houwa tjib a9al chay des notes khir men l session principale bech tet7aseb l'a7sen. Rakkez 3la les matières li ta3ref rouhek tnajem tjib fihom des points fisa3 (kima l'info, langues, wala philo). L math a5dem les examens l 9dom barka. Matfchelech!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 102,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena jibt 14.5 bac sc w darna ghasbin alya medecine w houma yaarfou li scorha 17+ w dima ykoulou aalik makrech w jaabouhali fi wejhi"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema. L wehed y7ess b l'injustice ki darna ma yefhmouch l système des scores. B 14.5 f bac Sciences, rak nja7t b mention Bien w hethi 7aja tayara barcha! Les parents dima y7ebou ychoufou wledhom tobba, ama l wa9e3 l'universitaire tbedel."
+      },
+      {
+        "role": "user",
+        "content": "kifeh nfasrelhom l'orientation w nkalemhom?"
+      },
+      {
+        "role": "assistant",
+        "content": "A93ed m3ahom b hédou, 7el l dalil mta3 l'orientation (wela e site) w warihom les scores mta3 3amnawel (170+ lel médecine). Mba3ed, warihom les spécialités paramédicales kima l'Anesthésie, Physiothérapie wela l'Imagerie Médicale li l afa9 mte3hom tayara w scorek ykhalet l'hom. Ken chéfou des chiffres réels taw yefhmou."
+      }
+    ],
+    "category": "family_pressure",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 103,
+    "messages": [
+      {
+        "role": "user",
+        "content": "scorey 142 bac eco w nheb IHEC Carthage, nakhel telha wela s3ib?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut! B score 142 bac Éco, 3andek des chances, ama l'IHEC Carthage (Licence en Sciences de Gestion) dima l score mte3ha yl3ab bin 144 w 150 حسب e demande mta3 l 3am. Fih chwaya risque."
+      },
+      {
+        "role": "user",
+        "content": "ken makhlatch chneya n7ot fel choix 2?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken makhlatch 3al IHEC Carthage, tnajem t7ot l'ISG Tunis (Institut Supérieur de Gestion) fi Bardo, houwa zeda tayara barcha. Wela tnajem t7ot l'ESC Manouba, wela FSEGT. Zid l'IHEC Sousse ken ma y9al9ekch l'éloignement. Dima a3mel plan B w C fi nafs l domaine."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 104,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi fasrli chnia 7keyet 7% fl orientation, ena men nabeul w nheb nakra f sousse"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema! L'avantage mta3 7% yet3ta kenek t7eb ta9ra fi faculté mawjouda fi l'académie mte3ek (l wileya mte3ek wela l wilayet l 9rab li tab3in nafs l'université). Enti men Nabeul (ta3ba l'Université de Carthage), ken t7eb ta9ra f Sousse (Université de Sousse), ma tet7asablikch l 7% khater mouch nafs l'académie."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 105,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salut, rani dhaya3 barcha. bac info score 120, nheb fac feha prog w tkharej des developpeurs bahin ama manhebech ISAMM"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut! Ken t7eb développement w programmation, w b score 120, tnajem tchouf les ISET (Institut Supérieur des Études Technologiques) kima ISET Rades wela ISET Charguia fi l'Informatique. Formation fihom 100% pratique w tkharej des devs tayarat."
+      },
+      {
+        "role": "user",
+        "content": "w l ISI ariana?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ISI Ariana (Institut Supérieur d'Informatique) ممتاز barcha, ama le score demandé ghadi dima a3la chwaya (souvent bin 135 w 150 lel bac info). Tnajem t7otha fi l choix lewel juste au cas où l score yti7, ama dima 7ot les ISET wala FST fi les choix elli ba3dha bech todhmen blasetk."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 106,
+    "messages": [
+      {
+        "role": "user",
+        "content": "wallahi nhess f rasi bech yetarcha9 mel takhmem. bac lettres, score 95 w nheb hja fiha animation wla theathre"
+      },
+      {
+        "role": "assistant",
+        "content": "Bismelleh alik, matkhalich e stress yet7akem fik. B score 95 bac lettres, 3andek des options tayarat f l domaine artistique w l'animation! Tnajem tchouf l'ISAD (Animation w Jeunesse) fi Bir El Bey, wela l'ISMT (Institut Supérieur de Musique et Théâtre) fi l Kef."
+      },
+      {
+        "role": "user",
+        "content": "lezemha test d'admission hethi yakhi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey exactement! Barcha facultés d'art w théâtre yotlbou test d'aptitude (concours sur dossier w entretien wala test pratique). Rod belek lezemk tsajel fihom mel tawa 9bal l'orientation l 3adeya, f l site mta3 l'orientation famech rubrique spéciale les filières elli yotlbou ektibar."
+      }
+    ],
+    "category": "confused_students",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 107,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi 11 bac math w haret bin prepa w fac de science, baba kali prepa khir w ena khayef"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut. L'Prépa (IPEIT, IPEIM, etc.) behya barcha kenek tnajem tansa kol chay w ta9ra lil w nhar l modet 3amin bech t3addi concours. Ama b 11 moyenne, lezemk tkoun wa3i elli rythme bech ykoun s3ib w yelzmek rattrapage kbir."
+      },
+      {
+        "role": "user",
+        "content": "w fel fac de science najem nwali ingenieur?"
+      },
+      {
+        "role": "assistant",
+        "content": "Oui bien sûr! Tnajem ta3mel Licence (Math wela Physique-Chimie) fi FST wala FSM, w ken tkoun parmi les premiers f l promo mte3ek (tjib des mentions), tnajem tsabeb dossier w todkhol l cycle d'ingénieur. C'est une excellente alternative ken t7eb ta9ra à ton rythme."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 108,
+    "messages": [
+      {
+        "role": "user",
+        "content": "khouya ena hzin barcha... njaht bac math b 10.1 w manjm naamel chy biha w shabi lkol l fouk 14"
+      },
+      {
+        "role": "assistant",
+        "content": "Mabrouk ennje7 se3a! Walahi na3ref l'i7ses hedha ki t9aren rouhek b s7abek, ama asma3ni mli7: 10.1 f bac math rak tetsamma salaktha w 3andek l base logic. L bac étape w t3addet, l fac c'est un nouveau départ w 3abed bda men sfer w wsel."
+      },
+      {
+        "role": "user",
+        "content": "chnwa najem naamel b score 102 brabi?"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 102 tnajem temchi fi barcha thneyet behyin: Les ISET (Informatique, Mécanique, Électrique) eli fihom khedma madhmouna w tnajem tatla3 fihom fisa3. Wela tnajem ta3mel Licence fondamentale f les universités régionales kima Gafsa, Gabès, wala Bizerte w mba3ed t'excel fihom."
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 109,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salaire mtaa ingenieur fel etatique yakhi yvaut le coup?"
+      },
+      {
+        "role": "assistant",
+        "content": "F l'étatique (fonction publique en Tunisie), salaire mta3 ingénieur débutant (A1) ykoun bin 1600 w 1800 TND net. L'avantage f l'étatique houwa la stabilité, les horaires w les primes fi b3adh l wizaret (kima STEG wela SONEDE win fama des avantages okhryn). F l privé, l salaire yebda kifkif ama yetla3 barcha fisa3 ba3d 2-3 snin."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 110,
+    "messages": [
+      {
+        "role": "user",
+        "content": "slm, chkoun as3ab insat wala prepa ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Ezzouz fihom niveau tayara ama l système différent: L'INSAT heya prépa intégrée (CBA/MPI), ta9ra 2 ans w t3addi concours interne (m3a wled fac-tek barka). Fiha barcha khedma w mini-projets. La Prépa classique (IPEIT, IPEST) s3iba f rythme w pression psychologique, w t3addi concours national m3a tounes kemla. L prépa classique tetsamma as3ab fi niveau l stress w l concours."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 111,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nheb njareb fac TBS b bardo, andhom test anglais s3ib ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Tunis Business School (TBS) ta9bel b score mta3 l bac, w fama effectivement test de niveau fi l'Anglais khater la scolarité lkolha b l'anglais. L test mouch 's3ib' ta3jizi, ama lezemk tkoun tefhem w tnajem t3aber b anglais s7i7 (B1/B2 level). Kenek tetaferrej f les séries w ta9ra articles bl'anglais, taw tsalakha."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 112,
+    "messages": [
+      {
+        "role": "user",
+        "content": "bhim fel fac, dkhalt fac de science njaht b 10 bessif, chneya njem nakhdem baad ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Matgoulch 3la rouhek bhim! L Fac de Science (FST wela autres) s3iba w rythme mte3ha keshin, w tenjah b 10 tetsamma salaktha w jebt l module. L khedma mba3ed depend 3la spécialité mte3ek (Info, Chimie, Bio, Math)."
+      },
+      {
+        "role": "user",
+        "content": "ena info, fama khedma?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'Info heya a7sen 7aja tnajem ta3melha! F l marché de travail f Tounes, mouch bech ykouloulek '9adeh jebt moyenne f l fac'. Bech ykouloulek 'chnouwa ta3ref tcodey?'. A3mel des projets wa7dek f e dar (Web wela Mobile), 7othom f CV, w daber stage. L flous w l khedma fi l'IT dima mawjoudin."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 113,
+    "messages": [
+      {
+        "role": "user",
+        "content": "bich nes2l aala architecture e zokrom fi tounes ENAU, nansah beha?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ENAU (École Nationale d'Architecture et d'Urbanisme) fi Sidi Bou Said heya l'école étatique l wa7ida f Tounes mta3 architecture. L 9raya fiha 6 snin, passionnante barcha ama fiha barcha chahriyat w projets w maquettes w khedma ydaweya."
+      },
+      {
+        "role": "user",
+        "content": "w be3d ykoulou batala s7i7?"
+      },
+      {
+        "role": "assistant",
+        "content": "S7i7 l marché f Tounes fih barcha concurrence tawa w fama difficulté f l bideya bech tal9a salaire behi f cabinet. Ama ken tkoun motivé, tnajem tekhdem freelance f l'étranger (modélisation 3D, BIM) wala temchi l les pays du Golfe w la France win l'architecte mezel matloub."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 114,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi 14 fel bac sport, nheb naamel ISSAE ksar said behi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Mabrouk l 14! L'ISSEP Ksar Saïd heya l'institut l'akber w l'akther ma3rouf f Tounes l les métiers du sport w l'éducation physique. B scorek tnajem tkhalet facilement. Behi barcha ken t7eb twalli prof de sport, entraîneur, wela préparateur physique."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 115,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nabki w nokech... bdit naamer fel dalil w rasi wjaani.. 7ajet barcha w ma fehem chay"
+      },
+      {
+        "role": "assistant",
+        "content": "Osbor chwaya, tfadhel kess ma w arta7. E dalil tawjih fih barcha info w ydoowakh s7i7. Kifah n3awnek? Abda bel 7ajet eli met2aked menhom. Chnouma l matières li t7ebhom w tjib fihom bel behi?"
+      },
+      {
+        "role": "user",
+        "content": "nheb nkhdem f sbitar ama nkreh dam.. w rani sc exp w score 130"
+      },
+      {
+        "role": "assistant",
+        "content": "Fhemtk. Ken t7eb sbitar w tekrah e dam, a7sen choix lik f les paramédicaux houma: 1) L'Imagerie Médicale (Radiologie): tekhdem b les machines mta3 l'IRM w l'échographie, ma fehech dam jemla. 2) Physiothérapie / Kiné: tekhdem rééducation. 3) Nutrition (Diététique). B score 130, l'Imagerie Médicale wala l Nutrition tnajem tal9ahom fi facultés kima Monastir wela Sfax wela Gabès."
+      }
+    ],
+    "category": "confused_students",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 116,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi fama reo mtaac mars, s3iba chwaya yakhi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Concours de Réorientation universitaire (session Mars) fih 2 types: 1) Réorientation par score (ta3mel demande b scorek mta3 e bac kima l'orientation l 3adeya). 2) Réorientation par concours (t3addi des épreuves kima l bac ama f des matières spécifiques l e domaine li t7ebbou, par exemple math/physique lel médecine). L'option mta3 l concours tetlab barcha préparation w s3iba chwaya khater l blayes limités barcha, ama test7a9 l mo7awla!"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 117,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nheb na9ra fel esprit ama chahreya baba 1000dt, najm?"
+      },
+      {
+        "role": "assistant",
+        "content": "ESPRIT heya université privée, w l frais de scolarité ghalyin chwaya (fouf 7000-8000 TND par an selon l niveau). B chahreya mta3 1000dt tnajem tkoun s3iba chwaya 3la l 3ayla tkhalesha cash. Ama fama des solutions kima les crédits d'études (les banques ya3tiw prêt étudiant), wala l'ESPRIT ta3ti des facilités de paiement. W tnajem zeda tekhdem à temps partiel bech t3awen."
+      },
+      {
+        "role": "user",
+        "content": "fama fac etatique kima esprit?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'alternative l'étatique w l gratuite li fiha nafs l'esprit pratique heya les ISET (Institut Supérieur des Études Technologiques) kima ISET Rades, ISET Sfax. Ya9riw barcha pratique w tnajem ba3d t3addi concours sur dossier bech tkamel cycle ingénieur fi l'étatique (ENSI, ENIT) wela 7ata tkamel fi ESPRIT ba3d l licence ken daberte khedma w bech tkhales l master/ingéniorat cours du soir."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 118,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem ena ltaw lani fehem chneya l faida mtaa foyer l jami3i"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! L Foyer universitaire (Mbayet) 3andou barcha fwayed: 1) Rkhis barcha par rapport l lekra mta3 les appartements (el chambre b qq dizaines de dinars f l 3am w mekla rkhisa f l resto). 2) 9rib lel les facultés généralement. 3) L'ambiance: t3ich m3a des étudiants kifik, tnajmou ta9raw m3a b3adhkom w t3iichou jaw l fac. L'inconvénient houwa l manque d'intimité w b3adh l foyers 9dom chwaya f l'infrastructure."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 119,
+    "messages": [
+      {
+        "role": "user",
+        "content": "kadeh yelzmni score bch naamel dentaire monastir?"
+      },
+      {
+        "role": "assistant",
+        "content": "Médecine Dentaire fi Monastir dima scorha mgarreb l l médecine générale. Généralement l score national ykoun fou9 165 w yousel l 170+ selon les années (7asb la difficulté mta3 l bac f l 3am hedheka w l blayes disponibles). Ken l moyenne mte3ek fou9 16 f bac math/sc, tnajem tkhalet."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 120,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena dhont aala rohi bac sc jibt 10 w ommi tbki kalet chmata f bnet khalti w baba kal l'khaltna mayjich ml fac"
+      },
+      {
+        "role": "assistant",
+        "content": "Ya rabi, 7asses bik w rani na3ref eli l pression mta3 l 3ayla w mo9arnet la9areb heya as3ab 7aja f l bac. Ama اسمعني, l bac mouch 9imetek enty k'ensén! Tjib 10 mouch ma3neha enty fchel. Barcha ness jebou 10 w mchew l fac 3adeya w khedmou w walew modara w bnew rwe7hom."
+      },
+      {
+        "role": "user",
+        "content": "ama dar mayhbouch yakablou l mo3dal w dima yetmanykou"
+      },
+      {
+        "role": "assistant",
+        "content": "Ma ta3tihomch wthnek tawa, houma sous le choc w ki yebdew metghachchin y9oulou ay klem. Enty tawa ekhtar filière fiha afa9 (kima Informatique wela Gestion wala langues) w اثبت روحك f l fac. Ki bech trawa7 b e dima men l'awa2el f l fac w tdaber khedma, taw houma bedhom yetbadlou w yeftakhrou bik. Khali 10 hedhika l motivation mte3ek!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 121,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chkounkhir medecine sousse wla medecine sfax?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz Facultés de Médecine f Sousse w Sfax houma des références kbar w ykharjou fi des médecins de très haut niveau w ma9boulin partout f l monde. Sfax ma3roufa b l'excellence mte3ha w l CHU Habib Bourguiba kbir barcha. Sousse zeda fiha CHU Sahloul w Farhat Hached w l'environnement estudiantin fi Sousse 7lou barcha. Ekhtar 7asb e distance l darek w l foyer!"
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 122,
+    "messages": [
+      {
+        "role": "user",
+        "content": "najem njareb IPEIT w naamel 1 an w ken manjahtech nbadl?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey tnajem. Barcha étudiants ya3mlou l'expérience mta3 l Prépa (IPEIT, IPEST, etc.) f l'1ère année. Ken 7assou l rythme keshin barcha wala ma nj7ouch, ya3mlou réorientation (par score wela t3addi concours) fi Mars mta3 nafs l 3am bech l 3am l jey ymchiw fac okhra kima FST wela ISET. W l'avantage ennou 3am l prépa bech ya3tik base s7i7a f l khedma w l math."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 123,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi moyenne 15 bac info, tnajem tjibli ISI ariana ? w la ISAMM ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Mabrouk l 15! B moyenne 15 f Bac Info, dima scorek ykhaltek l l'ISAMM (Institut Supérieur des Arts Multimédia de la Manouba) w l'ISI Ariana (Institut Supérieur d'Informatique). L'ISI scorha dima a3la chwaya mel ISAMM (autour de 145-155), ama b 15 3andek fortes chances bech tji men l'awa2el w todkhol l'ISI eli heya l'une des meilleures f tounes."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 124,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem, rani hbelt w ana nkhamem fel orientation w l taw ma htit hata choix fel site"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem, wasa3 belek w matkhalich e stress yeghlbek, mazel fama wa9t. Abda b l'étape hedhi: ekteb 3la war9a 3 filières elli matkrahhomch w tjib fihom notes mleyen f l bac. Kenek t7eb l'IT 7ot l'Info, ken t7eb l bio 7ot paramédical, ken t7eb math 7ot prépa. Chnouma l matières li tarta7elhom?"
+      },
+      {
+        "role": "user",
+        "content": "ena dima njib mlih fel gestion w math, ama scori na9es chwaya bac eco"
+      },
+      {
+        "role": "assistant",
+        "content": "Behi barcha, b bac Eco w t7eb l gestion w l math, 3andek a7sen les choix houma: Sciences de Gestion (Comptabilité, Finance, Marketing) wela Informatique de Gestion (ISG, ESC, FSEGT, wela ISET f l région mte3ek). Ken scorek na9es, 7ot les instituts li s9orehom mgarreb (kima l'ISET) fi l'awa2el bech todhmen blasa, w 7ot les facs l kbar f l début just in case."
+      }
+    ],
+    "category": "confused_students",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 125,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi kadeh njem ntaleb flous ki nekhdem f call center?"
+      },
+      {
+        "role": "assistant",
+        "content": "L khedma f l Call Center f Tounes (surtout émission wela réception d'appels b l français/anglais) tkhalles mli7 l les étudiants w les jeunes diplômés. L salaire de base ykoun bin 800 w 1200 TND net. M3a les primes (assiduité w rendement) tnajem tousel bin 1500 w 2000 TND facile kenek tayara f e vente wela e support."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 126,
+    "messages": [
+      {
+        "role": "user",
+        "content": "andi bac lettres, w nheb nkhdem l barra, chnouma les licences behyin?"
+      },
+      {
+        "role": "assistant",
+        "content": "B bac lettres w t7eb tkhdem lbarra, a7sen les filières li fihom afa9 mondiale houma: 1) Langues Appliquées w Traduction: Anglais wela Allemand, w l traduction matlouba barcha lbarra. 2) Droit International / Sciences Politiques: Ken tkamel Master lbarra. 3) Tourisme w l'Hôtellerie (kima IHEC Carthage wela Sidi Dhrif): Fih khedma mondiale fi les hôtels w les croisières."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 127,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena njht bac tech b 13.5 scorei 134, w nheb IPEST. nkhlet ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'IPEST (La Marsa) ta9bel asasan l bac Math w bac Sciences b des scores kbar barcha (souvent l'élite w l top mta3 tounes fou9 17 moyenne). B bac Tech w moyenne 13.5, l'accès lel IPEST s3ib barcha bech man9oulch impossible. Ama b 13.5 tnajem tkhalet 3la Prépa PT (Physique-Technologie) fi des IPEI kima IPEIT, IPEIM (Monastir) wela IPEIN (Nabeul)."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": "fama prepa bl francais ? khatr français mteei d3if barcha w khayef"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, fi Tounes l cursus Universitaire mta3 l Prépa (w l'Ingénierie, médecine, sciences lkol) ykoun bel Français. L math, l physique, w l chimie kolhom b termes français. Ama matkhafech, l français li ta7tejou mouch 'littérature', houwa français technique w scientifique (des mots kima 'soit', 'on pose', 'équation'). F chhar loul taw testenes bih!"
+      },
+      {
+        "role": "user",
+        "content": "bhy y3aychek rayehtni"
+      },
+      {
+        "role": "assistant",
+        "content": "De rien! Dima odkhl w a9ra les cours mte3ek, w ma t7chemch bech tes2el ken ma fhemtch kelma. Bon courage!"
+      }
+    ],
+    "category": "confused_students",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 129,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi 11 bac sc w t3ebt mel t5mem, ykali chouf fac dentaire lbarra w ena maandi hta frank"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut, walahi l mojtama3 dima yjiiblek a7lem kbira w ynasaweik f l wa9e3. Ken l'objectif médecine w makhlatch w makch mta3 privé lbarra (khater tkalef barcha flous, bin 15 w 30 malyoun f l 3am l Roumanie w Senegal), famech mochkel jemla. Chnouwa ekhouya les domaines li t7ebhom w tnajem takhdem fihom fi Tounes?"
+      },
+      {
+        "role": "user",
+        "content": "nheb hyawanet w tbi3a"
+      },
+      {
+        "role": "assistant",
+        "content": "Excellent! B bac Sciences, tnajem ta3mel Biologie wela Sciences de la Vie et de la Terre (SVT) f l FST, wala ta3mel l'Agronomie fi des instituts kima l'INAT (Tunis), ESA Mateur, wela Chott Mariem. Tnajem twalli Ingénieur Agronome wala tekhdem f l'environnement w les laboratoires. Les options hethom scorhom à la portée w mofeed barcha!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 130,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi fama khedma fi genie electrique fi tounes?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey w barcha! L'Ingénieur en Génie Électrique matloub barcha fi Tounes f l'industrie (les usines, les câbleries kima Yazaki, Draxlmaier), w f l'énergie (STEG, énergie renouvelable kima solaire/éolien), w zeda f l'automatisme w la robotique. L chômage fih très faible w l salaire yabda behi w yetla3 fisa3."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 131,
+    "messages": [
+      {
+        "role": "user",
+        "content": "asslema... ena ma narafch win nemchi. bac info score 109, rani fadyt w y2st"
+      },
+      {
+        "role": "assistant",
+        "content": "Aslema w tawa tfarhed 3ala rouhek. B score 109 bac Info rak tnajem ta3mel barcha 7ajet fi l'informatique. Les ISET houma l'alternative e tayaara b score kima hedha, tnajem ta9ra Développement Système d'Information (DSI) wala Réseaux (RSI). W fama zeda l'ISIMA fi Mahdia wala ISITCom fi Sousse elli 9rab l scorek."
+      },
+      {
+        "role": "user",
+        "content": "aman ykblouni f iset rades ?"
+      },
+      {
+        "role": "assistant",
+        "content": "ISET Rades heya mel les ISET li 3andhom demande kbira barcha w scoreha dima a3la chwaya (souvent 120+ lel bac info). Ama matkhafech, 7otha 1er choix, w 7ot ba3dha ISET Charguia wala ISET Nabeul w Bizerte. L important t7ot plusieurs ISET bech todhmen wehda fihom, l programme w diplôme mta3 les ISET lkol kifkif!"
+      }
+    ],
+    "category": "confused_students",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 132,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem ena nheb nakhdem f domaine l art wel design (bac lettres), kifeh l procedure"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Ken t7eb l design w l'art, a7sen les facultés houma l'ESSTED (Design) fi Denden, l'ISAMM (Multimédia), w les Instituts des Beaux-Arts (ISBA Tunis, Sousse, Sfax). Rod belek, l majorité mta3 les filières hedhom (Design Espace, Produit, Image) w Beaux-Arts yotlbou Ektibar (Test d'aptitude) fi rsém w créativité. Lezemk t3adi l'ektibar hedha 9bal l tawjih l 3adi."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 133,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chneya rayk fel ENISO fi sousse ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ENISO (École Nationale d'Ingénieurs de Sousse) tayara barcha! Heya réputée f les spécialités kima l'Électronique, Mécanique, w l'Informatique Industrielle. Fiha encadrement tayara w l'environnement mta3 Sousse w le Technopôle de Sousse ykhalli les étudiants yal9aw des stages w des projets m3a les entreprises fisa3. Diplômé menha dima matloub."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 134,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi lhak naamel reorientation baed ma nkamel l license mtei ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ba3d l licence mte3ek tetsamma kamelt l cursus l 2awel mta3ek. Mba3ed, ma ta3melch 'réorientation', ta3mel 'Master' wala 'Cycle d'ingénieur sur dossier'. Ken t7eb tbadal l domaine, tnajem ta3mel Master Professionnel f un autre domaine proche, wala t3awed te9ra licence okhra (ama lezemk tes2el 3al les procédures d'inscription pour les diplômés)."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 135,
+    "messages": [
+      {
+        "role": "user",
+        "content": "yarham waldik aal site, ama ena nheb naskek aal prepa lettres. c vrai feha fac fi tounes?"
+      },
+      {
+        "role": "assistant",
+        "content": "Wa waldik! Ey, fama Prépa Lettres f Tounes, heya l'Institut Préparatoire aux Études Littéraires et de Sciences Humaines de Tunis (IPELSHT) f Gorjani. Ta9ra 2 ans w t3addi concours bech todkhol l'ENS (École Normale Supérieure). Heya l'élite mta3 l lettres w tkharej les profs agrégés w les chercheurs."
+      },
+      {
+        "role": "user",
+        "content": "w scorha kbir?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, le score demandé dima a3la men l'orientation 3adeya khater les places limitées barcha (une centaine d'étudiants). Lezemk tjib moyenne mofeed f bac lettres (souvent 13-14+) bech todhmen blasa. W 9rayetha s3iba w test7a9 barcha lecture w 7fadha."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 136,
+    "messages": [
+      {
+        "role": "user",
+        "content": "bjeh rabi ansahni rani manjmtech njib akthr mn 9.8 fel bac w taw baba bech yamel m3aya aarka kbiira w ommi mardht ml ghach"
+      },
+      {
+        "role": "assistant",
+        "content": "La7dha barka w tnafas mli7. Raby yfarij 3la darkom ama rahom juste ma fhmouch elli hedhi c'est juste épreuve f 7yetek. Jebt 9.8 ma3neha test7a9 l controle. Ta7dhira sghira f les matières li jebt fihom khayeb, w taw tenja7 f l controle w yafra7 w yensew l ghach lkol. Barra ahki m3ahom b hédou, 9olhom 'rani nzid na9ra w nw3dkom f l controle nja7'."
+      },
+      {
+        "role": "user",
+        "content": "aychek khouya/okhti. zaama nsala7ha?"
+      },
+      {
+        "role": "assistant",
+        "content": "Wa7na hna bech n3awnouk! Ey tsal7a, 9.8 ma3neha ne9sek point wela zouz f matière wehda bech tfout 10. A3mel effort f les jours li mezelou, a5dem e des sujets d'examens li fetou barka. Inti tnajem, confiance f rouhek!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 137,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ana nheb ntir men tounes khtr l orientation system fachal, kifah nekhou ecole fi allemagne"
+      },
+      {
+        "role": "assistant",
+        "content": "L'orientation fi Tounes s3iba s7i7, ama bech temchi l'Allemagne ba3d l bac, lazemk: 1. Tjib l bac (bien sûr) b moyenne behya. 2. T3addi l niveau de langue Allemande (B1 wala B2 fel Goethe Institut). 3. T7adher compte bloqué (compte bloqué fih environ 11 000 Euros) bech تثبت li tnajem t3ich ghadi l 3am loul. 4. Tsajel f l'université (uni-assist) w thez l visa. L procédure tekhou wa9t, abda a9ra langue mel tawa."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 138,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salaire anesthesiste fel privé fi tounes"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire mta3 technicien supérieur en Anesthésie-Réanimation fi les cliniques privées f Tounes yabda généralement bin 1200 w 1500 TND net w ynajem yfout hedha avec les gardes w l'expérience (yousel 2000+ TND). L demande 3la l'anesthésiste kbira barcha f l privé w lbarra zeda."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 139,
+    "messages": [
+      {
+        "role": "user",
+        "content": "khouya chnia ahsan 7aja f bac tech w score 135? nheb IT wla IA"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 135 f bac Tech, rak tnajem ta3mel les licences f l'informatique kima l'ISI (Ariana) wela l'ISAMM (Multimédia Manouba) wela FST, hedhom yodkhlouk direct f l'IT. Ken t7eb Ingénierie, tnajem ta3mel Prépa PT w menha t3addi concours l l'ENSI (spécialité informatique)."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 140,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem, brabi f dalil tawjih fama hja esmha 'licence appliquée' w 'licence fondamentale', l far9 ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Kbal ken fama l far9 hedha, ama tawa tna7a w wallet l'appellation 'Licence Nationale' (Licence Unifiée) f l LMD e jdid. Ama l far9 e tarixi houwa elli 'Fondamentale' thadherek l l'enseignement w l recherche w l master recherche, w 'Appliquée' thadherek lel khedma direct f les entreprises w les masters pro. Tawa tout est unifié w tnajem ta3mel les deux ba3d l licence."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 141,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi bac math njibt 16.2 w hayer mabin medcine w prepa mp bch nemchi polytechnique france. nsihti?"
+      },
+      {
+        "role": "assistant",
+        "content": "Choix s3ib w tayara barcha! - Ken temchi Médecine: rak tdhmen 9raya claire, parcours long ama stable, prestige, w afa9 f tounes w lbarra. - Ken temchi Prépa MP (kima IPEST wela IPEIT): l'objectif bech t3addi concours français. Ken tenjah f Polytechnique wela Centrale, afa9ek f l'ingénierie w la finance w l'IA fi la France c'est le top du top, w l flous khir barcha mel médecine fl bideya. As2el rouhek: T7eb e dam, sbitar, w les patients? Wela t7eb l math, code, w finance?"
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 142,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salut nheb nejem naamel dentaire f sfax ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salut! F Tounes, l Faculté de Médecine Dentaire mawjouda ken fi Monastir. Famech faculté de médecine dentaire f Sfax wala Tunis. Ya3ni ken t7eb ta9ra médecine dentaire (tbiib sneyen), lezemek tekhou l'orientation l Monastir, win ma kount fi Tounes."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 143,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nhes rouhi fadhya, no passions, njht fel bac b 12 w ma naaraf naamel chay, aatitny conseil aman"
+      },
+      {
+        "role": "assistant",
+        "content": "C'est très courant bech t7es haka f l'âge hedha. L'école t9arrik l matières ama ma t9arrikch tlawaj 3la passion mte3ek. B 12, a7sen conseil na3tihoulek: Ekhtar filière \"générale\" w fiha demande, kima la Gestion/Business (Marketing, Finance) wala l'IT (Web, Réseaux) ken t7eb l pc. F l fac, w enty ta9ra, ebda jareb 7ajet jdoda (des clubs, des événements, associatif kima AIESEC, JCI). L passion tetkhalek m3a l tajrba!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 144,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salaire sage femme fi tounes?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire d'une sage-femme (Licence en obstétrique) f Tounes yabda f les environs de 1100 w 1300 TND net fi Sbitar l 7oukoumi (Public). F l privé (cliniques), ynajem yabda bin 1000 w 1200 TND w yetla3 bel les heures sup w les gardes de nuit w l'expérience."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 145,
+    "messages": [
+      {
+        "role": "user",
+        "content": "najem njib ISG tunis b score 120 eco ?"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 120 f Bac Éco, l'ISG Tunis tnajem tkoun limite s3iba chwaya khater l score mte3ha l Sciences de Gestion dima yabda fi l'entourage de 125-135. Ama dima 7otha f e choix lewel, w 7ot m3aha l'ESC Manouba w FSEGT El Manar, li s9orhom a9al b chwaya."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 146,
+    "messages": [
+      {
+        "role": "user",
+        "content": "khouya chkoun fih lflous akther, ingenieur wala tbib ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Question s3iba w dépend mel parcours! - Tbib: F l bideya ykhaless 3adi kima interne w résident (1200 - 1800 TND), ama ki ykamal l spécialité w y7el cabinet privé (ba3d 10-12 snin), ywalli ydakhal f flous kbar barcha. - Ingénieur: F l bideya ykhaless khir mel tbib (1500 - 2500 TND), w ken ykoun f domaine kima l'IA wela l Cybersécurité w yekhdem lbarra wala en freelance, ynajem ydakhal des sommes énormes fisa3 w f a9al wa9t."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 147,
+    "messages": [
+      {
+        "role": "user",
+        "content": "andi bac lettre w nheb hja aala architecture d interieur w design, i koulou fama fac fi denden"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey s7i7! Heya l'ESSTED (École Supérieure des Sciences et Technologies du Design) fi Denden. Heya a7sen fac étatique f tounes l design. Tnajem ta3mel fiha Design Espace (Architecture d'intérieur), wela Design Produit, wela Design Image. Ama rod belek, lezemk tsajel f test d'aptitude (rsém w créativité) fi site l'orientation w tenjah fih bech ya9blouk."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 148,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi 11 bac sc w darna kalouli lezem ta9ra haja bahdhena khtr mafamech flous foyer, w hna f gafsa mafamech hjet tayara"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem, nfhém e thourouf mta3 l 3ayla. Matkhalich l 7aja hedhi t2ather 3lik négativement. F Gafsa fama des facultés tayarat: L Faculté des Sciences (FST Gafsa) w l'ISET Gafsa. Tnajem ta3mel licence f l'Informatique, wela l Sciences Infirmières ken fama. L'important howa tjib de bonnes notes f l fac mte3ek, l khedma mouch marbouta b wileya, marbouta b diplôme w l compétences li tabnihom."
+      }
+    ],
+    "category": "family_pressure",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 149,
+    "messages": [
+      {
+        "role": "user",
+        "content": "kifah njem nzied shonsi bech nt9bél fi ISCAE manouba comptabilité?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'accès l ISCAE Manouba y3tamed à 100% 3la l score mta3 l bac mte3ek (l formule globale + les matières spécifiques). Kenek min wilayet l Grand Tunis, tnajem testfad men 7% bonus géographique. Sinon, l'unique 7aja heya enek tjib a3la note momkna f l bac. F l'orientation, 7ot ISCAE k'awel choix."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 150,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi fama ikhtissas cybersécurité f fac etatique?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, f l'étatique, la Cybersécurité t9raha fi l niveau Master wela Cycle d'ingénieur. Kima fi SUP'COM, ENSI, wela l'ISIMM (Monastir) w FST w ISI Ariana. En Licence, t9ra Informatique générale wela Réseaux (kima RSI f les ISET), w mba3ed t'tkhases f l Cybersécurité f l Master."
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 151,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salut amalt bac sport w farih barcha, najem naamel journaliste sportif?"
+      },
+      {
+        "role": "assistant",
+        "content": "Mabrouk ennje7! B bac Sport, l'accès lel IPSI (Institut de Presse et des Sciences de l'Information) s3ib khater yothlbou bac lettres w éco akther. Ama tnajem ta3mel ISSEP (Institut des sports) w mba3ed tdkhol l domaine l'animation sportive, w ta3mel des formations privées fi l journalisme w e ta3li9 e riyadhi (commentateur sportif). Barcha asemi ma3roufa bdew هكا."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 152,
+    "messages": [
+      {
+        "role": "user",
+        "content": "njem nakra hja thebbni f pharmacie en france ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'accès l les études de Pharmacie en France yet3adda bel système PASS (Parcours d'Accès Spécifique Santé) wela L.A.S. Lezemk tsabeb via Campus France. Les études s3ab w concours yesser s3ib f l'année lewla, ama ken tjib score behi f bac (15+) w daber admission, l afa9 mte3ha fel france extraordinaire."
+      }
+    ],
+    "category": "abroad",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 153,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena rani fdhht oilti w hchmt nkolhom jibt 10.5 bac math... w shabi li kol mchew prepa w fac d medecine"
+      },
+      {
+        "role": "assistant",
+        "content": "Yezi mel takhmam hedha! Bac Math s3ib w 10.5 rak tetsamma nja7t b 3ara9 jbinek. L mo9arna hya elli ta9tel e chaghf. W a3ref eli b 10.5 tnajem temchi ISET w tmajwer tched ingénieur ba3d, w tjib khir men s7abek li mchew prépa w w7lou f l concours. L 7yet mte3ek tabda tawa, mouch toufa houni."
+      },
+      {
+        "role": "user",
+        "content": "chnwa tansehni n7ot lzm njib diplome behi"
+      },
+      {
+        "role": "assistant",
+        "content": "7ot l'ISET (Informatique wela Électromécanique) fi l région mte3ek. Fihom barcha application, w ken tkhdem 3la rouhek, tekhou l Licence w tsabeb sur dossier fi école d'ingénieur. Wela 7ot FST fi filière kima Math-Info (MIA). Wkhdem 3la rouhek f l 1ère année fac, barcha ness jebou 10 w kmlou jébou 16 f l fac."
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 154,
+    "messages": [
+      {
+        "role": "user",
+        "content": "kifah nwali chef w ntayeb? fama fac fi tounes hekka?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken t7eb e tabkh w twalli Chef Cuisinier, a7sen blassa heya les instituts de tourisme w l'hôtellerie. Tnajem ta3mel l'Institut Supérieur des Études Touristiques fi Sidi Dhrif wela Kantaoui. W fama zeda les Centres de Formation Professionnelle (BTS wela BTP f e Pâtisserie w l'Art Culinaire) elli houma مطلوبين بصفة غريبة f tounes w lbarra w fihom l flous."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 155,
+    "messages": [
+      {
+        "role": "user",
+        "content": "andi bac info w 14.5 moyenne najem nedkhel l ENSI ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ENSI (École Nationale des Sciences de l'Informatique) heya école d'ingénieurs (Cycle Ingénieur). Ma tnajemch todkhelilha direct ba3d l bac. Lezemk ta3mel: 1. Prépa (w t3addi concours national w tenjah bech tekhtarha). 2. Wala Licence fi l'informatique (ISI, ISAMM, etc.) w ba3d tsabeb dossierk lel ENSI m3a l'aw2el mta3 l promo."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 156,
+    "messages": [
+      {
+        "role": "user",
+        "content": "kadeh yotlbou fl esprit bech nkra 3 ans licence ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ESPRIT dima t7adeth l'frais de scolarité mte3ha. Généralement, l licence fi ESPRIT (School of Business wala IT) tetkalef bin 6500 w 8000 TND par an. Ya3ni les 3 ans ytalbou environ bin 20,000 w 24,000 TND f l total. Fihom des facilités de paiement w tnajem tchouf les banques partenaires lel prêts."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 157,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena y2st w fekrt nbatel kraya, khtra l 9raya fi tunis dharban lougha w mafemech khedma"
+      },
+      {
+        "role": "assistant",
+        "content": "Nefhêm barcha frustration mte3ek, l marché s3ib w l système dima ybén mo3a9ad. Ama tbatel l 9raya bech yzed ys3ab l wath3 akther. L 9raya ma t3allemkch ken l métier, t3allemk l discipline w tjiblek des opportunités lbarra (ken t7eb tkamel f l'étranger)."
+      },
+      {
+        "role": "user",
+        "content": "ama brcha chomeur ..."
+      },
+      {
+        "role": "assistant",
+        "content": "S7i7 fama chômage f b3ath l'i5tissaset, ama fama des domaines fihom \"pénurie\" w ya5tfou fik khtif! Kima l'IT, l'IA, Paramédical w Langues étrangères. Khtiyar e spécialité l s7i7a houwa l mochkel. Matratich 3la rouhek w a3mel domaine mtlob, mouch ay diplôme."
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 158,
+    "messages": [
+      {
+        "role": "user",
+        "content": "scorey 158 bac sc, zaama wselt l medecine djdida wala famch fac okhra fiha tbib ?"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 158 fi Bac Sciences, l médecine dima scoreha a3la men hekka b chwaya (souvent bin 165 w 170+). Ama tnajem ta3mel Médecine Militaire (Académie Navale wala l'Armée de terre) ken theb, yotlbou chwaya a9al selon l concours. Wela tnajem ta3mel Pharmacie w Dentaire li houma s9orehom ykoun mgarreb (ama dima fou9 160)."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 159,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena dhont aala rohi bac sc jibt 10 w ommi tbki kalet chmata f bnet khalti w baba kal l'khaltna mayjich ml fac"
+      },
+      {
+        "role": "assistant",
+        "content": "Ya rabi, 7asses bik w rani na3ref eli l pression mta3 l 3ayla w mo9arnet la9areb heya as3ab 7aja f l bac. Ama اسمعني, l bac mouch 9imetek enty k'ensén! Tjib 10 mouch ma3neha enty fchel. Barcha ness jebou 10 w mchew l fac 3adeya w khedmou w walew modara w bnew rwe7hom."
+      },
+      {
+        "role": "user",
+        "content": "ama dar mayhbouch yakablou l mo3dal w dima yetmanykou"
+      },
+      {
+        "role": "assistant",
+        "content": "Ma ta3tihomch wthnek tawa, houma sous le choc w ki yebdew metghachchin y9oulou ay klem. Enty tawa ekhtar filière fiha afa9 (kima Informatique wela Gestion wala langues) w اثبت روحك f l fac. Ki bech trawa7 b e dima men l'awa2el f l fac w tdaber khedma, taw houma bedhom yetbadlou w yeftakhrou bik. Khali 10 hedhika l motivation mte3ek!"
+      }
+    ],
+    "category": "family_pressure",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 160,
+    "messages": [
+      {
+        "role": "user",
+        "content": "fama chance 150 score bac info bch njib insat ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'INSAT b score 150 f bac Info heya f e zone s3iba chwaya. 3amnawel l score mta3 l'INSAT (MPI w CBA) l bac info wsel fi l'entourage de 165+. L'accès lel INSAT dima s3ib khaterha ta9bel ken l top. Ama tnajem t7otha choix lewel (matakhser chay) w t7ot l'ISI Ariana w ISAMM ba3dha, fihom l'informatique tayara w tnajem tkhalet!"
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 161,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nheb nkolkom ena nkhayer bin prepa w fac de science, w baba kali prepa khir w ena khayef w nkhamem nenzel aal ipeit wla ipeiem ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken tnajem tet7amel rythme de travail kbir, l Prépa khir bech todkhol direct concours d'ingénieur. IPEIT (Tunis) w IPEIM (Monastir) zouz behyin. IPEIT fiha concurrence kbira w as3ab chwaya f l jaw, ama t7adher bel behi. IPEIM tayara zeda w l jaw fi Monastir ytaye9 3al 9raya w l foyer 9rib. Ekhtar elli a9reb l darek w t7ess l environnement mte3ou akther yse3dek."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 162,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem, brabi zaama njem ntaleb flous f canada kima ykoulou 10k dollar ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! L 10k CAD par mois (environ 120,000 CAD par an) heya l salaire mta3 un profil confirmé wela Senior f des domaines kima l'IT (Data Science, Cloud, Dev) wela la finance w l médecine fi Canada. Un junior (débutant) yebda bin 4000 w 6000 CAD par mois. Ey s7i7, l flous mawjouda w tnajem tousel l 10k ama ba3d quelques années d'expérience w ken tched poste behi."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 163,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chnwa l fark bin ENSI w SUPCOM ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ENSI (École Nationale des Sciences de l'Informatique) spécialisée principalement fi l'informatique pur w e développement logiciel w l'IA. SUP'COM (École Supérieure des Communications de Tunis) spécialisée fi l e télécommunication, l réseaux, l cybersécurité, w l cloud. Ezzouz houma l top mta3 l top fi Tounes (après l Prépa) w diplomé mte3hom yikhdem b suhla f tounes w lbarra."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 164,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi scorey 110 eco w nheb ihec sousse zaama nekhouha?"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 110 fi bac Éco, 3andek des chances behyin bech tched l'IHEC Sousse. Dima e score mta3ha ykoun a9al mel IHEC Carthage (bin 105 w 115). 7otha f choix loul w 7ot ISG Sousse k'plan B m3aha."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 165,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nheb nakhdem f marketing, lazem naamel fac idara wela chnou?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey, a7sen theneya bech tekhdem f l Marketing heya ta3mel Licence fi l Sciences de Gestion (ISG, IHEC, ESC, wela FSEGT). W mba3d ta3mel Master fi l Marketing Digital wala l Stratégie Marketing. Zeda tnajem tet3allem barcha 7ajet b les certifications en ligne (kima Google Digital Garage, HubSpot) khater l marché mta3 l digital marketing ytleb barcha pratiques w soft skills."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 166,
+    "messages": [
+      {
+        "role": "user",
+        "content": "khouya ena nheb no9ed nfarih aala rohi f sfax w manmchich l tunis khtr masrouf... ama andi 14 fel bac tech... chnouma l afak f sfax?"
+      },
+      {
+        "role": "assistant",
+        "content": "Sfax fiha a7sen les facultés f Tounes w l 9raya fiha ممتاز. B 14 f bac Tech tnajem ta3mel: 1) Prépa IPEIS (Ken t7eb tched cycle d'ingénieur kima ENIS). 2) FST Sfax wela l'ISIMS (Ken t7eb l'informatique w l multimedia). 3) ISET Sfax (Formation technique tayara barcha). Sfax 9otb universitaire tayara w l'masrouf ghadi a9al barcha men Tunis."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 167,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena nekreh l math w chneya naamel? scori 105 w bac sc"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken tekrah l Math w b score 105 bac Sciences, eb3ed 3al l'IT w e la physique/chimie li fihom formules. Tnajem ta3mel les filières paramédicales kima l'Infirmerie, Sciences Infirmières, wala Langues (Anglais/Français). Wela ta3mel ISET fi l'Industrie Agroalimentaire wala l'Environnement."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 168,
+    "messages": [
+      {
+        "role": "user",
+        "content": "bich ns2lkom aal e prepas... zaama prepa pc wela mp as3ab?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz s3ab ama l far9 f e charge: - Prépa MP (Math-Physique): El math fiha théorique w 9wiy barcha w l'coefficient mte3ou dharb. As3ab l ness li matemchich m3a l'abstraction w les démonstrations. - Prépa PC (Physique-Chimie): L'chimie w l'physique fihom barcha 7fadha w application, w l math a9al chwaya dharb mel MP. Barcha ness y9oulou PC ashel chwaya, ama e chimie tnajem tkoun complexe l b3adh les étudiants."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 169,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chneya maaneha credit etudiant? behi wla yabkaw ykossou mn chahreyty baad ?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'crédit étudiant houwa قرض ta3tihouk l banque bech tkhales bih 9raytek (kima fi ESPRIT wela l'étranger). L'avantage houwa ennou y3atiwek \"période de grâce"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 170,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi najem nbadel e choix mtai fel dalil tawjih ghodwa l eker djal?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey! Tnajem tbadal w tmodifi les choix mte3ek fi site l'orientation 9ad ma t7eb w t'enregistri (sauvegarder) a9al 7aja 9bal ma tsakar l délai (deadline). A5er modification (sauvegarde) heya eli bech teta3tamad f l concours. Rod belek tanssa ma t'enregistrich l modifications mte3ek!"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 171,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem ena nabki ltaw aala rabi 7remli khtr njht b 10 w mnkdarsh nkhosh l hata blasa"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem w estaghfer l moulék, e denya mouch mo3dal f l bac! B 10 de moyenne w nja7t, rak 5abitelk blasa fel université l étatique w dakhlet l'enseignement supérieur. Barcha w barcha w zeda barcha ness jebou 10 w kamlou l fac w wallew de très grands professionnels. L'orientation s7i7 bech y7otouk f les facultés li scorhom a9al, ama l khedma fi e denya dépend 3ala e diplôme mta3 e fac w 3ala mharetek enti, mouch bac!"
+      },
+      {
+        "role": "user",
+        "content": "chnia les choix li inajmou yekblouni?"
+      },
+      {
+        "role": "assistant",
+        "content": "Tnajem t7ot les ISET (fi ay spécialité kima e commerce, mécanique, info), l'ISAE (Instituts Supérieurs d'Administration des Entreprises), wela l langues fi les facultés régionales (Jendouba, Gabès, Kairouan). Kolhom ykharjouk b diplôme m3taraf bih. Tfakker, el 3ebra bel khawatim, a5dem 3la rouhek fi fac tawa w tjib mention!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 172,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chneya l afa9 mta license philo?"
+      },
+      {
+        "role": "assistant",
+        "content": "L Licence f Philosophie (Philo) tkharej asasan des professeurs mta3 Philo l les lycées (enseignement secondaire). Ken t7eb tbambi fiha, tnajem tkamel l'Agrégation fi l'ENS w twalli prof universitaire. Tnajem zeda tekhdem f l journalisme, la rédaction, w l'édition. Ama l marché d'emploi f tounes limiteha barcha fi l'enseignement."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 173,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi fama khedma fel UX UI fi tounes wela lezem naaraf ncodey?"
+      },
+      {
+        "role": "assistant",
+        "content": "Le Design UX/UI fih barcha barcha khedma f Tounes w lbarra. Kol entreprise mta3 tech tawa test7a9 designer bech y7assen l'interface mta3 l'application mte3ha. W le, mouch lezem ta3ref tcodey (mouch lezem tkoun dev). L'essentiel ta3raf tikhdem b Figma w Adobe XD, w tefhem l principes mta3 l'ergonomie w l'expérience utilisateur."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 174,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chkoun naamel IPEST wla medecine... nheb flous barcha mbaed"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken l'objectif l'oul houwa l'indépendance financière fisa3 w l 'flous barcha', l'IPEST heya e theneya l a7sen. L'IPEST tkhalik t3addi l concours français w todkhol l des écoles d'ingénieurs en France. B diplôme d'ingénieur f l'IA wela la finance, tnajem tbda b salaire fou9 40K Euro fi l'année ba3d 5 ans post-bac. L médecine prestige, ama twal barcha (10 ans+) bech tbda tdakhal e flous l kbar."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 175,
+    "messages": [
+      {
+        "role": "user",
+        "content": "andi 10 fel controle bac lettres w theb naamel theathre fi tounes ... ykablouni?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ISAD (Institut Supérieur d'Art Dramatique) fi Tunis dima tetleb ektibar (test d'aptitude) w مقابلة شخصية. Ken l moyenne mte3ek 10, e score ykoun ta7 chwaya w l blayes limités barcha f Tunis. Lezemek takhdem l'ektibar barcha bech twalli fi l'awa2el fih w ta9na3 l jury. Ken la, tnajem tchouf l'ISMT f l Kef elli l score mte3ha a9al."
+      }
+    ],
+    "category": "admission_scores",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 176,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nhess rouhi dhayaa, nheb naamel dev jeux video w nheb nkharej mn tunis. chkoun fac l ashel?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken t7eb l dev Jeux Vidéo w t7eb tokhrj men Tounes, a7sen choix howa L'informatique Pure. Tnajem ta3mel: 1) ISAMM (Manouba): Fihom parcours Multimédia w Jeux. 2) ESPRIT (ken 3andek l budget): Fihom clubs tayarat w options 3al développement w partenariat m3a des entreprises européennes. 3) Licence Info (ISI / FST) w t3alem Unity w C# wa7dek, w mba3d ta3mel Master f l'étranger."
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 177,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem, bac eco, nheb iscae manouba ama khtr ana mn monastir 7% ttyrha alya tounsya?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Ey l'avantage 7% géographique yeta3ta l wled l'académie mta3 l fac (hna, les élèves mta3 Tounes w Manouba w Ariana w Ben Arous bech yakhdhou bonus 7% 3al score mte3hom). Enty men Monastir ma yeta3takch l 7% heki 3al ISCAE, donc e scorek lezem ykoun behi barcha bech tfouthom. Ama tnajem testfad mel 7% fi les facs mta3 l'Université de Monastir / Sousse!"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 178,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi kifech thebbni nhezha e kraya w baba aabeni flous khtr bech nokredh l fac prive"
+      },
+      {
+        "role": "assistant",
+        "content": "L mas2ouleya hethi s3iba s7i7, ama a7sebha motivation mouch dheddek. Ken babek khedhelek crédit bech y9arik fi fac privée, heka khater y2amen bik w b mosta9blek. A5dem 3la rouhek, a7dher l les cours lkol, jib de bonnes notes, w 7awel tdaber des stages d'été rémunérés. Ki tetkharrej, e salaire mta3 e diplôme mte3ek (surtout IT/Ingénieur) bech ykhalik traje3 e crédit fisa3 w tfar7ou."
+      }
+    ],
+    "category": "family_pressure",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 179,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi 11 bac tech w hayer bin genir civil w meca. chkoun fih ashel?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'zzouz fihom math w physique, ama e theneya tokhtalef: - Génie Civil fih barcha calcul mta3 structures (RDM, béton armé, topographie). Kenek bahi f l conception w l forces yse3dek. - Génie Mécanique fih l thermodynamique, la mécanique des fluides, w la CAO (dessin industriel 3D). Barcha étudiants yal9aw l CAO ashel w fiha jaw f l conception. E thnin yetlabou khedma!"
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 180,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chkoun naamel IPEIN (nabeul) wla IPEIB (bizerte) ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ezzouz tayyarat w ykharjou fi des résultats behyin f l concours. L'IPEIN (Nabeul) ma3roufa b e niveau l kbir f l section PT w fiha foyer w jaw behi. L'IPEIB (Bizerte) behya zeda w fiha cadre hédhy w béhi lel 9raya w concentration. Ekhtar 7asb e distance l darek w win t7es rouhek terta7 akther."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 181,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem ena nheb nakhdem f cyber sec w khtarouly ISET rades (RSI). behi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem! Excellent choix. L'ISET Rades heya mel a7sen les ISET f Tounes, w e spécialité RSI (Réseaux et Systèmes Informatiques) heya la base mta3 la Cybersécurité. Ghadi bech tet3alem l les réseaux (Cisco), Linux, w l systèmes. Ki tkamel, tnajem ta3mel Master pro fi la Sécurité Informatique wela tkamel cycle d'ingénieur. Bonne chance!"
+      }
+    ],
+    "category": "cybersecurity",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 182,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi kadeh l salaire mta data scientist f france?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salaire d'un Data Scientist en France l un profil Junior (débutant ba3d diplôme d'ingénieur/Master) ykoun généralement bin 38,000 w 45,000 Euros Brut par an. M3a 2-3 snin expérience, ynajem yfout l 55,000 EUR w yousel l 70,000+ EUR l les profils seniors (Lead Data Scientist). L demande dima 9weya ghadi."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 183,
+    "messages": [
+      {
+        "role": "user",
+        "content": "scorey 140 w bac math w theb nakra IA ... nheb naamel FST, behi?"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 140 fi Bac Math, tnajem tkhalet 3la Licence Mathématiques w Informatique Appliquées (MIA) wela Licence en Informatique f l'FST (Faculté des Sciences de Tunis). Heya tayara barcha w fiha barcha math w algorithmique li heya la base mta3 l'IA. Ki tkamel l Licence mte3ek tnajem tkamel Master Recherche wela Pro fi l'IA w l Machine Learning."
+      }
+    ],
+    "category": "ai",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 184,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nheb nkolkom ena nkhayer bin IHEC w ESC manouba... IHEC aabya bl mandhar kima ykoulou w ena msrofekh aala kadi"
+      },
+      {
+        "role": "assistant",
+        "content": "L'IHEC Carthage fiha jaw w prestige s7i7 w fiha des classes sociales variées, ama l 9raya mte3ha heya l asés. L'ESC Manouba (École Supérieure de Commerce) heya zeda men a7sen les facultés w l formation fiha excellente, w l jaw mte3ha très académique w motawadhe3 akther. Ezzouz ykharjoulek diplôme tayara w yosel l khedma, mchi l l'ESC ken t7ess l'environnement ghadi yray7ek akther."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 185,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salaire mta anesthesiste fel etatique w kifeh nkhdem l bara"
+      },
+      {
+        "role": "assistant",
+        "content": "F l'hôpital public (étatique) f Tounes, l salaire mta3 un Technicien Supérieur en Anesthésie yebda approximativement bin 1100 w 1300 TND net. L khedma lbarra (kima l'Allemagne w l France) mawjouda barcha. L'Allemagne test7a9 just niveau langue (B2 Allemand) w tsabeb l reconnaissance (Urkunde). F l France lezemk t3addi équivalence (épreuves de vérification des connaissances - EVC)."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 186,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena aaylti lkolhom ykarouny b bent aami eli mchet prepa w ena khabithom khtr tnekhbet f fac eadia, chneya naamel walah nekhnek"
+      },
+      {
+        "role": "assistant",
+        "content": "Hedi e mo9arna hiya emm l machekel f tounes. Ena n9olek: e denya mouch course mta3 sprint, c'est un marathon. Bent 3amek mchet prepa s7i7, ama chkoun ya3ref, tnajem tnajem enti tjib mention fi faculté 3adeya w tokhrj d'ingénieur w takhdem khedma khayaliyya 9balha hiya! Ekhedm f sakt, l fac mte3ek hiya forstek bech twari l rouhek (mouch lihom) chnouwa tnajem tdir."
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 187,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chneya l kraya fi ISTIC sousse? behya?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'ISITCom Sousse (Institut Supérieur d'Informatique et des Technologies de Communication) fi Hammam Sousse, tayara barcha! Fiha 9raya behya f l'informatique, l réseaux, w l multimédia. L'ambiance f Hammam Sousse tayara w l'institut réputé bech ykharrej des étudiants behyin li tal9a khedma fisa3 wela tekmal l ingéniorat."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 188,
+    "messages": [
+      {
+        "role": "user",
+        "content": "andi 10 fel bac info w nheb developpement web, fama aml?"
+      },
+      {
+        "role": "assistant",
+        "content": "Bien sûr fama amal w kbir zeda! B 10 f bac info tnajem tsabeb l les ISET, wela l facultés régionales f l'informatique. L'essentiel houwa ennou e dev web (HTML, CSS, React, PHP) tnajem tet3almou m3a l fac wala wa7dek f e dar (autodidacte) via YouTube w Coursera. L diplôme bech ydakhlek e siffa, ama code mte3ek houwa li bech ykhalssak!"
+      }
+    ],
+    "category": "programming",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 189,
+    "messages": [
+      {
+        "role": "user",
+        "content": "brabi chneya salaire architecte d interieur fel privé ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Architecte d'intérieur (Designer Espace) f Tounes f l bideya yakhlet salaire bin 900 w 1200 TND net dans un cabinet wala une agence d'aménagement. Ken ykoun 3andou expérience w yestlem des projets kbar, l salaire ynajem yousel l 2000+ TND. Ama l'indépendance (freelance / ouvrir sa propre agence) heya li fiha l flous l kbar."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 190,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salem... ena rani dakhla baathi khater scorei 150 (bac sc) w darna ghasbin medecine ama l score ma yekhletch... chneya plan B nansah behi?"
+      },
+      {
+        "role": "assistant",
+        "content": "Salem. M3a l score 150 f bac Sciences, l médecine heya as3ab chwaya l score l 3am hetha. A7sen plan B ykoun: 1) Médecine Dentaire wela Pharmacie (ken l score ta7 fihom). 2) Prépa Bio-Géo (BG) bech t3addi concours w todkhol l agronomie wela l'ingénierie biologique. 3) L'Institut des Sciences Infirmières wela paramédical (Imagerie/Anesthésie) elli dima mosta9belhom mofeed barcha w salairehom yfout barcha mihn okhra."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 191,
+    "messages": [
+      {
+        "role": "user",
+        "content": "salaire full stack dev fi tunis ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Un développeur Full-Stack Junior f Tounes yebda bin 1500 w 2000 TND net par mois. Un profil Intermédiaire (2-4 ans d'expérience) yakhlet bin 2500 w 3500 TND. Un Senior ynajem yfout 4000 w 5000+ TND, surtt ken yekhdem m3a des entreprises offshores (boîtes étrangères installées fi Tounes). L demande 3lihom dima kbira."
+      }
+    ],
+    "category": "salaries",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 192,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ana ma narefsh chnouwa thebb nakhdem w nhass f rouhi mouch mtaa fac, famech 7al formation behyia?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey bien sûr! L fac mouch e theneya l wa7ida. Tnajem ta3mel formation professionnelle (BTP wela BTS). Les formations f e domaine mta3 l Soudure, Climatisation, Cuisine/Pâtisserie, wela Développement Web f les centres privés/étatiques fihom barcha l khedma. F Tounes l 7arfeyyin w les techniciens spécialisés ydakhlou f flous w dima matloubin."
+      }
+    ],
+    "category": "confusion",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 193,
+    "messages": [
+      {
+        "role": "user",
+        "content": "kifah nesnaa CV behi baed l bac bch ndaber khedma seif ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ba3d l bac ma 3andekch barcha expérience professionnelle, donc l CV mte3ek lezem yrakkez 3la: 1) L formation mte3ek (Bac w l filière). 2) Les compétences (Langues: Français/Anglais, Informatique: Word/Excel). 3) Les 'Soft skills' (kima l'organisation, l'esprit d'équipe, dynamique). 4) Les activités extra-scolaires (ken tlababt sport wela charekt fi club wela AIESEC). A3mel design ndhif 3la Canva wela Word w ab3ath!"
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 194,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena njht bac lettres score 110. chnia ahsen hja lel emploi mbaed?"
+      },
+      {
+        "role": "assistant",
+        "content": "B score 110 f bac lettres, a7sen l 7ajet l l'emploi houma: 1) Langues Appliquées (Anglais/Allemand): bech tekhdem fi l traduction, les centres d'appels, wela les entreprises internationales. 2) Droit: bech todkhol f l carrière mta3 l'avocat wela juriste d'entreprise. 3) Ressources Humaines wela Sociologie: fihom barcha afa9 l gestion mta3 l 3bed fi les entreprises."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 195,
+    "messages": [
+      {
+        "role": "user",
+        "content": "yahasra aala kraya, jibt 12 bac math w hsabi lkol 16, tdharemt lhak"
+      },
+      {
+        "role": "assistant",
+        "content": "Matgoulch l 7keya hedhi. L mo9arna hya elli thedik. B 12 bac Math, 3andek la base (Maths w Physique) elli tkhalik tenjah f ay institut. ISET, Faculté des Sciences, wela Licence fi l'informatique houma kolhom 9rib l scorek w fihom afa9 tayara. Khali 12 hethi e ddaf3a mte3ek bech tkoun 1er de promotion l 3am l jay f l fac!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 196,
+    "messages": [
+      {
+        "role": "user",
+        "content": "chneya l afak mtaa cycle ingenieur agronomique?"
+      },
+      {
+        "role": "assistant",
+        "content": "L'Ingénieur Agronome f Tounes fih barcha l'afa9 tawa m3a l machekel mta3 l'environnement w sécurité alimentaire. Tnajem tekhdem f l'industrie agroalimentaire, les fermes w les domaines agricoles, f l'ministère mta3 la fela7a, wela f l recherche (l'INAT wela Chott Mariem w ESA Mateur tayarat). W tnajem ta3mel projetek l khes b les subventions mta3 e dawla."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 197,
+    "messages": [
+      {
+        "role": "user",
+        "content": "famma khedma f IT be diplome ISET wala lezem ingenieur?"
+      },
+      {
+        "role": "assistant",
+        "content": "Diplôme mta3 l'ISET (Licence Appliquée/Nationale) matloub barcha fi l marché mta3 l'IT f Tounes. Barcha entreprises ylawjou 3la des 'Techniciens Supérieurs' wela des développeurs Front/Back-end w ykhalssouhom bil behi khaterhom 'pratiques' w opérationnels fisa3. Mouch lezem dima tkoun ingénieur bech tal9a khedma f l IT, ama l'ingénieur yebda l salaire mte3ou a3la chwaya w ychouf des postes mta3 management mba3d."
+      }
+    ],
+    "category": "careers",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 198,
+    "messages": [
+      {
+        "role": "user",
+        "content": "ena andi problem, scorei ma jeblych ipeit, dkhalt prepa bizerte, ipeib bahya?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ey! L'IPEIB (Bizerte) tayara barcha! E systeme f les prépas fi Tounes lkol howa nafssou, nafss e programme, w e concours houwa nafssou. F Bizerte l jaw hédhi, tnajem trakz 3al 9raya mte3ek mli7 b3id 3la e stresse mta3 e tounes l 3asma. L'important f l Prépa houwa l khedma mte3ek personnelle w dharben l les exercices, mouch ken l blassa."
+      }
+    ],
+    "category": "universities",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 199,
+    "messages": [
+      {
+        "role": "user",
+        "content": "nheb njareb naamel e reorientation khtr l orientation system andy ando aghlat, ma aatanich l choix 1 malgres scory akber !"
+      },
+      {
+        "role": "assistant",
+        "content": "Ken scorek a3la mel dernier orienté f l choix 1 mte3ek w ma3toukch l blasa, fama possibilité mta3 'Recours' f l'orientation. Tnajem teba3eth demande (réclamation) f le site mta3 l'orientation f délai l ma7doud (chouf l calendrier mta3 l orientation). Ken fama ghalta, taw ysala7ouha. Sinon, tnajem ta3mel réorientation f session Mars."
+      }
+    ],
+    "category": "orientation",
+    "language": "tunisian_arabic_french"
+  },
+  {
+    "conversation_id": 200,
+    "messages": [
+      {
+        "role": "user",
+        "content": "merci rani rtaht barcha, kont mbambi aala l prepa w rtht tawa b FST w rani bch nhareth aala rohi l am jey"
+      },
+      {
+        "role": "assistant",
+        "content": "Hethya l'mentalité l s7i7a! L FST (Faculté des Sciences de Tunis) heya a7sen blasa l la3bed elli tekhdem b ydeha w tjib l résultat. Barcha ness tal3ou menha l des écoles d'ingénieurs wela kamlou l'étranger. A5dem, e7dher l les cours w les TDs mte3ek, w rabbi bech ywf9ak w ywselk l l kher. Bon courage w ana dima m3ak!"
+      }
+    ],
+    "category": "emotional",
+    "language": "tunisian_arabic_french"
+  }
+  ]

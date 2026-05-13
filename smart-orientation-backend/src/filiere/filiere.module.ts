@@ -7,6 +7,6 @@ import { PrismaModule } from '../prisma/prisma.module';
   imports: [PrismaModule],
   controllers: [FiliereController],
   providers: [FiliereService],
-  exports: [FiliereService] // 👈 زيد هذا
+  exports: [FiliereService], // 👈 زيد هذا
 })
 export class FiliereModule {}

@@ -4,7 +4,6 @@ import { PhraseRotation } from './sentence-rotation';
 
 @Injectable()
 export class ToneVariationService {
-
   private readonly phraseRotation = new PhraseRotation();
 
   /**
@@ -59,12 +58,14 @@ export class ToneVariationService {
     const lines = text.split('\n');
 
     if (lines.length > 1) {
-      return lines.map(line => {
-        if (Math.random() > 0.7 && line.length > 15) {
-          return `${line}...`;
-        }
-        return line;
-      }).join('\n');
+      return lines
+        .map((line) => {
+          if (Math.random() > 0.7 && line.length > 15) {
+            return `${line}...`;
+          }
+          return line;
+        })
+        .join('\n');
     }
 
     return text;
@@ -74,7 +75,7 @@ export class ToneVariationService {
    * Randomly change sentence order for natural variation
    */
   private varySentenceOrder(text: string): string {
-    const lines = text.split('\n').filter(l => l.trim());
+    const lines = text.split('\n').filter((l) => l.trim());
 
     if (lines.length <= 2) return text;
 

@@ -13,6 +13,7 @@ import { ChatbotService } from './chatbot.service';
 import { StudentService } from '../student/student.service';
 import { Public } from '../common/decorators/public.decorator';
 import { DynamicRoadmapService } from './services/dynamic-roadmap.service';
+import { GemmaEnhancerService } from './gemma-enhancer.service';
 
 interface ChatRequest {
   message: string;
@@ -36,6 +37,7 @@ export class ChatbotController {
     private readonly chatbotService: ChatbotService,
     private readonly studentService: StudentService,
     private readonly dynamicRoadmapService: DynamicRoadmapService,
+    private readonly gemmaEnhancerService: GemmaEnhancerService,
   ) {}
 
   @Post('ask')
@@ -53,21 +55,28 @@ export class ChatbotController {
         !!bodyStudentData.language);
 
     if (hasBodyStudentData) {
+      const effectiveStudentData = {
+        score: bodyStudentData.score,
+        bacType: bodyStudentData.bacType || bodyStudentData.bac,
+        name: bodyStudentData.name,
+        bacAverage: bodyStudentData.bacAverage,
+        FG: bodyStudentData.FG,
+        selectedFiliere: bodyStudentData.selectedFiliere,
+        language: bodyStudentData.language,
+        interest: bodyStudentData.interest,
+      };
       const reply = await this.chatbotService.processMessage(
         message,
-        {
-          score: bodyStudentData.score,
-          bacType: bodyStudentData.bacType || bodyStudentData.bac,
-          name: bodyStudentData.name,
-          bacAverage: bodyStudentData.bacAverage,
-          FG: bodyStudentData.FG,
-          selectedFiliere: bodyStudentData.selectedFiliere,
-          language: bodyStudentData.language,
-          interest: bodyStudentData.interest,
-        },
+        effectiveStudentData,
         conversationHistory ?? [],
       );
-      return { reply };
+      return {
+        reply: await this.gemmaEnhancerService.enhanceResponse(
+          reply,
+          message,
+          effectiveStudentData,
+        ),
+      };
     }
 
     // Priority 2: Fallback to database (authenticated user)
@@ -91,7 +100,13 @@ export class ChatbotController {
       dbStudentData,
       conversationHistory ?? [],
     );
-    return { reply };
+    return {
+      reply: await this.gemmaEnhancerService.enhanceResponse(
+        reply,
+        message,
+        dbStudentData,
+      ),
+    };
   }
 
   @Get('ping')

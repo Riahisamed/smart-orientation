@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConversationState } from '../state/conversation-state.interface';
-import { ConversationStage, getNextNaturalStage, isStageTransitionAllowed } from './conversation-stage';
+import {
+  ConversationStage,
+  getNextNaturalStage,
+  isStageTransitionAllowed,
+} from './conversation-stage';
 import { FollowupEngine } from './followup-engine';
 import { IntentResult } from '../intents/intent.types';
 
 @Injectable()
 export class ConversationFlowService {
-
-  constructor(
-    private readonly followupEngine: FollowupEngine,
-  ) {}
+  constructor(private readonly followupEngine: FollowupEngine) {}
 
   /**
    * Process message and evolve conversation state
@@ -23,14 +24,14 @@ export class ConversationFlowService {
     followUp: string | null;
     shouldGiveDecision: boolean;
   } {
-
-    let updatedState = { ...state };
+    const updatedState = { ...state };
 
     // Calculate and update conversation stage
     updatedState.conversationStage = this.calculateCurrentStage(updatedState);
 
     // Check if ready for final decision
-    const shouldGiveDecision = this.followupEngine.isReadyForDecision(updatedState);
+    const shouldGiveDecision =
+      this.followupEngine.isReadyForDecision(updatedState);
 
     if (shouldGiveDecision) {
       updatedState.conversationStage = ConversationStage.FINAL_DECISION;
@@ -56,15 +57,24 @@ export class ConversationFlowService {
     let stage = state.conversationStage;
 
     // Auto evolution logic based on collected data
-    if (stage === ConversationStage.EXPLORATION && state.likedDomains.length > 0) {
+    if (
+      stage === ConversationStage.EXPLORATION &&
+      state.likedDomains.length > 0
+    ) {
       stage = ConversationStage.DOMAIN_SELECTION;
     }
 
-    if (stage === ConversationStage.DOMAIN_SELECTION && state.likedCareers.length > 0) {
+    if (
+      stage === ConversationStage.DOMAIN_SELECTION &&
+      state.likedCareers.length > 0
+    ) {
       stage = ConversationStage.CAREER_DISCOVERY;
     }
 
-    if (stage === ConversationStage.CAREER_DISCOVERY && state.shownPrograms.length >= 1) {
+    if (
+      stage === ConversationStage.CAREER_DISCOVERY &&
+      state.shownPrograms.length >= 1
+    ) {
       stage = ConversationStage.RECOMMENDATION;
     }
 
@@ -85,9 +95,10 @@ export class ConversationFlowService {
    * Returns false if already rejected
    */
   shouldSuggestDomain(state: ConversationState, domain: string): boolean {
-    return !state.rejectedDomains.some(rejected =>
-      domain.toLowerCase().includes(rejected.toLowerCase()) ||
-      rejected.toLowerCase().includes(domain.toLowerCase())
+    return !state.rejectedDomains.some(
+      (rejected) =>
+        domain.toLowerCase().includes(rejected.toLowerCase()) ||
+        rejected.toLowerCase().includes(domain.toLowerCase()),
     );
   }
 

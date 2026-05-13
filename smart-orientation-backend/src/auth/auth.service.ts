@@ -12,55 +12,51 @@ import { AuthEmailService } from './auth-email.service';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
     private authEmailService: AuthEmailService,
   ) {}
 
-async register(email: string, password: string) {
+  async register(email: string, password: string) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
-const existingUser = await this.prisma.user.findUnique({
-where: { email },
-})
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
+    }
 
-if(existingUser){
-throw new BadRequestException("Email already exists")
-}
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-const hashedPassword = await bcrypt.hash(password,10)
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+      },
+    });
 
-const user = await this.prisma.user.create({
-data:{
-email,
-password: hashedPassword
-}
-})
+    await this.prisma.student.create({
+      data: {
+        name: email,
+        bacType: 'MATH',
+        bacAverage: 0,
+        french: 0,
+        english: 0,
+        userId: user.id,
+      },
+    });
 
-await this.prisma.student.create({
-data:{
-name: email,
-bacType: "MATH",
-bacAverage: 0,
-french: 0,
-english: 0,
-userId: user.id
-}
-})
-
-return {
-message:"User created successfully",
-user:{
-id:user.id,
-email:user.email,
-role:user.role
-}
-}
-
-}
+    return {
+      message: 'User created successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
+  }
   async login(email: string, password: string) {
-
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -88,17 +84,16 @@ role:user.role
     const token = this.jwtService.sign(payload);
 
     return {
-  access_token: token,
-  user: {
-    id: user.id,
-    email: user.email,
-    role: user.role
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
-  };
-}
 
   async googleLogin(email: string, name: string | null) {
-
     let user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -162,7 +157,10 @@ role:user.role
     });
 
     try {
-      await this.authEmailService.sendPasswordResetEmail(user.email, resetToken);
+      await this.authEmailService.sendPasswordResetEmail(
+        user.email,
+        resetToken,
+      );
     } catch (error) {
       throw new InternalServerErrorException('Failed to send reset email');
     }

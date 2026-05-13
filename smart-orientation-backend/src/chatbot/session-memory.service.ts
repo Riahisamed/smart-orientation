@@ -1,9 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConversationMemory, MemoryService, ExtractedIntent } from './memory.service';
+import {
+  ConversationMemory,
+  MemoryService,
+  ExtractedIntent,
+} from './memory.service';
 
 /**
  * 💾 PERSISTENT SESSION MEMORY SERVICE
- * 
+ *
  * Stores user conversation state across sessions, page refreshes and navigation
  * Makes AI remember user preferences permanently during interaction
  */
@@ -14,7 +18,7 @@ export type SessionData = {
   createdAt: number;
   lastActivity: number;
   memory: ConversationMemory;
-  
+
   // Additional session state
   lastDetectedField: string | null;
   lastQuestionAsked: string | null;
@@ -66,7 +70,7 @@ export class SessionMemoryService {
       lastDetectedField: null,
       lastQuestionAsked: null,
       lastRecommendations: [],
-      isActive: true
+      isActive: true,
     };
 
     this.sessions.set(sessionId, session);
@@ -79,16 +83,23 @@ export class SessionMemoryService {
    */
   updateSessionFromMessage(sessionId: string, message: string): SessionData {
     const session = this.getSession(sessionId);
-    
+
     // Extract intent from message
-    const extracted = this.memoryService.extractFromMessage(message, session.memory);
-    
+    const extracted = this.memoryService.extractFromMessage(
+      message,
+      session.memory,
+    );
+
     // Update memory
-    session.memory = this.memoryService.updateMemory(session.memory, extracted, message);
-    
+    session.memory = this.memoryService.updateMemory(
+      session.memory,
+      extracted,
+      message,
+    );
+
     // Update session metadata
     session.lastActivity = Date.now();
-    
+
     // Track last detected field
     if (extracted.interest) {
       session.lastDetectedField = extracted.interest;
@@ -99,7 +110,9 @@ export class SessionMemoryService {
       return this.resetSession(sessionId);
     }
 
-    this.logger.log(`[SESSION] Updated memory for session ${sessionId}, interest: ${session.memory.interest}, track: ${session.memory.preferredTrack}`);
+    this.logger.log(
+      `[SESSION] Updated memory for session ${sessionId}, interest: ${session.memory.interest}, track: ${session.memory.preferredTrack}`,
+    );
 
     return session;
   }
@@ -107,7 +120,10 @@ export class SessionMemoryService {
   /**
    * ✏️ MANUALLY UPDATE SESSION MEMORY
    */
-  updateSession(sessionId: string, updates: Partial<ConversationMemory>): SessionData {
+  updateSession(
+    sessionId: string,
+    updates: Partial<ConversationMemory>,
+  ): SessionData {
     const session = this.getSession(sessionId);
     session.memory = { ...session.memory, ...updates };
     session.lastActivity = Date.now();
@@ -144,10 +160,10 @@ export class SessionMemoryService {
    */
   resetSession(sessionId: string): SessionData {
     this.logger.log(`[SESSION] Resetting session: ${sessionId}`);
-    
+
     const session = this.createNewSession(sessionId);
     this.sessions.set(sessionId, session);
-    
+
     return session;
   }
 
@@ -174,7 +190,9 @@ export class SessionMemoryService {
     }
 
     if (expiredCount > 0) {
-      this.logger.debug(`[SESSION] Cleaned up ${expiredCount} expired sessions`);
+      this.logger.debug(
+        `[SESSION] Cleaned up ${expiredCount} expired sessions`,
+      );
     }
   }
 
@@ -185,10 +203,10 @@ export class SessionMemoryService {
     const normalized = message.toLowerCase().trim();
     const resetPatterns = [
       /\b(restart|reset|recommencer|nouveau|commencer depuis le début)\b/i,
-      /\b(ابدأ من جديد|اعادة|البداية|صفر|أبدا من أول)\b/i
+      /\b(ابدأ من جديد|اعادة|البداية|صفر|أبدا من أول)\b/i,
     ];
 
-    return resetPatterns.some(pattern => pattern.test(normalized));
+    return resetPatterns.some((pattern) => pattern.test(normalized));
   }
 
   /**

@@ -2,10 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { IntentDetectorService } from './intent-detector.service';
-import { ProfileFilterService, StudentProfile } from './services/profile-filter.service';
+import {
+  ProfileFilterService,
+  StudentProfile,
+} from './services/profile-filter.service';
 
-export type AdmissionLevel = 'safe' | 'possible' | 'hard';
-export type ProgramDomain = 'tech' | 'health' | 'business' | 'sport' | 'art' | 'engineering' | 'letters' | 'other';
+export type AdmissionLevel = 'safe' | 'possible' | 'hard' | 'impossible';
+export type ProgramDomain =
+  | 'tech'
+  | 'health'
+  | 'business'
+  | 'sport'
+  | 'art'
+  | 'engineering'
+  | 'letters'
+  | 'other';
 
 export type RagQuery = {
   message?: string;
@@ -136,19 +147,23 @@ type FieldsJsonData = {
 };
 
 export function normalizeText(text: string) {
-  return text
+  return (text || '')
+    .normalize('NFKC')
     .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[أإآ]/g, "ا")
-    .replace(/ة/g, "ه")
-    .replace(/ى/g, "ي")
-    .replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, " ")
-    .replace(/\s+/g, " ")
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
+    .replace(/[’'`´]/g, ' ')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
-function getFormulaSearchTerms(formula?: string): string {
+export function getFormulaSearchTerms(formula?: string): string {
   if (!formula) return '';
 
   const normalizedFormula = formula.toUpperCase();
@@ -161,7 +176,10 @@ function getFormulaSearchTerms(formula?: string): string {
     [/\bESP\b/, 'espagnol langues'],
     [/\bIT\b/, 'italien langues'],
     [/\bALL\b/, 'allemand langues'],
-    [/\bHG\b/, 'histoire geographie géographie sciences humaines humanites humanités'],
+    [
+      /\bHG\b/,
+      'histoire geographie géographie sciences humaines humanites humanités',
+    ],
     [/\bPH\b/, 'philosophie psychologie sciences humaines humanites humanités'],
   ];
 
@@ -174,105 +192,144 @@ function getFormulaSearchTerms(formula?: string): string {
 
 export const FIELD_ALIASES = {
   engineering: [
-    "génie",
-    "engineering",
-    "ingenierie",
-    "civil",
-    "mécanique",
-    "mecanique",
-    "electrique",
-    "électrique",
-    "industrie",
-    "industriel",
-    "الهندسة",
-    "مدنية",
-    "ميكانيك",
-    "كهرباء",
-    "صناعة"
+    'génie',
+    'engineering',
+    'ingenierie',
+    'civil',
+    'mécanique',
+    'mecanique',
+    'electrique',
+    'électrique',
+    'industrie',
+    'industriel',
+    'الهندسة',
+    'مدنية',
+    'ميكانيك',
+    'كهرباء',
+    'صناعة',
   ],
 
   it: [
-    "informatique",
-    "dev",
-    "web",
-    "data",
-    "cyber",
-    "programmation",
-    "اعلامية",
-    "معلوماتية",
-    "برمجة"
+    'informatique',
+    'dev',
+    'web',
+    'data',
+    'cyber',
+    'programmation',
+    'اعلامية',
+    'معلوماتية',
+    'برمجة',
+    'العلوم المعلوماتية',
+    'هندسة نظم المعلومات',
+    'الإعلامية',
+    'تقنيات الإعلامية',
+    'تكنولوجيا المعلومات',
+    'علوم وتقنيات المعلومات',
+    'المعلومات والاتصالات',
+    'تكنولوجيا المعلومات والاتصالات',
+    'informatia',
+    'informatique de gestion',
+    'tic',
+    'réseaux',
+    'développement',
+    'systèmes informatiques',
+    'logiciel',
+    'software',
+    'it',
+    'multimédia',
+    'data',
+    'cybersécurité',
+    'شبكات',
+    'تطوير',
+    'حاسوب',
+    'تكنولوجيا',
   ],
 
-  health: [
-    "santé",
-    "medical",
-    "médecine",
-    "pharmacie",
-    "طب",
-    "صيدلة",
-    "صحة"
-  ],
+  health: ['santé', 'medical', 'médecine', 'pharmacie', 'طب', 'صيدلة', 'صحة'],
 
-  sport: [
-    "sport",
-    "coach",
-    "kiné",
-    "رياضة",
-    "تربية بدنية"
-  ],
+  sport: ['sport', 'coach', 'kiné', 'رياضة', 'تربية بدنية'],
 
-  art: [
-    "art",
-    "design",
-    "cinema",
-    "musique",
-    "فن",
-    "تصميم"
-  ],
+  art: ['art', 'design', 'cinema', 'musique', 'فن', 'تصميم'],
 
   business: [
-    "business",
-    "finance",
-    "management",
-    "gestion",
-    "commerce",
-    "تصرف",
-    "اقتصاد"
+    'business',
+    'finance',
+    'management',
+    'gestion',
+    'commerce',
+    'تصرف',
+    'اقتصاد',
   ],
 
   letters: [
-    "lettres",
-    "langues",
-    "litterature",
-    "littérature",
-    "francais",
-    "français",
-    "anglais",
-    "arabe",
-    "traduction",
-    "communication",
-    "journalisme",
-    "droit",
-    "civilisation",
-    "sciences humaines",
-    "humanites",
-    "humanités",
-    "philosophie",
-    "histoire",
-    "géographie",
-    "geographie",
-    "sociologie",
-    "psychologie",
-    "education",
-    "éducation",
-    "law",
-    "حقوق",
-    "آداب",
-    "لغات",
-    "ترجمة",
-    "صحافة",
-    "تواصل"
-  ]
+    'lettres',
+    'lettre',
+    'langues',
+    'langue',
+    'linguistique',
+    'litterature',
+    'littérature',
+    'francais',
+    'français',
+    'anglais',
+    'arabe',
+    'traduction',
+    'traducteur',
+    'communication',
+    'journalisme',
+    'journaliste',
+    'redaction',
+    'redacteur',
+    'presse',
+    'media',
+    'droit',
+    'civilisation',
+    'sciences humaines',
+    'humanites',
+    'humanités',
+    'philosophie',
+    'histoire',
+    'géographie',
+    'geographie',
+    'sociologie',
+    'psychologie',
+    'education',
+    'éducation',
+    'law',
+    'حقوق',
+    'آداب',
+    'لغات',
+    'ترجمة',
+    'صحافة',
+    'تواصل',
+    // Guide titles are mostly Arabic — Latin-only filters excluded almost all rows
+    'العربية',
+    'الفرنسية',
+    'الانجليزية',
+    'الإنجليزية',
+    'الاسبانية',
+    'الايطالية',
+    'الالمانية',
+    'اللغات',
+    'اللغة',
+    'القانون',
+    'الانسانية',
+    'الإنسانية',
+    'الاداب',
+    'الآداب',
+    'الشريعة',
+    'علوم انسانية',
+    'علوم الانسانية',
+    'العلوم الانسانية',
+    'العلوم الإنسانية',
+    'فلسفة',
+    'جغرافيا',
+    'جغرافية',
+    'الانسانية',
+    'والاداب',
+    'الادب',
+    'الأدب',
+  ],
 } as const;
 
 type FieldAliasKey = keyof typeof FIELD_ALIASES;
@@ -280,15 +337,17 @@ type FieldAliasKey = keyof typeof FIELD_ALIASES;
 export function detectField(message: string): FieldAliasKey | null {
   const normalized = normalizeText(message);
 
-  if (/\b(litterair\w*|litterature|lettres?|langues?|droit|humanites?|humaines?|traduction|journalisme|communication)\b/.test(normalized)) {
+  if (
+    /\b(litterair\w*|litterature|lettres?|langues?|linguistique|droit|humanites?|humaines?|traduction|traducteur|journalisme|journaliste|communication|redaction|redacteur|presse|media)\b/.test(
+      normalized,
+    )
+  ) {
     return 'letters';
   }
 
   for (const [field, keywords] of Object.entries(FIELD_ALIASES)) {
     if (
-      keywords.some(keyword =>
-        normalized.includes(normalizeText(keyword))
-      )
+      keywords.some((keyword) => normalized.includes(normalizeText(keyword)))
     ) {
       return field as FieldAliasKey;
     }
@@ -297,46 +356,44 @@ export function detectField(message: string): FieldAliasKey | null {
   return null;
 }
 
-export function findProgramsByField<T extends {
-  program?: string;
-  name?: string;
-  institution?: string;
-  description?: string;
-  specialization?: string;
-  formula?: string;
-  domain?: string;
-  bacTypes?: GuideBacType[];
-  matchingBac?: GuideBacType;
-}>(
-  field: FieldAliasKey | string | null,
-  guides: T[],
-  bacType?: string,
-): T[] {
+export function findProgramsByField<
+  T extends {
+    program?: string;
+    name?: string;
+    institution?: string;
+    description?: string;
+    specialization?: string;
+    formula?: string;
+    domain?: string;
+    bacTypes?: GuideBacType[];
+    matchingBac?: GuideBacType;
+  },
+>(field: FieldAliasKey | string | null, guides: T[], bacType?: string): T[] {
   if (!field) return [];
 
   const aliases = FIELD_ALIASES[field as FieldAliasKey] || [];
 
-  return guides.filter(program => {
+  return guides.filter((program) => {
     const searchableText = normalizeText(`
-      ${program.program || ""}
-      ${program.name || ""}
-      ${program.institution || ""}
-      ${program.specialization || ""}
-      ${program.description || ""}
-      ${program.formula || ""}
+      ${program.program || ''}
+      ${program.name || ''}
+      ${program.institution || ''}
+      ${program.specialization || ''}
+      ${program.description || ''}
+      ${program.formula || ''}
       ${getFormulaSearchTerms(program.formula)}
-      ${program.domain || ""}
+      ${program.domain || ''}
     `);
 
-    const hasKeyword = aliases.some(alias =>
-      searchableText.includes(normalizeText(alias))
+    const hasKeyword = aliases.some((alias) =>
+      searchableText.includes(normalizeText(alias)),
     );
 
     const supportsBac =
       !bacType ||
       !!program.matchingBac ||
-      program.bacTypes?.some(b =>
-        normalizeText(b.type).includes(normalizeText(bacType))
+      program.bacTypes?.some((b) =>
+        normalizeText(b.type).includes(normalizeText(bacType)),
       );
 
     return hasKeyword && supportsBac;
@@ -347,12 +404,36 @@ export function findProgramsByField<T extends {
  * Sub-domain keywords for filtering jobs and skills within a field
  */
 const SUB_DOMAIN_KEYWORDS: Record<string, string[]> = {
-  medecine: ['médecine', 'medecine', 'médecin', 'medecin', 'doctor', 'طبيب', 'طب'],
+  medecine: [
+    'médecine',
+    'medecine',
+    'médecin',
+    'medecin',
+    'doctor',
+    'طبيب',
+    'طب',
+  ],
   pharmacie: ['pharmacie', 'pharmacien', 'pharmacy', 'صيدلة', 'صيدلي'],
   dentaire: ['dentaire', 'dentiste', 'أسنان', 'طبيب أسنان'],
   infirmier: ['infirmier', 'nurse', 'تمريض', 'ممرض'],
-  developpeur: ['dev', 'développeur', 'developpeur', 'developer', 'برمجة', 'مطور', 'programmeur'],
-  cyber: ['cyber', 'sécurité', 'secu', 'pentest', 'hacker', 'أمن معلومات', 'أمن سيبراني'],
+  developpeur: [
+    'dev',
+    'développeur',
+    'developpeur',
+    'developer',
+    'برمجة',
+    'مطور',
+    'programmeur',
+  ],
+  cyber: [
+    'cyber',
+    'sécurité',
+    'secu',
+    'pentest',
+    'hacker',
+    'أمن معلومات',
+    'أمن سيبراني',
+  ],
   data: ['data', 'analyse', 'analyst', 'بيانات', 'تحليل'],
   reseau: ['réseau', 'reseau', 'network', 'شبكات'],
   frontend: ['frontend', 'front-end', 'front', 'ui', 'ux'],
@@ -366,44 +447,77 @@ const SUB_DOMAIN_KEYWORDS: Record<string, string[]> = {
   design: ['design', 'تصميم', 'graphiste'],
 };
 
-/** 
+/**
  * REUSABLE: detectField helper
  * Maps user message to ONE detected domain field
  */
 const DOMAIN_DETECTION_RULES: { field: string; keywords: RegExp[] }[] = [
-  { field: 'IT', keywords: [
-    /informatique|informatia|dev|developpement|programmation|software|reseau|reseaux|cyber|data|ia|ai|intelligence artificielle|web|mobile|cloud|devops|it|tech|code|fullstack|frontend|backend|برمجة|اعلامية|معلوماتية|شبكات|أمن معلومات|تطوير/i,
-  ]},
-  { field: 'SPORT', keywords: [
-    /sport|sportif|sportive|kine|kinesitherapie|entrainement|entraînement|coach|coaching|fitness|eps|education physique|performance sportive|athlete|football|basket|tennis|رياضة|الرياضة|بدنية|تربية بدنية|تدريب|مدرب|علاج طبيعي|لياقة/i,
-  ]},
-  { field: 'HEALTH', keywords: [
-    /medecine|medicine|medical|sante|santé|pharmacie|infirmier|infirmiere|dentaire|dentiste|biologie|biologiste|paramedical|paramédical|soins|hopital|hospital|clinique|patient|diagnostic|urgences|chirurgie|anesthesie|radiologie|laboratoire medical|طب|صحة|صيدلة|تمريض|بيولوجيا|مستشفى|علاج/i,
-  ]},
-  { field: 'BUSINESS', keywords: [
-    /business|gestion|commerce|finance|marketing|economie|economie|comptabilite|comptabilite|audit|banque|assurance|management|administration|ressources humaines|rh|logistique|supply chain|trading|bourse|entrepreneur|startup|أعمال|إدارة|محاسبة|مالية|تصرف|تجارة|اقتصاد|تسويق/i,
-  ]},
-  { field: 'ENGINEERING', keywords: [
-    /ingenieur|ingenierie|genie|mecanique|electrique|electronique|civil|industriel|production|maintenance|mines|ponts|geophysique|petrole|energie|automatique|robotique|genie civil|genie mecanique|هندسة|مهندس|مدني|ميكانيك|كهرباء|إلكترونيك|طاقة/i,
-  ]},
-  { field: 'DESIGN', keywords: [
-    /design|graphisme|graphique|graphiste|illustration|typographie|branding|ui|ux|figma|photoshop|illustrator|mode|fashion|decoration|interieur|تصميم|جرافيك|فنون تطبيقية|ديكور/i,
-  ]},
-  { field: 'MEDIA', keywords: [
-    /media|audiovisuel|cinema|theatre|journalisme|journalist|communication|radio|television|tv|presse|publicite|publicité|rédaction|redaction|content creator|إعلام|صحافة|اتصال|إذاعة|تلفزة|سينما|مسرح/i,
-  ]},
-  { field: 'SCIENCE', keywords: [
-    /science|physique|chimie|mathematiques|mathematique|biologie|biologiste|recherche|laboratoire|environnement|agronomie|geologie|astronomie|recherche scientifique|علوم|كيمياء|فيزياء|رياضيات|أحياء|بحث علمي|مختبر/i,
-  ]},
-  { field: 'LAW', keywords: [
-    /droit|law|juridique|justice|avocat|notaire|magistrat|juge|tribunal|juriste|legal|contentieux|loi|réglementation|reglementation|compliance|قانون|عدالة|محامي|قاضي|محكمة|قضاء/i,
-  ]},
-  { field: 'ECONOMY', keywords: [
-    /economie|economie|economique|economique|macro|micro|politique economique|analyse economique|econometrie|بنوك|أسواق|مالية|استثمار|اقتصاد كلي|اقتصاد جزئي/i,
-  ]},
-  { field: 'EDUCATION', keywords: [
-    /education|enseignement|formation|pedagogie|professeur|enseignant|maitre|maître|educateur|ecole|ecole|universite|université|tutorat|apprentissage|didactique|تربية|تعليم|أستاذ|مدرس|تكوين|تعليمي|مدرسة|جامعة/i,
-  ]},
+  {
+    field: 'IT',
+    keywords: [
+      /informatique|informatia|dev|developpement|programmation|software|reseau|reseaux|cyber|data|ia|ai|intelligence artificielle|web|mobile|cloud|devops|it|tech|code|fullstack|frontend|backend|برمجة|اعلامية|معلوماتية|شبكات|أمن معلومات|تطوير/i,
+    ],
+  },
+  {
+    field: 'SPORT',
+    keywords: [
+      /sport|sportif|sportive|kine|kinesitherapie|entrainement|entraînement|coach|coaching|fitness|eps|education physique|performance sportive|athlete|football|basket|tennis|رياضة|الرياضة|بدنية|تربية بدنية|تدريب|مدرب|علاج طبيعي|لياقة/i,
+    ],
+  },
+  {
+    field: 'HEALTH',
+    keywords: [
+      /medecine|medicine|medical|sante|santé|pharmacie|infirmier|infirmiere|dentaire|dentiste|biologie|biologiste|paramedical|paramédical|soins|hopital|hospital|clinique|patient|diagnostic|urgences|chirurgie|anesthesie|radiologie|laboratoire medical|طب|صحة|صيدلة|تمريض|بيولوجيا|مستشفى|علاج/i,
+    ],
+  },
+  {
+    field: 'BUSINESS',
+    keywords: [
+      /business|gestion|commerce|finance|marketing|economie|economie|comptabilite|comptabilite|audit|banque|assurance|management|administration|ressources humaines|rh|logistique|supply chain|trading|bourse|entrepreneur|startup|أعمال|إدارة|محاسبة|مالية|تصرف|تجارة|اقتصاد|تسويق/i,
+    ],
+  },
+  {
+    field: 'ENGINEERING',
+    keywords: [
+      /ingenieur|ingenierie|genie|mecanique|electrique|electronique|civil|industriel|production|maintenance|mines|ponts|geophysique|petrole|energie|automatique|robotique|genie civil|genie mecanique|هندسة|مهندس|مدني|ميكانيك|كهرباء|إلكترونيك|طاقة/i,
+    ],
+  },
+  {
+    field: 'DESIGN',
+    keywords: [
+      /design|graphisme|graphique|graphiste|illustration|typographie|branding|ui|ux|figma|photoshop|illustrator|mode|fashion|decoration|interieur|تصميم|جرافيك|فنون تطبيقية|ديكور/i,
+    ],
+  },
+  {
+    field: 'MEDIA',
+    keywords: [
+      /media|audiovisuel|cinema|theatre|journalisme|journalist|communication|radio|television|tv|presse|publicite|publicité|rédaction|redaction|content creator|إعلام|صحافة|اتصال|إذاعة|تلفزة|سينما|مسرح/i,
+    ],
+  },
+  {
+    field: 'SCIENCE',
+    keywords: [
+      /science|physique|chimie|mathematiques|mathematique|biologie|biologiste|recherche|laboratoire|environnement|agronomie|geologie|astronomie|recherche scientifique|علوم|كيمياء|فيزياء|رياضيات|أحياء|بحث علمي|مختبر/i,
+    ],
+  },
+  {
+    field: 'LAW',
+    keywords: [
+      /droit|law|juridique|justice|avocat|notaire|magistrat|juge|tribunal|juriste|legal|contentieux|loi|réglementation|reglementation|compliance|قانون|عدالة|محامي|قاضي|محكمة|قضاء/i,
+    ],
+  },
+  {
+    field: 'ECONOMY',
+    keywords: [
+      /economie|economie|economique|economique|macro|micro|politique economique|analyse economique|econometrie|بنوك|أسواق|مالية|استثمار|اقتصاد كلي|اقتصاد جزئي/i,
+    ],
+  },
+  {
+    field: 'EDUCATION',
+    keywords: [
+      /education|enseignement|formation|pedagogie|professeur|enseignant|maitre|maître|educateur|ecole|ecole|universite|université|tutorat|apprentissage|didactique|تربية|تعليم|أستاذ|مدرس|تكوين|تعليمي|مدرسة|جامعة/i,
+    ],
+  },
 ];
 
 /**
@@ -441,17 +555,17 @@ function mapToFieldsJsonField(detectedField: string | null): string | null {
   if (!detectedField) return null;
   const n = normalizeField(detectedField);
   const map: Record<string, string> = {
-    'it': 'IT',
-    'sport': 'Sport', // Sport is not in fields.json, we'll handle this virtually
-    'health': 'Medical / Health',
-    'business': 'Business / Management',
-    'engineering': 'Engineering',
-    'design': 'Arts & Design',
-    'media': 'Media', // not in fields.json
-    'science': 'Science',
-    'law': 'Law',
-    'economy': 'Economy', // not in fields.json
-    'education': 'Education', // not in fields.json
+    it: 'IT',
+    sport: 'Sport', // Sport is not in fields.json, we'll handle this virtually
+    health: 'Medical / Health',
+    business: 'Business / Management',
+    engineering: 'Engineering',
+    design: 'Arts & Design',
+    media: 'Media', // not in fields.json
+    science: 'Science',
+    law: 'Law',
+    economy: 'Economy', // not in fields.json
+    education: 'Education', // not in fields.json
   };
   return map[n] || null;
 }
@@ -459,14 +573,14 @@ function mapToFieldsJsonField(detectedField: string | null): string | null {
 /** Map a canonical fields.json field name back to our 11-domain key */
 function mapToDomainKey(fieldsJsonField: string): string {
   const map: Record<string, string> = {
-    'IT': 'IT',
+    IT: 'IT',
     'Medical / Health': 'HEALTH',
     'Business / Management': 'BUSINESS',
-    'Engineering': 'ENGINEERING',
+    Engineering: 'ENGINEERING',
     'Arts & Design': 'DESIGN',
-    'Science': 'SCIENCE',
-    'Law': 'LAW',
-    'Languages': 'EDUCATION',
+    Science: 'SCIENCE',
+    Law: 'LAW',
+    Languages: 'EDUCATION',
     'Social Sciences': 'EDUCATION',
   };
   return map[fieldsJsonField] || fieldsJsonField.toUpperCase();
@@ -482,9 +596,21 @@ export class RagService {
   private readonly bacAliases: Record<string, string[]> = {
     math: ['math', 'maths', 'mathematique', 'mathematiques', 'رياضيات'],
     sciences: ['science', 'sciences', 'svt', 'experimental', 'علوم تجريبية'],
-    technique: ['tech', 'technique', 'technologique', 'العلوم التقنية', 'تقنية'],
+    technique: [
+      'tech',
+      'technique',
+      'technologique',
+      'العلوم التقنية',
+      'تقنية',
+    ],
     economie: ['eco', 'economie', 'gestion', 'اقتصاد وتصرف', 'اقتصاد', 'تصرف'],
-    informatique: ['info', 'informatique', 'bac info', 'علوم الاعلامية', 'اعلامية'],
+    informatique: [
+      'info',
+      'informatique',
+      'bac info',
+      'علوم الاعلامية',
+      'اعلامية',
+    ],
     lettres: ['lettres', 'lettre', 'adab', 'litteraire', 'اداب'],
     sport: ['sport', 'sportif', 'رياضة'],
   };
@@ -498,61 +624,224 @@ export class RagService {
 
   private readonly fieldAliases: Record<string, string[]> = {
     IT: [
-      'informatique', 'info', 'it', 'dev', 'développement', 'programmation',
-      'web', 'mobile', 'data', 'ai', 'ia', 'cyber', 'cloud', 'tech',
-      'برمجة', 'اعلامية', 'معلوماتية', 'شبكات', 'أمن معلومات'
+      'informatique',
+      'info',
+      'it',
+      'dev',
+      'développement',
+      'programmation',
+      'web',
+      'mobile',
+      'data',
+      'ai',
+      'ia',
+      'cyber',
+      'cloud',
+      'tech',
+      'برمجة',
+      'اعلامية',
+      'معلوماتية',
+      'شبكات',
+      'أمن معلومات',
+      'العلوم المعلوماتية',
+      'هندسة نظم المعلومات',
+      'الإعلامية',
+      'تقنيات الإعلامية',
+      'تكنولوجيا المعلومات',
+      'علوم وتقنيات المعلومات',
+      'المعلومات والاتصالات',
+      'تكنولوجيا المعلومات والاتصالات',
+      'informatia',
+      'informatique de gestion',
+      'tic',
+      'réseaux',
+      'systèmes informatiques',
+      'logiciel',
+      'software',
+      'multimédia',
+      'cybersécurité',
+      'تطوير',
+      'حاسوب',
     ],
     'Medical / Health': [
-      'medecine', 'medecin', 'medical', 'sante', 'pharmacie', 'infirmier', 'infirmière',
-      'biologie', 'biologiste', 'laboratoire', 'paramedical', 'soins',
-      'طب', 'صحة', 'صيدلة', 'تمريض', 'بيولوجيا'
+      'medecine',
+      'medecin',
+      'medical',
+      'sante',
+      'pharmacie',
+      'infirmier',
+      'infirmière',
+      'biologie',
+      'biologiste',
+      'laboratoire',
+      'paramedical',
+      'soins',
+      'طب',
+      'صحة',
+      'صيدلة',
+      'تمريض',
+      'بيولوجيا',
     ],
     Engineering: [
-      'ingenieur', 'ingenierie', 'genie', 'mecanique', 'electrique', 'civil',
-      'industriel', 'production', 'energie', 'electronique',
-      'هندسة', 'مهندس', 'مدني', 'ميكانيك', 'كهرباء'
+      'ingenieur',
+      'ingenierie',
+      'genie',
+      'mecanique',
+      'electrique',
+      'civil',
+      'industriel',
+      'production',
+      'energie',
+      'electronique',
+      'هندسة',
+      'مهندس',
+      'مدني',
+      'ميكانيك',
+      'كهرباء',
     ],
     'Business / Management': [
-      'gestion', 'business', 'commerce', 'marketing', 'finance',
-      'comptabilite', 'economie', 'administration', 'audit', 'rh',
-      'أعمال', 'إدارة', 'محاسبة', 'مالية', 'تصرف', 'تجارة'
+      'gestion',
+      'business',
+      'commerce',
+      'marketing',
+      'finance',
+      'comptabilite',
+      'economie',
+      'administration',
+      'audit',
+      'rh',
+      'أعمال',
+      'إدارة',
+      'محاسبة',
+      'مالية',
+      'تصرف',
+      'تجارة',
     ],
     Sport: [
-      'sport', 'sports', 'activite physique', 'education physique', 'entrainement',
-      'coaching', 'kinesitherapie', 'kine', 'performance', 'athletisme', 'fitness',
-      'رياضة', 'تربية بدنية', 'تدريب', 'مدرب', 'علاج طبيعي'
+      'sport',
+      'sports',
+      'activite physique',
+      'education physique',
+      'entrainement',
+      'coaching',
+      'kinesitherapie',
+      'kine',
+      'performance',
+      'athletisme',
+      'fitness',
+      'رياضة',
+      'تربية بدنية',
+      'تدريب',
+      'مدرب',
+      'علاج طبيعي',
     ],
     'Arts & Design': [
-      'art', 'design', 'graphique', 'architecture', 'mode', 'fashion',
-      'multimedia', 'audiovisuel', 'cinema', 'musique', 'beaux-arts',
-      'فن', 'تصميم', 'عمارة', 'أزياء', 'موسيقى', 'سينما'
+      'art',
+      'design',
+      'graphique',
+      'architecture',
+      'mode',
+      'fashion',
+      'multimedia',
+      'audiovisuel',
+      'cinema',
+      'musique',
+      'beaux-arts',
+      'فن',
+      'تصميم',
+      'عمارة',
+      'أزياء',
+      'موسيقى',
+      'سينما',
     ],
     Languages: [...FIELD_ALIASES.letters],
     'Social Sciences': [...FIELD_ALIASES.letters],
     Science: [
-      'science', 'recherche', 'laboratoire', 'chimie', 'physique', 'biologie',
-      'mathematiques', 'environnement', 'agronomie', 'geologie',
-      'علوم', 'كيمياء', 'فيزياء', 'أحياء', 'رياضيات', 'بحث'
+      'science',
+      'recherche',
+      'laboratoire',
+      'chimie',
+      'physique',
+      'biologie',
+      'mathematiques',
+      'environnement',
+      'agronomie',
+      'geologie',
+      'علوم',
+      'كيمياء',
+      'فيزياء',
+      'أحياء',
+      'رياضيات',
+      'بحث',
     ],
     Education: [
-      'education', 'enseignement', 'formation', 'pedagogie', 'professeur',
-      'enseignant', 'maitre', 'educateur', 'ecole', 'universite',
-      'تربية', 'تعليم', 'أستاذ', 'مدرس', 'تكوين'
+      'education',
+      'enseignement',
+      'formation',
+      'pedagogie',
+      'professeur',
+      'enseignant',
+      'maitre',
+      'educateur',
+      'ecole',
+      'universite',
+      'تربية',
+      'تعليم',
+      'أستاذ',
+      'مدرس',
+      'تكوين',
     ],
     Law: [
-      'droit', 'law', 'juridique', 'avocat', 'justice', 'notaire',
-      'juriste', 'legal', 'magistrat', 'juge', 'tribunal',
-      'قانون', 'عدالة', 'محامي', 'قاضي', 'محكمة', 'قضاء'
+      'droit',
+      'law',
+      'juridique',
+      'avocat',
+      'justice',
+      'notaire',
+      'juriste',
+      'legal',
+      'magistrat',
+      'juge',
+      'tribunal',
+      'قانون',
+      'عدالة',
+      'محامي',
+      'قاضي',
+      'محكمة',
+      'قضاء',
     ],
     Media: [
-      'media', 'audiovisuel', 'journalisme', 'communication', 'cinema',
-      'television', 'radio', 'presse', 'publicite',
-      'إعلام', 'صحافة', 'اتصال', 'إذاعة', 'تلفزة', 'وسائط'
+      'media',
+      'audiovisuel',
+      'journalisme',
+      'communication',
+      'cinema',
+      'television',
+      'radio',
+      'presse',
+      'publicite',
+      'إعلام',
+      'صحافة',
+      'اتصال',
+      'إذاعة',
+      'تلفزة',
+      'وسائط',
     ],
     Economy: [
-      'economie', 'economique', 'macroeconomic', 'microeconomic',
-      'banque', 'finance', 'investissement', 'marché', 'marche',
-      'اقتصاد', 'مالية', 'بنوك', 'استثمار', 'أسواق'
+      'economie',
+      'economique',
+      'macroeconomic',
+      'microeconomic',
+      'banque',
+      'finance',
+      'investissement',
+      'marché',
+      'marche',
+      'اقتصاد',
+      'مالية',
+      'بنوك',
+      'استثمار',
+      'أسواق',
     ],
   };
 
@@ -563,7 +852,13 @@ export class RagService {
     sciences: ['Medical / Health', 'Science', 'Engineering'],
     technique: ['Engineering', 'Arts & Design'],
     economie: ['Business / Management'],
-    lettres: ['Languages', 'Law', 'Social Sciences', 'Education', 'Arts & Design'],
+    lettres: [
+      'Languages',
+      'Law',
+      'Social Sciences',
+      'Education',
+      'Arts & Design',
+    ],
     sport: ['Sport', 'Medical / Health', 'Education'],
   };
 
@@ -577,7 +872,10 @@ export class RagService {
     sport: ['sport', 'health'],
   };
 
-  private readonly programDomainKeywords: Record<Exclude<ProgramDomain, 'other'>, string[]> = {
+  private readonly programDomainKeywords: Record<
+    Exclude<ProgramDomain, 'other'>,
+    string[]
+  > = {
     engineering: [...FIELD_ALIASES.engineering],
     tech: [
       'informatique',
@@ -603,8 +901,22 @@ export class RagService {
       'شبكات',
       'برمجة',
       'حاسوب',
-      'تكنولوجيات المعلومات',
+      'تكنولوجيا المعلومات',
       'ذكاء اصطناعي',
+      'العلوم المعلوماتية',
+      'هندسة نظم المعلومات',
+      'الإعلامية',
+      'تقنيات الإعلامية',
+      'تكنولوجيا المعلومات',
+      'علوم وتقنيات المعلومات',
+      'المعلومات والاتصالات',
+      'تكنولوجيا المعلومات والاتصالات',
+      'informatique de gestion',
+      'tic',
+      'systèmes informatiques',
+      'multimédia',
+      'cybersécurité',
+      'تطوير',
     ],
     health: [
       'biologie',
@@ -685,14 +997,21 @@ export class RagService {
     private readonly intentDetector: IntentDetectorService,
     private readonly profileFilter: ProfileFilterService,
   ) {
-    this.guideData = this.loadJsonFile<GuideProgram[]>('prisma/guide.json', []).map((program) => ({
+    this.guideData = this.loadJsonFile<GuideProgram[]>(
+      'prisma/guide.json',
+      [],
+    ).map((program) => ({
       ...program,
       domain: this.detectProgramDomain(program),
     }));
-    this.fieldsData = this.loadJsonFile<FieldsJsonData>('lib/data/fields.json', {
-      fields: [],
-    }).fields || [];
-    this.jobsData = this.loadJsonFile<JobDomainData[]>('lib/data/jobs.json', []);
+    this.fieldsData =
+      this.loadJsonFile<FieldsJsonData>('lib/data/fields.json', {
+        fields: [],
+      }).fields || [];
+    this.jobsData = this.loadJsonFile<JobDomainData[]>(
+      'lib/data/jobs.json',
+      [],
+    );
 
     this.logger.log(`Loaded ${this.guideData.length} guide programs`);
     this.logger.log(`Loaded ${this.fieldsData.length} fields`);
@@ -712,7 +1031,7 @@ export class RagService {
   // ============================================
   getJobsByField(detectedField: string | null): JobData[] {
     if (!detectedField) return [];
-    
+
     // Try to find in jobs.json directly by canonical name
     const fieldsJsonName = mapToFieldsJsonField(detectedField);
     if (fieldsJsonName) {
@@ -721,29 +1040,37 @@ export class RagService {
       );
       if (domainJobs) return domainJobs.jobs.slice(0, 3);
     }
-    
+
     // Fallback: try by detected field key
     const domainJobs = this.jobsData.find(
       (jd) => normalizeField(jd.field) === normalizeField(detectedField),
     );
     if (domainJobs) return domainJobs.jobs.slice(0, 3);
-    
+
     return [];
   }
 
   // ============================================
   // 🔍 PROFILE-BASED: get jobs filtered by student profile
   // ============================================
-  getJobsByFieldAndProfile(detectedField: string | null, profile: StudentProfile): JobData[] {
+  getJobsByFieldAndProfile(
+    detectedField: string | null,
+    profile: StudentProfile,
+  ): JobData[] {
     // First check if domain is allowed for this BAC type
     if (profile.bacType && detectedField) {
-      const isAllowed = this.profileFilter.isDomainAllowed(detectedField, profile.bacType);
+      const isAllowed = this.profileFilter.isDomainAllowed(
+        detectedField,
+        profile.bacType,
+      );
       if (!isAllowed) {
-        this.logger.debug(`Domain ${detectedField} not allowed for BAC ${profile.bacType}`);
+        this.logger.debug(
+          `Domain ${detectedField} not allowed for BAC ${profile.bacType}`,
+        );
         return [];
       }
     }
-    
+
     // Return jobs for the allowed domain
     return this.getJobsByField(detectedField);
   }
@@ -758,51 +1085,78 @@ export class RagService {
   // ============================================
   // 🔍 PUBLIC HELPER: filter programs by detected field
   // ============================================
-  filterProgramsByField(programs: RankedProgram[], detectedField: string | null): RankedProgram[] {
+  filterProgramsByField(
+    programs: RankedProgram[],
+    detectedField: string | null,
+  ): RankedProgram[] {
     if (!detectedField || programs.length === 0) return [];
 
     return findProgramsByField(this.toAliasFieldKey(detectedField), programs);
-    
+
     const domainKey = normalizeField(detectedField || '');
-    
+
     return programs.filter((p) => {
-      const haystack = normalizeField([p.name, p.program, p.domain, p.formula].filter(Boolean).join(' '));
-      
+      const haystack = normalizeField(
+        [p.name, p.program, p.domain, p.formula].filter(Boolean).join(' '),
+      );
+
       // Strong keyword matching per domain
       if (domainKey === 'it') {
-        return /\b(informatique|informatia|developpement|programmation|reseau|logiciel|software|cyber|data|ia|ai|web|mobile|cloud|devops|tech|اعلامية|معلوماتية|برمجة|شبكات|تكنولوجيا)\b/i.test(haystack);
+        return /\b(informatique|informatia|developpement|programmation|reseau|logiciel|software|cyber|data|ia|ai|web|mobile|cloud|devops|tech|اعلامية|معلوماتية|برمجة|شبكات|تكنولوجيا|العلوم المعلوماتية|هندسة نظم المعلومات|الإعلامية|تقنيات الإعلامية|تكنولوجيا المعلومات|علوم وتقنيات المعلومات|المعلومات والاتصالات|تكنولوجيا المعلومات والاتصالات|informatique de gestion|tic|systèmes informatiques|multimédia|cybersécurité|تطوير|حاسوب)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'sport') {
-        return /\b(sport|activite physique|kine|kinesitherapie|entrainement|eps|education physique|nutrition sportive|performance sportive|fitness|coaching|رياضة|تربية بدنية|بدنية)\b/i.test(haystack);
+        return /\b(sport|activite physique|kine|kinesitherapie|entrainement|eps|education physique|nutrition sportive|performance sportive|fitness|coaching|رياضة|تربية بدنية|بدنية)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'health' || domainKey === 'medical / health') {
-        return /\b(biologie|sante|paramedical|medecine|pharmacie|dentaire|infirmier|soins|veterinaire|anesthesie|radiologie|chirurgie|laboratoire medical|طب|صحة|صيدلة|تمريض|بيولوجيا|علاج)\b/i.test(haystack);
+        return /\b(biologie|sante|paramedical|medecine|pharmacie|dentaire|infirmier|soins|veterinaire|anesthesie|radiologie|chirurgie|laboratoire medical|طب|صحة|صيدلة|تمريض|بيولوجيا|علاج)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'business' || domainKey === 'business / management') {
-        return /\b(gestion|commerce|finance|marketing|economie|comptabilite|audit|bank|assurance|management|administration|ressources humaines|logistique|تجارة|أعمال|إدارة|محاسبة|مالية|تصرف|اقتصاد)\b/i.test(haystack);
+        return /\b(gestion|commerce|finance|marketing|economie|comptabilite|audit|bank|assurance|management|administration|ressources humaines|logistique|تجارة|أعمال|إدارة|محاسبة|مالية|تصرف|اقتصاد)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'engineering') {
-        return /\b(ingenieur|ingenierie|genie|mecanique|electrique|electronique|civil|industriel|production|maintenance|mines|ponts|geophysique|petrole|energie|automatique|robotique|هندسة|مهندس|مدني|ميكانيك|كهرباء)\b/i.test(haystack);
+        return /\b(ingenieur|ingenierie|genie|mecanique|electrique|electronique|civil|industriel|production|maintenance|mines|ponts|geophysique|petrole|energie|automatique|robotique|هندسة|مهندس|مدني|ميكانيك|كهرباء)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'design' || domainKey === 'arts & design') {
-        return /\b(art|design|graphisme|graphique|architecture|architecte|mode|fashion|cinema|audiovisuel|theatre|musique|beaux-arts|decoration|creation|artistique|تصميم|فن|عمارة|جرافيك)\b/i.test(haystack);
+        return /\b(art|design|graphisme|graphique|architecture|architecte|mode|fashion|cinema|audiovisuel|theatre|musique|beaux-arts|decoration|creation|artistique|تصميم|فن|عمارة|جرافيك)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'media') {
-        return /\b(media|journalisme|journalist|communication|television|radio|presse|publicite|redaction|content|إعلام|صحافة|اتصال|إذاعة|تلفزة|وسائط)\b/i.test(haystack);
+        return /\b(media|journalisme|journalist|communication|television|radio|presse|publicite|redaction|content|إعلام|صحافة|اتصال|إذاعة|تلفزة|وسائط)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'science') {
-        return /\b(physique|chimie|mathematiques|science|biologie|environnement|agronomie|geologie|astronomie|recherche|laboratoire|علوم|كيمياء|فيزياء|رياضيات|أحياء|مختبر)\b/i.test(haystack);
+        return /\b(physique|chimie|mathematiques|science|biologie|environnement|agronomie|geologie|astronomie|recherche|laboratoire|علوم|كيمياء|فيزياء|رياضيات|أحياء|مختبر)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'law') {
-        return /\b(droit|juridique|justice|avocat|notaire|magistrat|juge|tribunal|juriste|legal|قانون|عدالة|محامي|قاضي|محكمة|قضاء)\b/i.test(haystack);
+        return /\b(droit|juridique|justice|avocat|notaire|magistrat|juge|tribunal|juriste|legal|قانون|عدالة|محامي|قاضي|محكمة|قضاء)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'economy') {
-        return /\b(economie|economique|banque|finance|investissement|marche|bourse|macro|micro|اقتصاد|مالية|بنوك|استثمار|أسواق)\b/i.test(haystack);
+        return /\b(economie|economique|banque|finance|investissement|marche|bourse|macro|micro|اقتصاد|مالية|بنوك|استثمار|أسواق)\b/i.test(
+          haystack,
+        );
       }
       if (domainKey === 'education') {
-        return /\b(education|enseignement|formation|pedagogie|professeur|enseignant|maitre|educateur|ecole|universite|تربية|تعليم|أستاذ|مدرس|تكوين|مدرسة|جامعة)\b/i.test(haystack);
+        return /\b(education|enseignement|formation|pedagogie|professeur|enseignant|maitre|educateur|ecole|universite|تربية|تعليم|أستاذ|مدرس|تكوين|مدرسة|جامعة)\b/i.test(
+          haystack,
+        );
       }
-      
+
       return false;
     });
   }
@@ -812,10 +1166,12 @@ export class RagService {
   // ============================================
   getFollowUpForField(detectedField: string | null, lang: 'fr' | 'ar'): string {
     if (!detectedField) {
-      return lang === 'ar' ? 'شنو المجال اللي يهمك؟' : 'Quel domaine t\'intéresse ?';
+      return lang === 'ar'
+        ? 'شنو المجال اللي يهمك؟'
+        : "Quel domaine t'intéresse ?";
     }
     const key = normalizeField(detectedField);
-    
+
     const chains: Record<string, { ar: string; fr: string }[]> = {
       it: [
         { ar: 'تحب dev ولا réseaux؟', fr: 'Tu préfères dev ou réseaux ?' },
@@ -824,50 +1180,83 @@ export class RagService {
       ],
       sport: [
         { ar: 'تحب coaching ولا kiné؟', fr: 'Tu préfères coaching ou kiné ?' },
-        { ar: 'performance ولا enseignement؟', fr: 'Performance ou enseignement ?' },
+        {
+          ar: 'performance ولا enseignement؟',
+          fr: 'Performance ou enseignement ?',
+        },
       ],
       health: [
-        { ar: 'تحب médecine ولا paramédical؟', fr: 'Tu préfères médecine ou paramédical ?' },
+        {
+          ar: 'تحب médecine ولا paramédical؟',
+          fr: 'Tu préfères médecine ou paramédical ?',
+        },
         { ar: 'مستشفى ولا عيادة؟', fr: 'Hôpital ou clinique ?' },
       ],
       business: [
-        { ar: 'تحب finance ولا marketing؟', fr: 'Tu préfères finance ou marketing ?' },
+        {
+          ar: 'تحب finance ولا marketing؟',
+          fr: 'Tu préfères finance ou marketing ?',
+        },
         { ar: 'محاسبة ولا إدارة؟', fr: 'Comptabilité ou gestion ?' },
       ],
       engineering: [
-        { ar: 'تحب mécanique ولا électrique؟', fr: 'Tu préfères mécanique ou électrique ?' },
+        {
+          ar: 'تحب mécanique ولا électrique؟',
+          fr: 'Tu préfères mécanique ou électrique ?',
+        },
         { ar: 'مدني ولا صناعي؟', fr: 'Civil ou industriel ?' },
       ],
       design: [
-        { ar: 'تحب graphisme ولا architecture؟', fr: 'Tu préfères graphisme ou architecture ?' },
+        {
+          ar: 'تحب graphisme ولا architecture؟',
+          fr: 'Tu préfères graphisme ou architecture ?',
+        },
         { ar: 'تصميم ولا أزياء؟', fr: 'Design ou mode ?' },
       ],
       media: [
-        { ar: 'تحب journalisme ولا audiovisuel؟', fr: 'Tu préfères journalisme ou audiovisuel ?' },
+        {
+          ar: 'تحب journalisme ولا audiovisuel؟',
+          fr: 'Tu préfères journalisme ou audiovisuel ?',
+        },
         { ar: 'إذاعة ولا تلفزة؟', fr: 'Radio ou télévision ?' },
       ],
       science: [
-        { ar: 'تحب chimie ولا biologie؟', fr: 'Tu préfères chimie ou biologie ?' },
+        {
+          ar: 'تحب chimie ولا biologie؟',
+          fr: 'Tu préfères chimie ou biologie ?',
+        },
         { ar: 'بحث ولا تطبيق؟', fr: 'Recherche ou application ?' },
       ],
       law: [
-        { ar: 'تحب avocat ولا notaire؟', fr: 'Tu préfères avocat ou notaire ?' },
+        {
+          ar: 'تحب avocat ولا notaire؟',
+          fr: 'Tu préfères avocat ou notaire ?',
+        },
         { ar: 'قانون خاص ولا عام؟', fr: 'Droit privé ou public ?' },
       ],
       economy: [
-        { ar: 'تحب banque ولا finance؟', fr: 'Tu préfères banque ou finance ?' },
+        {
+          ar: 'تحب banque ولا finance؟',
+          fr: 'Tu préfères banque ou finance ?',
+        },
         { ar: 'macro ولا microéconomie؟', fr: 'Macro ou microéconomie ?' },
       ],
       education: [
-        { ar: 'تحب تعليم أساسي ولا ثانوي؟', fr: 'Tu préfères primaire ou secondaire ?' },
+        {
+          ar: 'تحب تعليم أساسي ولا ثانوي؟',
+          fr: 'Tu préfères primaire ou secondaire ?',
+        },
         { ar: 'تكوين مهني ولا أكاديمي؟', fr: 'Formation pro ou académique ?' },
       ],
     };
-    
+
     const qs = Object.entries(chains).find(([k]) => key.includes(k))?.[1] || [
-      { ar: 'تحب نشوفلك برامج ولا خدمات؟', fr: 'Tu veux voir des programmes ou des métiers ?' },
+      {
+        ar: 'تحب نشوفلك برامج ولا خدمات؟',
+        fr: 'Tu veux voir des programmes ou des métiers ?',
+      },
     ];
-    
+
     return qs[0][lang];
   }
 
@@ -880,11 +1269,15 @@ export class RagService {
 
     const limit = this.normalizeLimit(query.limit);
     // PRIORITY 1: Detect field from interest (overrides everything)
-    const field = this.detectField(query.message || '', query.bacType, query.interest);
+    const field = this.detectField(
+      query.message || '',
+      query.bacType,
+      query.interest,
+    );
     const jobs = this.findJobs(field, query.message || '').slice(0, 3);
 
     // ALWAYS get fresh candidates from all programs
-    let allPrograms = this.filterProgramsByBacType(query.bacType);
+    const allPrograms = this.filterProgramsByBacType(query.bacType);
 
     // Get requested domain from interest
     const selectedInterestDomain = this.normalizeProgramDomain(query.interest);
@@ -896,12 +1289,20 @@ export class RagService {
     // HARD FILTER: Use STRICT name-based filtering from fields.json if field is detected
     // This ensures ONLY programs matching the detected field's Arabic names are returned
     let candidates = allPrograms;
-    const aliasField = detectField(`${query.interest || ''} ${query.message || ''}`) || this.toAliasFieldKey(field?.field);
+    const aliasField =
+      detectField(`${query.interest || ''} ${query.message || ''}`) ||
+      this.toAliasFieldKey(field?.field);
 
     if (aliasField) {
-      const aliasPrograms = findProgramsByField(aliasField, allPrograms, query.bacType);
+      const aliasPrograms = findProgramsByField(
+        aliasField,
+        allPrograms,
+        query.bacType,
+      );
       if (aliasPrograms.length > 0) {
-        this.logger.log(`Alias field filter: ${aliasPrograms.length}/${allPrograms.length} programs match field=${aliasField}`);
+        this.logger.log(
+          `Alias field filter: ${aliasPrograms.length}/${allPrograms.length} programs match field=${aliasField}`,
+        );
         candidates = aliasPrograms;
       }
     }
@@ -911,28 +1312,42 @@ export class RagService {
       const strictFiltered = this.filterProgramsByFieldName(field, allPrograms);
 
       if (strictFiltered.length > 0) {
-        this.logger.log(`STRICT name filter: ${strictFiltered.length}/${allPrograms.length} programs match field=${field.field}`);
+        this.logger.log(
+          `STRICT name filter: ${strictFiltered.length}/${allPrograms.length} programs match field=${field.field}`,
+        );
         candidates = strictFiltered;
       } else {
         // 2) Fallback to regex matching
-        const fieldFiltered = allPrograms.filter((program) => this.matchesField(program, field));
+        const fieldFiltered = allPrograms.filter((program) =>
+          this.matchesField(program, field),
+        );
         if (fieldFiltered.length > 0) {
-          this.logger.log(`Regex field filter: ${fieldFiltered.length}/${allPrograms.length} programs match field=${field.field}`);
+          this.logger.log(
+            `Regex field filter: ${fieldFiltered.length}/${allPrograms.length} programs match field=${field.field}`,
+          );
           candidates = fieldFiltered;
         } else if (requestedDomain) {
           // 3) Fallback: use domain matching
-          const domainFiltered = allPrograms.filter((program) => program.domain === requestedDomain);
+          const domainFiltered = allPrograms.filter(
+            (program) => program.domain === requestedDomain,
+          );
           if (domainFiltered.length > 0) {
-            this.logger.log(`Domain filter fallback: ${domainFiltered.length}/${allPrograms.length} programs match domain=${requestedDomain}`);
+            this.logger.log(
+              `Domain filter fallback: ${domainFiltered.length}/${allPrograms.length} programs match domain=${requestedDomain}`,
+            );
             candidates = domainFiltered;
           }
         }
       }
     } else if (requestedDomain) {
       // No field detected, use domain filtering
-      const interestFiltered = allPrograms.filter((program) => program.domain === requestedDomain);
+      const interestFiltered = allPrograms.filter(
+        (program) => program.domain === requestedDomain,
+      );
       if (interestFiltered.length > 0) {
-        this.logger.log(`Domain filter: ${interestFiltered.length}/${allPrograms.length} programs match domain=${requestedDomain}`);
+        this.logger.log(
+          `Domain filter: ${interestFiltered.length}/${allPrograms.length} programs match domain=${requestedDomain}`,
+        );
         candidates = interestFiltered;
       }
     }
@@ -947,27 +1362,37 @@ export class RagService {
 
     // FALLBACK: Ensure we always return programs (fresh computation)
     if (!rankedPrograms || rankedPrograms.length === 0) {
-      this.logger.warn('No programs after ranking, applying fallback with fresh computation');
+      this.logger.warn(
+        'No programs after ranking, applying fallback with fresh computation',
+      );
 
       // Fallback 1: Try all programs for this bac type, filtered by field/domain
       if (query.bacType) {
         let fallbackCandidates = this.guideData
-          .filter((p) => p.bacTypes?.some((b) => this.matchesBacType(b.type, query.bacType)))
-          .map(p =>
+          .filter((p) =>
+            p.bacTypes?.some((b) => this.matchesBacType(b.type, query.bacType)),
+          )
+          .map((p) =>
             this.toRankedProgram(
               p,
-              p.bacTypes?.find((b) => this.matchesBacType(b.type, query.bacType)),
+              p.bacTypes?.find((b) =>
+                this.matchesBacType(b.type, query.bacType),
+              ),
             ),
           );
 
         // Re-filter by detected field if available
         if (field) {
-          const fieldFiltered = fallbackCandidates.filter((p) => this.matchesField(p, field));
+          const fieldFiltered = fallbackCandidates.filter((p) =>
+            this.matchesField(p, field),
+          );
           if (fieldFiltered.length > 0) {
             fallbackCandidates = fieldFiltered;
           }
         } else if (requestedDomain) {
-          fallbackCandidates = fallbackCandidates.filter((p) => p.domain === requestedDomain);
+          fallbackCandidates = fallbackCandidates.filter(
+            (p) => p.domain === requestedDomain,
+          );
         }
 
         rankedPrograms = fallbackCandidates.slice(0, 3);
@@ -975,25 +1400,35 @@ export class RagService {
 
       // Fallback 2: Return easiest programs (lowest lastScore) - only if no interest/domain specified
       if (!requestedDomain && !field && rankedPrograms.length === 0) {
-        rankedPrograms = (this.guideData
-          .map(p => this.toRankedProgram(p, p.bacTypes?.[0]))
-          .sort((a, b) => (a.matchingBac?.lastScore ?? 999) - (b.matchingBac?.lastScore ?? 999)) as RankedProgram[]).slice(0, 3);
+        rankedPrograms = (
+          this.guideData
+            .map((p) => this.toRankedProgram(p, p.bacTypes?.[0]))
+            .sort(
+              (a, b) =>
+                (a.matchingBac?.lastScore ?? 999) -
+                (b.matchingBac?.lastScore ?? 999),
+            ) as RankedProgram[]
+        ).slice(0, 3);
       }
 
       // Fallback 3: Return any 3 programs (last resort)
       if (rankedPrograms.length === 0) {
-        rankedPrograms = (this.guideData.slice(0, 3).map(p => ({
+        rankedPrograms = this.guideData.slice(0, 3).map((p) => ({
           ...p,
           domain: this.detectProgramDomain(p),
-          admissionLevel: 'possible' as AdmissionLevel,
+          admissionLevel: 'possible',
           rankScore: 0,
           matchedKeywords: [],
-        })) as RankedProgram[]);
+        }));
       }
     }
 
+    // Filter out impossible programs (gap > 25 points) unless no other programs remain
+    const filteredPrograms = this.filterImpossiblePrograms(rankedPrograms, query.score);
+    rankedPrograms = filteredPrograms.length > 0 ? filteredPrograms : rankedPrograms;
+
     rankedPrograms = this.excludeOtherDomainUnlessEmpty(rankedPrograms);
-    this.logger.log(`RAG programs: ${rankedPrograms.length}`);
+    this.logger.log(`RAG programs: ${rankedPrograms.length} (after impossible filter)`);
 
     const demand = field?.demand_in_tunisia;
     const unemployment = field?.unemployment_risk;
@@ -1014,7 +1449,11 @@ export class RagService {
   }
 
   getEmploymentInsights(query: RagQuery): EmploymentInsights {
-    const field = this.detectField(query.message || '', query.bacType, query.interest);
+    const field = this.detectField(
+      query.message || '',
+      query.bacType,
+      query.interest,
+    );
     const jobs = this.findJobs(field, query.message || '').slice(0, 3);
 
     const demand = field?.demand_in_tunisia || 'Non précisé';
@@ -1035,7 +1474,10 @@ export class RagService {
   private calculateAverageUnemploymentRate(jobs: JobData[]): number | null {
     const rates = jobs
       .map((job) => job.unemployment_rate)
-      .filter((rate): rate is number => typeof rate === 'number' && Number.isFinite(rate));
+      .filter(
+        (rate): rate is number =>
+          typeof rate === 'number' && Number.isFinite(rate),
+      );
 
     if (rates.length === 0) return null;
 
@@ -1043,31 +1485,61 @@ export class RagService {
     return Math.round(average * 10) / 10;
   }
 
-  private categorizeDemand(demand?: string): 'high' | 'medium' | 'low' | 'unknown' {
+  private categorizeDemand(
+    demand?: string,
+  ): 'high' | 'medium' | 'low' | 'unknown' {
     if (!demand) return 'unknown';
     const normalized = this.normalize(demand);
-    if (normalized.includes('very') || normalized.includes('high') || normalized.includes('très') || normalized.includes('haut') || normalized.includes('eleve')) {
+    if (
+      normalized.includes('very') ||
+      normalized.includes('high') ||
+      normalized.includes('très') ||
+      normalized.includes('haut') ||
+      normalized.includes('eleve')
+    ) {
       return 'high';
     }
-    if (normalized.includes('moderate') || normalized.includes('moyen') || normalized.includes('modere')) {
+    if (
+      normalized.includes('moderate') ||
+      normalized.includes('moyen') ||
+      normalized.includes('modere')
+    ) {
       return 'medium';
     }
-    if (normalized.includes('low') || normalized.includes('faible') || normalized.includes('weak')) {
+    if (
+      normalized.includes('low') ||
+      normalized.includes('faible') ||
+      normalized.includes('weak')
+    ) {
       return 'low';
     }
     return 'unknown';
   }
 
-  private categorizeUnemploymentRisk(risk?: string): 'low' | 'moderate' | 'high' | 'unknown' {
+  private categorizeUnemploymentRisk(
+    risk?: string,
+  ): 'low' | 'moderate' | 'high' | 'unknown' {
     if (!risk) return 'unknown';
     const normalized = this.normalize(risk);
-    if (normalized.includes('low') || normalized.includes('faible') || normalized.includes('bas')) {
+    if (
+      normalized.includes('low') ||
+      normalized.includes('faible') ||
+      normalized.includes('bas')
+    ) {
       return 'low';
     }
-    if (normalized.includes('moderate') || normalized.includes('moyen') || normalized.includes('modere')) {
+    if (
+      normalized.includes('moderate') ||
+      normalized.includes('moyen') ||
+      normalized.includes('modere')
+    ) {
       return 'moderate';
     }
-    if (normalized.includes('high') || normalized.includes('haut') || normalized.includes('eleve')) {
+    if (
+      normalized.includes('high') ||
+      normalized.includes('haut') ||
+      normalized.includes('eleve')
+    ) {
       return 'high';
     }
     return 'unknown';
@@ -1086,7 +1558,10 @@ export class RagService {
   }
 
   // STRICT interest matcher - only returns true for strong matches
-  private matchesInterestStrict(program: RankedProgram, interest?: string): boolean {
+  private matchesInterestStrict(
+    program: RankedProgram,
+    interest?: string,
+  ): boolean {
     if (!interest) return false;
 
     const name = (program.name || program.program || '').toLowerCase();
@@ -1095,23 +1570,33 @@ export class RagService {
 
     // STRICT patterns - must contain these keywords
     if (interest === 'sport') {
-      return /\b(sport|kin[ée]|kine|nutrition sportive|[ée]ducation physique|eps|activit[ée] physique|entra[iî]nement|performance sportive|m[ée]decine du sport|science du sport|gestion sportive)\b/i.test(haystack);
+      return /\b(sport|kin[ée]|kine|nutrition sportive|[ée]ducation physique|eps|activit[ée] physique|entra[iî]nement|performance sportive|m[ée]decine du sport|science du sport|gestion sportive)\b/i.test(
+        haystack,
+      );
     }
 
     if (interest === 'tech') {
-      return /\b(informatique|informatia|r[ée]seau|réseaux|d[ée]veloppement|dev|programmation|software|it|tech|cyber|cloud|data|ia|ai|intelligence artificielle|g[ée]nie [ée]lectrique|g[ée]nie m[ée]canique|automatique|robotique|syst[èe]me|software|web|mobile|coding)\b/i.test(haystack);
+      return /\b(informatique|informatia|r[ée]seau|réseaux|d[ée]veloppement|dev|programmation|software|it|tech|cyber|cloud|data|ia|ai|intelligence artificielle|g[ée]nie [ée]lectrique|g[ée]nie m[ée]canique|automatique|robotique|syst[èe]me|software|web|mobile|coding)\b/i.test(
+        haystack,
+      );
     }
 
     if (interest === 'health') {
-      return /\b(biologie|sant[ée]|paramedical|param[ée]dical|m[ée]decine|medecine|pharmacie|dentaire|dentiste|nurse|soignant|kin[ée]|infirmier|m[ée]decin|chirurgie|anesth[ée]sie|radiologie|laboratoire m[ée]dical|biologie m[ée]dicale)\b/i.test(haystack);
+      return /\b(biologie|sant[ée]|paramedical|param[ée]dical|m[ée]decine|medecine|pharmacie|dentaire|dentiste|nurse|soignant|kin[ée]|infirmier|m[ée]decin|chirurgie|anesth[ée]sie|radiologie|laboratoire m[ée]dical|biologie m[ée]dicale)\b/i.test(
+        haystack,
+      );
     }
 
     if (interest === 'business') {
-      return /\b(gestion|commerce|finance|marketing|[ée]conomie|economie|comptabilit[ée]|management|business|administration|ressources humaines|logistique|supply chain|audit|banque|assurance|bourse|trading)\b/i.test(haystack);
+      return /\b(gestion|commerce|finance|marketing|[ée]conomie|economie|comptabilit[ée]|management|business|administration|ressources humaines|logistique|supply chain|audit|banque|assurance|bourse|trading)\b/i.test(
+        haystack,
+      );
     }
 
     if (interest === 'art') {
-      return /\b(art|design|architecture|architecte|graphique|graphisme|mode|fashion|cin[ée]ma|audiovisuel|th[ée][aâ]tre|musique|plastique|beaux-arts|d[ée]cor|d[ée]coration|cr[ée]ation|artistique)\b/i.test(haystack);
+      return /\b(art|design|architecture|architecte|graphique|graphisme|mode|fashion|cin[ée]ma|audiovisuel|th[ée][aâ]tre|musique|plastique|beaux-arts|d[ée]cor|d[ée]coration|cr[ée]ation|artistique)\b/i.test(
+        haystack,
+      );
     }
 
     return false;
@@ -1122,12 +1607,30 @@ export class RagService {
     return !!requestedDomain && program.domain === requestedDomain;
   }
 
-  classifyAdmission(score: number | undefined, lastScore?: number | null): AdmissionLevel {
+  /**
+   * FIXED: REALISTIC score compatibility filtering.
+   *
+   * diff = programScore - studentScore (how much the program's score exceeds the student's)
+   *
+   * If diff <= 5:   SAFE      (student meets or slightly exceeds requirement)
+   * If diff <= 15:  MEDIUM    (student is close, achievable with effort)
+   * If diff <= 25:  HARD      (student is far but possible)
+   * If diff > 25:   IMPOSSIBLE (do NOT recommend — absurd score gap)
+   */
+  classifyAdmission(
+    score: number | undefined,
+    lastScore?: number | null,
+  ): AdmissionLevel {
     if (typeof score !== 'number' || !Number.isFinite(score)) return 'hard';
-    if (typeof lastScore !== 'number' || !Number.isFinite(lastScore)) return 'hard';
-    if (score >= lastScore + 10) return 'safe';
-    if (score >= lastScore) return 'possible';
-    return 'hard';
+    if (typeof lastScore !== 'number' || !Number.isFinite(lastScore))
+      return 'hard';
+
+    const diff = lastScore - score; // positive means program requires MORE than student has
+
+    if (diff <= 5) return 'safe';     // student close or above
+    if (diff <= 15) return 'possible';  // moderate gap
+    if (diff <= 25) return 'hard';    // large gap
+    return 'impossible';              // absurd gap — never recommend
   }
 
   rankPrograms(
@@ -1140,14 +1643,20 @@ export class RagService {
     // STEP 1: STRICT FILTER FIRST - Only keep programs matching the detected field
     let filteredPrograms = programs;
     if (detectedField) {
-      const fieldFiltered = programs.filter((program) => this.matchesField(program, detectedField));
+      const fieldFiltered = programs.filter((program) =>
+        this.matchesField(program, detectedField),
+      );
 
       if (fieldFiltered.length > 0) {
-        this.logger.log(`STRICT FILTER: ${fieldFiltered.length}/${programs.length} programs match field=${detectedField.field}`);
+        this.logger.log(
+          `STRICT FILTER: ${fieldFiltered.length}/${programs.length} programs match field=${detectedField.field}`,
+        );
         filteredPrograms = fieldFiltered;
       } else {
         // Keep the original programs (already domain-filtered) instead of falling back to ALL programs
-        this.logger.warn(`STRICT FILTER: No programs match field=${detectedField.field}, keeping pre-filtered ${programs.length} programs`);
+        this.logger.warn(
+          `STRICT FILTER: No programs match field=${detectedField.field}, keeping pre-filtered ${programs.length} programs`,
+        );
       }
     }
 
@@ -1158,7 +1667,10 @@ export class RagService {
       const programBacType = program.matchingBac?.type;
 
       // +3 if bac type matches
-      if (programBacType && this.normalizeBac(programBacType) === this.normalizeBac(query.bacType)) {
+      if (
+        programBacType &&
+        this.normalizeBac(programBacType) === this.normalizeBac(query.bacType)
+      ) {
         score += 3;
       }
 
@@ -1189,7 +1701,10 @@ export class RagService {
             ? Number((studentScore - lastScore).toFixed(2))
             : undefined,
         rankScore: score,
-        matchedKeywords: detectedField && this.matchesField(program, detectedField) ? ['field-match'] : [],
+        matchedKeywords:
+          detectedField && this.matchesField(program, detectedField)
+            ? ['field-match']
+            : [],
       };
     });
 
@@ -1197,9 +1712,15 @@ export class RagService {
     scoredPrograms.sort((a, b) => b.rankScore - a.rankScore);
 
     // DIVERSITY-AWARE SELECTION: Ensure variety in results
-    const diverseResult = this.selectDiversePrograms(scoredPrograms, detectedField, 4);
+    const diverseResult = this.selectDiversePrograms(
+      scoredPrograms,
+      detectedField,
+      4,
+    );
 
-    this.logger.log(`Ranked ${diverseResult.length} programs with diversity (institutions: ${new Set(diverseResult.map(p => p.institution)).size}, domains: ${new Set(diverseResult.map(p => p.domain)).size})`);
+    this.logger.log(
+      `Ranked ${diverseResult.length} programs with diversity (institutions: ${new Set(diverseResult.map((p) => p.institution)).size}, domains: ${new Set(diverseResult.map((p) => p.domain)).size})`,
+    );
 
     // Ensure at least 1 program
     if (diverseResult.length === 0 && scoredPrograms.length > 0) {
@@ -1252,7 +1773,7 @@ export class RagService {
     // (even if same institution, we need to return something)
     if (selected.length < 3) {
       for (const p of uniqueByName) {
-        if (selected.find(s => s.code === p.code)) continue; // Already selected
+        if (selected.find((s) => s.code === p.code)) continue; // Already selected
 
         selected.push(p);
         if (selected.length === 3) break;
@@ -1286,49 +1807,72 @@ export class RagService {
 
     // STRICT matching for each field - only specific keywords allowed
     if (normalizedField === 'sport') {
-      return /\b(sport|activite physique|activité physique|kine|kin[eé]sitherapie|entrainement|entraînement|eps|education physique|éducation physique|nutrition sportive|performance sportive|gestion sportive|sciences du sport|medecine du sport)\b/i.test(haystack);
+      return /\b(sport|activite physique|activité physique|kine|kin[eé]sitherapie|entrainement|entraînement|eps|education physique|éducation physique|nutrition sportive|performance sportive|gestion sportive|sciences du sport|medecine du sport)\b/i.test(
+        haystack,
+      );
     }
 
     if (normalizedField === 'it') {
-      return /\b(informatique|informatia|d[eé]veloppement|programmation|r[eé]seau|r[eé]seaux|syst[eè]me|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|cloud|devops|informatia|اعلامية|معلوماتية|برمجة|شبكات)\b/i.test(haystack);
+      return /\b(informatique|informatia|d[eé]veloppement|programmation|r[eé]seau|r[eé]seaux|syst[eè]me|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|cloud|devops|informatia|اعلامية|معلوماتية|برمجة|شبكات)\b/i.test(
+        haystack,
+      );
     }
 
-    if (normalizedField === 'medical' || normalizedField === 'medical / health') {
-      return /\b(biologie|biologique|sant[eé]|paramedical|param[eé]dical|m[eé]decine|medecine|pharmacie|dentaire|dentiste|infirmier|soignant|v[eé]t[eé]rinaire|anesth[eé]sie|radiologie|chirurgie|laboratoire medical|biologie medicale|طب|صحة|صيدلة|بيولوجيا|تمريض)\b/i.test(haystack);
+    if (
+      normalizedField === 'medical' ||
+      normalizedField === 'medical / health'
+    ) {
+      return /\b(biologie|biologique|sant[eé]|paramedical|param[eé]dical|m[eé]decine|medecine|pharmacie|dentaire|dentiste|infirmier|soignant|v[eé]t[eé]rinaire|anesth[eé]sie|radiologie|chirurgie|laboratoire medical|biologie medicale|طب|صحة|صيدلة|بيولوجيا|تمريض)\b/i.test(
+        haystack,
+      );
     }
 
-    if (normalizedField === 'business' || normalizedField === 'business / management') {
-      return /\b(gestion|commerce|finance|marketing|[eé]conomie|economie|comptabilit[eé]|audit|banque|assurance|bourse|trading|management|administration|ressources humaines|logistique|supply chain|تجارة|أعمال|ادارة|تصرف|اقتصاد|محاسبة|مالية)\b/i.test(haystack);
+    if (
+      normalizedField === 'business' ||
+      normalizedField === 'business / management'
+    ) {
+      return /\b(gestion|commerce|finance|marketing|[eé]conomie|economie|comptabilit[eé]|audit|banque|assurance|bourse|trading|management|administration|ressources humaines|logistique|supply chain|تجارة|أعمال|ادارة|تصرف|اقتصاد|محاسبة|مالية)\b/i.test(
+        haystack,
+      );
     }
 
     if (normalizedField === 'art' || normalizedField === 'arts & design') {
-      return /\b(art|design|architecture|architecte|graphisme|graphique|mode|fashion|cin[eé]ma|audiovisuel|th[eé][aâ]tre|theatre|musique|beaux-arts|beaux arts|d[eé]coration|cr[eé]ation|artistique|plastique|فن|تصميم|عمارة|موسيقى|سينما)\b/i.test(haystack);
+      return /\b(art|design|architecture|architecte|graphisme|graphique|mode|fashion|cin[eé]ma|audiovisuel|th[eé][aâ]tre|theatre|musique|beaux-arts|beaux arts|d[eé]coration|cr[eé]ation|artistique|plastique|فن|تصميم|عمارة|موسيقى|سينما)\b/i.test(
+        haystack,
+      );
     }
 
     if (normalizedField === 'engineering') {
-      return /\b(ing[eé]nieur|ingenierie|g[eé]nie|m[eé]canique|[eé]lectrique|[eé]lectronique|civil|industriel|production|maintenance|mines|ponts|g[eé]ophysique|petrole|energie|طاقة|هندسة|مهندس|مدني|ميكانيك|كهرباء)\b/i.test(haystack);
+      return /\b(ing[eé]nieur|ingenierie|g[eé]nie|m[eé]canique|[eé]lectrique|[eé]lectronique|civil|industriel|production|maintenance|mines|ponts|g[eé]ophysique|petrole|energie|طاقة|هندسة|مهندس|مدني|ميكانيك|كهرباء)\b/i.test(
+        haystack,
+      );
     }
 
     if (normalizedField === 'law') {
-      return /\b(droit|law|juridique|justice|avocat|notaire|magistrature|قانون|قضاء|محاماة)\b/i.test(haystack);
+      return /\b(droit|law|juridique|justice|avocat|notaire|magistrature|قانون|قضاء|محاماة)\b/i.test(
+        haystack,
+      );
     }
 
     if (normalizedField === 'science') {
-      return /\b(physique|chimie|math[eé]matiques|science|agronomie|environnement|g[eé]ologie|astronomie|فيزياء|كيمياء|رياضيات|علوم|فلك)\b/i.test(haystack);
+      return /\b(physique|chimie|math[eé]matiques|science|agronomie|environnement|g[eé]ologie|astronomie|فيزياء|كيمياء|رياضيات|علوم|فلك)\b/i.test(
+        haystack,
+      );
     }
 
     if (normalizedField === 'education') {
-      return /\b([eé]ducation|pedagogie|enseignement|professeur|ma[iî]tre|[eé]cole|formation|تربية|تعليم|أستاذ|مدرس)\b/i.test(haystack);
+      return /\b([eé]ducation|pedagogie|enseignement|professeur|ma[iî]tre|[eé]cole|formation|تربية|تعليم|أستاذ|مدرس)\b/i.test(
+        haystack,
+      );
     }
 
     // Default: use field name and keywords
     const fieldName = field.field.toLowerCase();
-    const fieldKeywords = [
-      fieldName,
-      ...(field.keywords || []),
-    ].map(k => k.toLowerCase());
+    const fieldKeywords = [fieldName, ...(field.keywords || [])].map((k) =>
+      k.toLowerCase(),
+    );
 
-    return fieldKeywords.some(keyword => haystack.includes(keyword));
+    return fieldKeywords.some((keyword) => haystack.includes(keyword));
   }
 
   private loadJsonFile<T>(relativePath: string, fallback: T): T {
@@ -1389,11 +1933,23 @@ export class RagService {
     };
   }
 
-  private detectProgramDomain(program: Pick<GuideProgram, 'name' | 'program'>): ProgramDomain {
-    const name = this.normalize([program.name, program.program].filter(Boolean).join(' '));
+  private detectProgramDomain(
+    program: Pick<GuideProgram, 'name' | 'program'>,
+  ): ProgramDomain {
+    const name = this.normalize(
+      [program.name, program.program].filter(Boolean).join(' '),
+    );
     const tokens = this.tokenize(name);
 
-    for (const domain of ['engineering', 'tech', 'health', 'business', 'sport', 'art', 'letters'] as const) {
+    for (const domain of [
+      'engineering',
+      'tech',
+      'health',
+      'business',
+      'sport',
+      'art',
+      'letters',
+    ] as const) {
       if (
         this.programDomainKeywords[domain].some((keyword) =>
           this.matchesProgramDomainKeyword(name, tokens, keyword),
@@ -1406,7 +1962,11 @@ export class RagService {
     return 'other';
   }
 
-  private matchesProgramDomainKeyword(text: string, tokens: string[], keyword: string): boolean {
+  private matchesProgramDomainKeyword(
+    text: string,
+    tokens: string[],
+    keyword: string,
+  ): boolean {
     const normalizedKeyword = this.normalize(keyword);
     if (!normalizedKeyword) return false;
 
@@ -1427,11 +1987,22 @@ export class RagService {
       business: ['business', 'gestion', 'commerce', 'finance', 'marketing'],
       sport: ['sport', 'sports'],
       art: ['art', 'arts', 'design', 'architecture'],
-      engineering: ['engineering', 'ingenierie', 'genie', 'civil', 'mecanique', 'electrique', 'industriel'],
+      engineering: [
+        'engineering',
+        'ingenierie',
+        'genie',
+        'civil',
+        'mecanique',
+        'electrique',
+        'industriel',
+      ],
       letters: [...FIELD_ALIASES.letters],
     };
 
-    for (const [domain, values] of Object.entries(aliases) as [Exclude<ProgramDomain, 'other'>, string[]][]) {
+    for (const [domain, values] of Object.entries(aliases) as [
+      Exclude<ProgramDomain, 'other'>,
+      string[],
+    ][]) {
       if (values.map((value) => this.normalize(value)).includes(normalized)) {
         return domain;
       }
@@ -1440,7 +2011,9 @@ export class RagService {
     return undefined;
   }
 
-  private detectInterestFromMessage(message: string): ProgramDomain | undefined {
+  private detectInterestFromMessage(
+    message: string,
+  ): ProgramDomain | undefined {
     const field = detectField(message);
     if (field) {
       return field === 'it' ? 'tech' : field;
@@ -1448,11 +2021,19 @@ export class RagService {
 
     const msg = message || '';
 
-    if (/\b(informatique|dev|developpement|programmation|it|reseau|reseaux|code)\b/i.test(msg)) {
+    if (
+      /\b(informatique|dev|developpement|programmation|it|reseau|reseaux|code)\b/i.test(
+        msg,
+      )
+    ) {
       return 'tech';
     }
 
-    if (/\b(sante|santé|medecine|medicine|biologie|paramedical|paramédical|pharmacie)\b/i.test(msg)) {
+    if (
+      /\b(sante|santé|medecine|medicine|biologie|paramedical|paramédical|pharmacie)\b/i.test(
+        msg,
+      )
+    ) {
       return 'health';
     }
 
@@ -1467,7 +2048,10 @@ export class RagService {
     return undefined;
   }
 
-  private isCompatibleWithBacDomain(program: RankedProgram, bacType?: string): boolean {
+  private isCompatibleWithBacDomain(
+    program: RankedProgram,
+    bacType?: string,
+  ): boolean {
     const normalizedBac = this.normalizeBac(bacType);
     const domain = (program.domain || 'other') as string;
 
@@ -1487,8 +2071,12 @@ export class RagService {
     return allowedDomains.includes(program.domain ?? 'other');
   }
 
-  private excludeOtherDomainUnlessEmpty(programs: RankedProgram[]): RankedProgram[] {
-    const withoutOther = programs.filter((program) => program.domain !== 'other');
+  private excludeOtherDomainUnlessEmpty(
+    programs: RankedProgram[],
+  ): RankedProgram[] {
+    const withoutOther = programs.filter(
+      (program) => program.domain !== 'other',
+    );
     if (withoutOther.length > 0) {
       return withoutOther;
     }
@@ -1497,10 +2085,37 @@ export class RagService {
   }
 
   /**
+   * 🚫 HARD FILTER: Remove impossible programs (studentScore + 25 < programScore)
+   * unless no programs remain after filtering.
+   */
+  private filterImpossiblePrograms(
+    programs: RankedProgram[],
+    studentScore?: number,
+  ): RankedProgram[] {
+    if (typeof studentScore !== 'number' || !Number.isFinite(studentScore)) {
+      return programs;
+    }
+    const impossibleThreshold = studentScore + 25;
+    const filtered = programs.filter((p) => {
+      const lastScore = p.matchingBac?.lastScore;
+      if (typeof lastScore !== 'number' || !Number.isFinite(lastScore)) {
+        return true; // keep if we can't determine score
+      }
+      // Keep only if program score is within reachable range
+      return lastScore <= impossibleThreshold;
+    });
+    // Only return filtered if we still have programs left
+    return filtered.length > 0 ? filtered : programs;
+  }
+
+  /**
    * STRICT name-based program filter using fields.json program names.
    * Only keeps programs whose program name matches one of the field's allowed program names.
    */
-  private filterProgramsByFieldName(field: FieldData, programs: RankedProgram[]): RankedProgram[] {
+  private filterProgramsByFieldName(
+    field: FieldData,
+    programs: RankedProgram[],
+  ): RankedProgram[] {
     if (!field || !field.keywords) return [];
 
     const aliasKey = this.toAliasFieldKey(field.field);
@@ -1509,24 +2124,28 @@ export class RagService {
     const allowedProgramNames: string[] = [];
     const aliases = this.fieldAliases[field.field] || [];
     if (aliases.length === 0) return [];
-    
-    const normalizedAliases = aliases.map(a => this.normalize(a)).filter(a => a.length > 0);
 
-    return programs.filter(program => {
+    const normalizedAliases = aliases
+      .map((a) => this.normalize(a))
+      .filter((a) => a.length > 0);
+
+    return programs.filter((program) => {
       const haystack = [
-      program.name,
-      program.program,
-      program.institution,
-      program.specialization,
-      program.description,
-      program.formula,
+        program.name,
+        program.program,
+        program.institution,
+        program.specialization,
+        program.description,
+        program.formula,
       ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
-      
+
       const normalizedHaystack = this.normalize(haystack);
-      return normalizedAliases.some(alias => normalizedHaystack.includes(alias));
+      return normalizedAliases.some((alias) =>
+        normalizedHaystack.includes(alias),
+      );
     });
   }
 
@@ -1553,17 +2172,41 @@ export class RagService {
     const aliases: Record<string, string[]> = {
       it: ['it', 'informatique', 'information technology'],
       engineering: ['engineering', 'ingenierie', 'genie'],
-      medicalhealth: ['medical health', 'medical', 'health', 'sante', 'medecine'],
-      businessmanagement: ['business management', 'business', 'management', 'gestion', 'commerce', 'finance'],
+      medicalhealth: [
+        'medical health',
+        'medical',
+        'health',
+        'sante',
+        'medecine',
+      ],
+      businessmanagement: [
+        'business management',
+        'business',
+        'management',
+        'gestion',
+        'commerce',
+        'finance',
+      ],
       sport: ['sport', 'sports', 'kine', 'education physique'],
       artsdesign: ['arts design', 'art', 'design', 'architecture', 'arts'],
       languages: [...FIELD_ALIASES.letters],
-      socialsciences: ['social sciences', 'sciences humaines', ...FIELD_ALIASES.letters],
+      socialsciences: [
+        'social sciences',
+        'sciences humaines',
+        ...FIELD_ALIASES.letters,
+      ],
       media: ['media', 'audiovisuel', 'journalisme', 'communication', 'cinema'],
       economy: ['economy', 'economic', 'economic', 'banque', 'finance'],
       education: ['education', 'enseignement', 'formation', 'pedagogie'],
       law: ['law', 'droit', 'justice', 'juridique'],
-      science: ['science', 'recherche', 'laboratoire', 'chimie', 'physique', 'biologie'],
+      science: [
+        'science',
+        'recherche',
+        'laboratoire',
+        'chimie',
+        'physique',
+        'biologie',
+      ],
     };
 
     const targetVariants = Object.values(aliases).find((items) =>
@@ -1575,7 +2218,10 @@ export class RagService {
       const fieldAliases = this.getFieldTerms(field);
       return targetVariants.some((variant) => {
         const normalizedVariant = this.normalize(variant);
-        return normalizedField === normalizedVariant || fieldAliases.includes(normalizedVariant);
+        return (
+          normalizedField === normalizedVariant ||
+          fieldAliases.includes(normalizedVariant)
+        );
       });
     });
 
@@ -1591,16 +2237,32 @@ export class RagService {
     const normalizedMessage = this.normalize(message);
     if (!normalizedMessage) return undefined;
 
-    if (/\b(informatique|info|it|developpement|programmation|reseau|code)\b/i.test(normalizedMessage)) {
+    if (
+      /\b(informatique|info|it|developpement|programmation|reseau|code)\b/i.test(
+        normalizedMessage,
+      )
+    ) {
       return 'IT';
     }
-    if (/\b(medecine|medical|sante|pharmacie|biologie|paramedical)\b/i.test(normalizedMessage)) {
+    if (
+      /\b(medecine|medical|sante|pharmacie|biologie|paramedical)\b/i.test(
+        normalizedMessage,
+      )
+    ) {
       return 'Medical / Health';
     }
-    if (/\b(sport|kine|kinesitherapie|eps|education physique|fitness)\b/i.test(normalizedMessage)) {
+    if (
+      /\b(sport|kine|kinesitherapie|eps|education physique|fitness)\b/i.test(
+        normalizedMessage,
+      )
+    ) {
       return 'Sport';
     }
-    if (/\b(gestion|commerce|business|finance|marketing)\b/i.test(normalizedMessage)) {
+    if (
+      /\b(gestion|commerce|business|finance|marketing)\b/i.test(
+        normalizedMessage,
+      )
+    ) {
       return 'Business / Management';
     }
 
@@ -1619,17 +2281,27 @@ export class RagService {
     };
 
     if (field === 'sport') {
-      return this.fieldsData.find((f) => f.field === map[field]) || this.getSportVirtualField();
+      return (
+        this.fieldsData.find((f) => f.field === map[field]) ||
+        this.getSportVirtualField()
+      );
     }
 
     if (field === 'letters') {
-      return this.fieldsData.find((f) => f.field === map[field]) || this.getLettersVirtualField();
+      return (
+        this.fieldsData.find((f) => f.field === map[field]) ||
+        this.getLettersVirtualField()
+      );
     }
 
     return this.fieldsData.find((f) => f.field === map[field]);
   }
 
-  private detectField(message: string, bacType?: string, interest?: string): FieldData | undefined {
+  private detectField(
+    message: string,
+    bacType?: string,
+    interest?: string,
+  ): FieldData | undefined {
     const aliasField =
       detectField(`${interest || ''} ${message || ''}`) ||
       this.toAliasFieldKey(this.mapInterestToField(interest));
@@ -1637,20 +2309,26 @@ export class RagService {
     if (aliasField) {
       const resolvedAliasField = this.resolveFieldByAliasKey(aliasField);
       if (resolvedAliasField) {
-        this.logger.log(`Domain detected by aliases: ${resolvedAliasField.field}`);
+        this.logger.log(
+          `Domain detected by aliases: ${resolvedAliasField.field}`,
+        );
         return resolvedAliasField;
       }
     }
 
     // Priority 1: user interest (ALWAYS overrides everything)
-    const interestField = this.resolveFieldByName(this.mapInterestToField(interest));
+    const interestField = this.resolveFieldByName(
+      this.mapInterestToField(interest),
+    );
     if (interestField) {
       this.logger.log(`Domain detected by INTEREST: ${interestField.field}`);
       return interestField;
     }
 
     // Priority 2: explicit message (only if no interest)
-    const explicitField = this.resolveFieldByName(this.detectExplicitFieldFromMessage(message));
+    const explicitField = this.resolveFieldByName(
+      this.detectExplicitFieldFromMessage(message),
+    );
     if (explicitField) return explicitField;
 
     // Priority 3: bacType fallback (only if no interest and no explicit message)
@@ -1662,7 +2340,7 @@ export class RagService {
           ? 'Engineering'
           : normalizedBac === 'sport'
             ? 'Sport'
-          : undefined;
+            : undefined;
     const resolvedBacField = this.resolveFieldByName(bacFallbackField);
     if (resolvedBacField) return resolvedBacField;
 
@@ -1679,7 +2357,10 @@ export class RagService {
       const extractedMatch = extractedFields.some((value) =>
         aliases.includes(this.normalize(value)),
       );
-      const textMatches = this.getMatchedTerms(normalizedMessage, aliases).length;
+      const textMatches = this.getMatchedTerms(
+        normalizedMessage,
+        aliases,
+      ).length;
 
       // demand and unemployment scoring
       const demandScore = this.scoreDemand(field.demand_in_tunisia);
@@ -1688,7 +2369,12 @@ export class RagService {
       // bac match boost
       const bacMatch = bacPreferredFields.includes(field.field) ? 6 : 0;
 
-      const score = textMatches + (extractedMatch ? 3 : 0) + demandScore + unemploymentScore + bacMatch;
+      const score =
+        textMatches +
+        (extractedMatch ? 3 : 0) +
+        demandScore +
+        unemploymentScore +
+        bacMatch;
 
       return {
         field,
@@ -1707,19 +2393,36 @@ export class RagService {
   private scoreDemand(demand?: string): number {
     if (!demand) return 0;
     const d = this.normalize(demand);
-    if (d.includes('very') || d.includes('very high') || d.includes('très') || d.includes('elev')) return 8;
-    if (d.includes('high') || d.includes('haut') || d.includes('eleve')) return 6;
-    if (d.includes('moderate') || d.includes('moyen') || d.includes('moder')) return 3;
-    if (d.includes('low') || d.includes('faible') || d.includes('weak')) return 0;
+    if (
+      d.includes('very') ||
+      d.includes('very high') ||
+      d.includes('très') ||
+      d.includes('elev')
+    )
+      return 8;
+    if (d.includes('high') || d.includes('haut') || d.includes('eleve'))
+      return 6;
+    if (d.includes('moderate') || d.includes('moyen') || d.includes('moder'))
+      return 3;
+    if (d.includes('low') || d.includes('faible') || d.includes('weak'))
+      return 0;
     return 0;
   }
 
   private scoreUnemployment(unemployment?: string): number {
     if (!unemployment) return 0;
     const u = this.normalize(unemployment);
-    if (u.includes('low') || u.includes('faible') || u.includes('bas')) return 6;
-    if (u.includes('moderate') || u.includes('moyen') || u.includes('mod')) return 3;
-    if (u.includes('high') || u.includes('haut') || u.includes('elev') || u.includes('eleve')) return 0;
+    if (u.includes('low') || u.includes('faible') || u.includes('bas'))
+      return 6;
+    if (u.includes('moderate') || u.includes('moyen') || u.includes('mod'))
+      return 3;
+    if (
+      u.includes('high') ||
+      u.includes('haut') ||
+      u.includes('elev') ||
+      u.includes('eleve')
+    )
+      return 0;
     return 0;
   }
 
@@ -1731,7 +2434,7 @@ export class RagService {
     if (!normalized) return null;
 
     for (const [subKey, keywords] of Object.entries(SUB_DOMAIN_KEYWORDS)) {
-      if (keywords.some(kw => normalized.includes(kw))) {
+      if (keywords.some((kw) => normalized.includes(kw))) {
         return subKey;
       }
     }
@@ -1741,7 +2444,10 @@ export class RagService {
   /**
    * Filter jobs by sub-domain keyword from the message
    */
-  private filterJobsByMessageKeyword(jobs: JobData[], message: string): JobData[] {
+  private filterJobsByMessageKeyword(
+    jobs: JobData[],
+    message: string,
+  ): JobData[] {
     const normalized = this.normalize(message);
     if (!normalized) return jobs;
 
@@ -1749,20 +2455,24 @@ export class RagService {
     const subDomain = this.detectSubDomain(message);
     if (subDomain) {
       const keywords = SUB_DOMAIN_KEYWORDS[subDomain] || [];
-      const filtered = jobs.filter(job => {
-        const haystack = this.normalize(job.title + ' ' + job.description + ' ' + job.skills.join(' '));
-        return keywords.some(kw => haystack.includes(kw));
+      const filtered = jobs.filter((job) => {
+        const haystack = this.normalize(
+          job.title + ' ' + job.description + ' ' + job.skills.join(' '),
+        );
+        return keywords.some((kw) => haystack.includes(kw));
       });
       if (filtered.length > 0) return filtered;
     }
 
     // General keyword matching: filter jobs by relevant keywords in message
     // Extract meaningful words from message (e.g., "cyber", "frontend", "web", "data")
-    const messageWords = normalized.split(/\s+/).filter(w => w.length > 2);
+    const messageWords = normalized.split(/\s+/).filter((w) => w.length > 2);
     if (messageWords.length > 0) {
-      const filtered = jobs.filter(job => {
-        const haystack = this.normalize(job.title + ' ' + job.description + ' ' + job.skills.join(' '));
-        return messageWords.some(word => haystack.includes(word));
+      const filtered = jobs.filter((job) => {
+        const haystack = this.normalize(
+          job.title + ' ' + job.description + ' ' + job.skills.join(' '),
+        );
+        return messageWords.some((word) => haystack.includes(word));
       });
       if (filtered.length > 0) return filtered;
     }
@@ -1772,43 +2482,51 @@ export class RagService {
 
   private findJobs(field: FieldData | undefined, message: string): JobData[] {
     const normalizedFieldName = this.normalize(field?.field);
-    
+
     // Try to find jobs by matching field name against jobs.json field keys
     const domainJobs = this.jobsData.find(
       (jd) => this.normalize(jd.field) === normalizedFieldName,
     );
-    
+
     if (domainJobs) {
       const jobs = domainJobs.jobs.slice(0, 3);
       return this.filterJobsByMessageKeyword(jobs, message);
     }
-    
+
     // Fallback: for fields like Sport that are in jobs.json with a different key
     if (normalizedFieldName === 'sport') {
-        return [
-          {
-            title: 'Coach sportif',
-            description: 'Encadre et forme des athlètes et équipes',
-            skills: ['Planification entraînement', 'Préparation physique', 'Communication'],
-            demand: 'Medium',
-            unemployment_rate: 9,
-          },
-          {
-            title: 'Préparateur physique',
-            description: 'Optimise la condition physique des sportifs',
-            skills: ['Condition physique', 'Analyse performance', 'Programmation entraînement'],
-            demand: 'Medium',
-            unemployment_rate: 8,
-          },
-          {
-            title: 'Kinésithérapeute',
-            description: 'Rééducation et soins des patients en kinésithérapie',
-            skills: ['Rééducation', 'Anatomie', 'Suivi patient'],
-            demand: 'High',
-            unemployment_rate: 6,
-          },
-        ];
-      }
+      return [
+        {
+          title: 'Coach sportif',
+          description: 'Encadre et forme des athlètes et équipes',
+          skills: [
+            'Planification entraînement',
+            'Préparation physique',
+            'Communication',
+          ],
+          demand: 'Medium',
+          unemployment_rate: 9,
+        },
+        {
+          title: 'Préparateur physique',
+          description: 'Optimise la condition physique des sportifs',
+          skills: [
+            'Condition physique',
+            'Analyse performance',
+            'Programmation entraînement',
+          ],
+          demand: 'Medium',
+          unemployment_rate: 8,
+        },
+        {
+          title: 'Kinésithérapeute',
+          description: 'Rééducation et soins des patients en kinésithérapie',
+          skills: ['Rééducation', 'Anatomie', 'Suivi patient'],
+          demand: 'High',
+          unemployment_rate: 6,
+        },
+      ];
+    }
 
     // Fallback to full scoring across all jobs if no direct match found
     const fieldTerms = this.getFieldTerms(field);
@@ -1819,7 +2537,9 @@ export class RagService {
       .flatMap((domain) =>
         domain.jobs.map((job) => {
           const text = this.normalize(
-            [domain.field, ...domain.keywords, job.title, ...job.skills].join(' '),
+            [domain.field, ...domain.keywords, job.title, ...job.skills].join(
+              ' ',
+            ),
           );
           if (
             isSportField &&
@@ -1911,17 +2631,21 @@ export class RagService {
     return this.bacDatasetMapping[canonicalKey];
   }
 
-  private matchesBacType(programBacType?: string, inputBacType?: string): boolean {
+  private matchesBacType(
+    programBacType?: string,
+    inputBacType?: string,
+  ): boolean {
     if (!programBacType || !inputBacType) return false;
 
     const normalizedInput = this.normalizeBac(inputBacType);
     const aliases = this.getBacAliases(normalizedInput);
     const normalizedProgramType = this.normalize(programBacType);
 
-    return aliases.some((alias) =>
-      normalizedProgramType === alias ||
-      normalizedProgramType.includes(alias) ||
-      alias.includes(normalizedProgramType),
+    return aliases.some(
+      (alias) =>
+        normalizedProgramType === alias ||
+        normalizedProgramType.includes(alias) ||
+        alias.includes(normalizedProgramType),
     );
   }
 
@@ -1958,8 +2682,11 @@ export class RagService {
 
   private normalize(value?: string): string {
     return (value || '')
+      .normalize('NFKC')
       .normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, '')
+      .replace(/œ/g, 'oe')
+      .replace(/æ/g, 'ae')
       .replace(/[\u0640\u064B-\u065F\u0670]/g, '')
       .replace(/[’'`´]/g, ' ')
       .replace(/[^a-zA-Z0-9\u0600-\u06FF\s]+/g, ' ')
@@ -1971,7 +2698,13 @@ export class RagService {
   private getSportVirtualField(): FieldData {
     return {
       field: 'Sport',
-      keywords: ['sport', 'éducation physique', 'kinésithérapie', 'préparation physique', 'coaching'],
+      keywords: [
+        'sport',
+        'éducation physique',
+        'kinésithérapie',
+        'préparation physique',
+        'coaching',
+      ],
       demand_in_tunisia: 'Moderate',
       future_outlook: 'Positive',
       unemployment_risk: 'Moderate',
@@ -2034,9 +2767,12 @@ export class RagService {
     if (direct[normalized]) return direct[normalized];
     if (direct[compact]) return direct[compact];
     if (normalized.includes('engineering')) return 'engineering';
-    if (normalized.includes('medical') || normalized.includes('health')) return 'health';
-    if (normalized.includes('business') || normalized.includes('management')) return 'business';
-    if (normalized.includes('arts') || normalized.includes('design')) return 'art';
+    if (normalized.includes('medical') || normalized.includes('health'))
+      return 'health';
+    if (normalized.includes('business') || normalized.includes('management'))
+      return 'business';
+    if (normalized.includes('arts') || normalized.includes('design'))
+      return 'art';
     if (
       normalized.includes('language') ||
       normalized.includes('langue') ||
@@ -2047,7 +2783,8 @@ export class RagService {
       normalized.includes('social sciences') ||
       normalized.includes('droit') ||
       normalized.includes('law')
-    ) return 'letters';
+    )
+      return 'letters';
 
     return detectField(fieldName || '');
   }
@@ -2056,7 +2793,9 @@ export class RagService {
     if (!field) return [];
 
     const aliasKey = this.toAliasFieldKey(field.field);
-    const aliases = aliasKey ? FIELD_ALIASES[aliasKey] : this.fieldAliases[field.field] || [];
+    const aliases = aliasKey
+      ? FIELD_ALIASES[aliasKey]
+      : this.fieldAliases[field.field] || [];
 
     return [
       field.field,
@@ -2109,13 +2848,20 @@ export class RagService {
     const jobs = this.retrieveJobsStrict(detectedField, query.message || '');
 
     // STEP 4: Rank and Classify Programs
-    const classifiedPrograms = this.classifyProgramsByDifficulty(programs, query.score);
+    const classifiedPrograms = this.classifyProgramsByDifficulty(
+      programs,
+      query.score,
+    );
 
     // STEP 5: Select Best/Backup/Risky
     const decisionOptions = this.selectDecisionOptions(classifiedPrograms);
 
     // Generate Dynamic Follow-Up
-    const followUp = this.generateFollowUpQuestion(detectedField, memory, query.message || '');
+    const followUp = this.generateFollowUpQuestion(
+      detectedField,
+      memory,
+      query.message || '',
+    );
 
     this.logger.log(
       `[DECISION ENGINE] Output: ${classifiedPrograms.length} programs, ${jobs.length} jobs, followUp=${followUp.text}`,
@@ -2145,7 +2891,9 @@ export class RagService {
     // Priority 1: Explicit message detection
     const explicitField = this.detectFieldFromMessageDetailed(message);
     if (explicitField) {
-      this.logger.log(`[STEP 1] Field from explicit message: ${explicitField.field}`);
+      this.logger.log(
+        `[STEP 1] Field from explicit message: ${explicitField.field}`,
+      );
       return explicitField;
     }
 
@@ -2162,7 +2910,9 @@ export class RagService {
     if (queryInterest) {
       const queryField = this.findFieldByName(queryInterest);
       if (queryField) {
-        this.logger.log(`[STEP 1] Field from query interest: ${queryField.field}`);
+        this.logger.log(
+          `[STEP 1] Field from query interest: ${queryField.field}`,
+        );
         return queryField;
       }
     }
@@ -2183,10 +2933,26 @@ export class RagService {
   private containsFieldOverride(message: string): boolean {
     // Check if message contains explicit field keywords that override memory
     const fieldKeywords = [
-      'informatique', 'sport', 'medecine', 'sante', 'art', 'design',
-      'gestion', 'commerce', 'droit', 'science', 'ingenieur', 'lettres',
-      'langues', 'litterature', 'anglais', 'francais', 'traduction',
-      'journalisme', 'communication', 'sciences humaines',
+      'informatique',
+      'sport',
+      'medecine',
+      'sante',
+      'art',
+      'design',
+      'gestion',
+      'commerce',
+      'droit',
+      'science',
+      'ingenieur',
+      'lettres',
+      'langues',
+      'litterature',
+      'anglais',
+      'francais',
+      'traduction',
+      'journalisme',
+      'communication',
+      'sciences humaines',
     ];
     const normalized = this.normalize(message);
     return fieldKeywords.some((kw) => normalized.includes(kw));
@@ -2198,7 +2964,10 @@ export class RagService {
     // Check each field's keywords
     for (const field of this.fieldsData) {
       const fieldName = this.normalize(field.field);
-      const keywords = [fieldName, ...(field.keywords || []).map((k) => this.normalize(k))];
+      const keywords = [
+        fieldName,
+        ...(field.keywords || []).map((k) => this.normalize(k)),
+      ];
 
       if (keywords.some((kw) => normalized.includes(kw))) {
         return field;
@@ -2221,7 +2990,9 @@ export class RagService {
     const normalized = this.normalize(interest);
 
     // Direct match
-    const direct = this.fieldsData.find((f) => this.normalize(f.field) === normalized);
+    const direct = this.fieldsData.find(
+      (f) => this.normalize(f.field) === normalized,
+    );
     if (direct) return direct;
 
     // Alias match
@@ -2291,11 +3062,16 @@ export class RagService {
       });
     }
 
-    this.logger.log(`[STEP 2] Retrieved ${candidates.length} programs for field=${field.field}`);
+    this.logger.log(
+      `[STEP 2] Retrieved ${candidates.length} programs for field=${field.field}`,
+    );
     return candidates;
   }
 
-  private matchesFieldStrict(program: RankedProgram, field: FieldData): boolean {
+  private matchesFieldStrict(
+    program: RankedProgram,
+    field: FieldData,
+  ): boolean {
     const aliasKey = this.toAliasFieldKey(field.field);
     if (aliasKey) {
       return findProgramsByField(aliasKey, [program]).length > 0;
@@ -2317,31 +3093,43 @@ export class RagService {
 
     // STRICT matching rules by field (normalized field names)
     const fieldRules: Record<string, RegExp> = {
-      sport: /\b(sport|activite physique|kine|kinesitherapie|entrainement|eps|education physique|nutrition sportive|performance sportive|fitness|coaching|رياضة|تربية بدنية)\b/i,
+      sport:
+        /\b(sport|activite physique|kine|kinesitherapie|entrainement|eps|education physique|nutrition sportive|performance sportive|fitness|coaching|رياضة|تربية بدنية)\b/i,
       it: /\b(informatique|developpement|programmation|reseau|systeme|logiciel|software|cyber|data|ia|ai|intelligence artificielle|web|mobile|cloud|devops|برمجة|اعلامية|شبكات)\b/i,
-      medical: /\b(biologie|sante|paramedical|medecine|pharmacie|dentaire|infirmier|soignant|veterinaire|anesthesie|radiologie|chirurgie|laboratoire medical|طب|صحة|صيدلة|تمريض)\b/i,
-      business: /\b(gestion|commerce|finance|marketing|economie|comptabilite|audit|banque|assurance|management|administration|ressources humaines|logistique|أعمال|إدارة|محاسبة|تجارة)\b/i,
+      medical:
+        /\b(biologie|sante|paramedical|medecine|pharmacie|dentaire|infirmier|soignant|veterinaire|anesthesie|radiologie|chirurgie|laboratoire medical|طب|صحة|صيدلة|تمريض)\b/i,
+      business:
+        /\b(gestion|commerce|finance|marketing|economie|comptabilite|audit|banque|assurance|management|administration|ressources humaines|logistique|أعمال|إدارة|محاسبة|تجارة)\b/i,
       art: /\b(art|design|architecture|architecte|graphisme|graphique|mode|fashion|cinema|audiovisuel|theatre|musique|beaux-arts|decoration|creation|artistique|فن|تصميم|عمارة|سينما)\b/i,
-      engineering: /\b(ingenieur|ingenierie|genie|mecanique|electrique|electronique|civil|industriel|production|maintenance|mines|ponts|geophysique|petrole|energie|هندسة|مهندس|مدني|ميكانيك)\b/i,
+      engineering:
+        /\b(ingenieur|ingenierie|genie|mecanique|electrique|electronique|civil|industriel|production|maintenance|mines|ponts|geophysique|petrole|energie|هندسة|مهندس|مدني|ميكانيك)\b/i,
       law: /\b(droit|juridique|justice|avocat|notaire|magistrature|juge|tribunal|قانون|عدالة|محامي|قضاء)\b/i,
-      science: /\b(physique|chimie|mathematiques|science|agronomie|environnement|geologie|astronomie|recherche|laboratoire|علوم|كيمياء|فيزياء|رياضيات)\b/i,
-      education: /\b(education|pedagogie|enseignement|professeur|maitre|ecole|formation|تربية|تعليم|أستاذ|مدرس|تكوين)\b/i,
-      media: /\b(media|audiovisuel|journalisme|communication|cinema|television|radio|presse|publicite|redaction|إعلام|صحافة|اتصال|إذاعة|تلفزة)\b/i,
-      economy: /\b(economie|economique|banque|finance|investissement|marche|bourse|macro|micro|اقتصاد|مالية|بنوك|استثمار|أسواق)\b/i,
+      science:
+        /\b(physique|chimie|mathematiques|science|agronomie|environnement|geologie|astronomie|recherche|laboratoire|علوم|كيمياء|فيزياء|رياضيات)\b/i,
+      education:
+        /\b(education|pedagogie|enseignement|professeur|maitre|ecole|formation|تربية|تعليم|أستاذ|مدرس|تكوين)\b/i,
+      media:
+        /\b(media|audiovisuel|journalisme|communication|cinema|television|radio|presse|publicite|redaction|إعلام|صحافة|اتصال|إذاعة|تلفزة)\b/i,
+      economy:
+        /\b(economie|economique|banque|finance|investissement|marche|bourse|macro|micro|اقتصاد|مالية|بنوك|استثمار|أسواق)\b/i,
     };
 
     for (const [fieldKey, regex] of Object.entries(fieldRules)) {
       if (normalizedField.includes(fieldKey)) {
         const matches = regex.test(haystack);
         if (!matches) {
-          this.logger.debug(`[STEP 2] REJECTED: ${program.program} - no ${fieldKey} keywords`);
+          this.logger.debug(
+            `[STEP 2] REJECTED: ${program.program} - no ${fieldKey} keywords`,
+          );
         }
         return matches;
       }
     }
 
     // Default: use field keywords
-    const fieldKeywords = [normalizedField, ...(field.keywords || [])].map((k) => this.normalize(k));
+    const fieldKeywords = [normalizedField, ...(field.keywords || [])].map(
+      (k) => this.normalize(k),
+    );
     return fieldKeywords.some((kw) => haystack.includes(kw));
   }
 
@@ -2350,7 +3138,10 @@ export class RagService {
    * ONLY retrieves jobs from jobs.json
    * NEVER generates fake jobs
    */
-  private retrieveJobsStrict(field: FieldData | null, _message: string): JobData[] {
+  private retrieveJobsStrict(
+    field: FieldData | null,
+    _message: string,
+  ): JobData[] {
     if (!field) {
       this.logger.warn('[STEP 3] No field provided, returning empty jobs');
       return [];
@@ -2362,14 +3153,18 @@ export class RagService {
     );
 
     if (!fieldJobs) {
-      this.logger.warn(`[STEP 3] No jobs found for field=${field.field} in jobs.json`);
+      this.logger.warn(
+        `[STEP 3] No jobs found for field=${field.field} in jobs.json`,
+      );
       return [];
     }
 
     // Return max 3 jobs with real data
     const jobs = fieldJobs.jobs.slice(0, 3);
 
-    this.logger.log(`[STEP 3] Retrieved ${jobs.length} jobs from jobs.json for field=${field.field}`);
+    this.logger.log(
+      `[STEP 3] Retrieved ${jobs.length} jobs from jobs.json for field=${field.field}`,
+    );
     return jobs;
   }
 
@@ -2410,7 +3205,9 @@ export class RagService {
   /**
    * STEP 5: Select Best / Backup / Risky Options
    */
-  private selectDecisionOptions(programs: ClassifiedProgram[]): DecisionOptions | null {
+  private selectDecisionOptions(
+    programs: ClassifiedProgram[],
+  ): DecisionOptions | null {
     if (programs.length === 0) {
       this.logger.warn('[STEP 5] No programs to select from');
       return null;
@@ -2479,38 +3276,24 @@ export class RagService {
         'civil ولا industriel؟',
         'production ولا maintenance؟',
       ],
-      design: [
-        'graphisme ولا architecture؟',
-        'mode ولا design intérieur؟',
-      ],
-      media: [
-        'journalisme ولا audiovisuel؟',
-        'radio ولا télévision؟',
-      ],
-      science: [
-        'chimie ولا biologie؟',
-        'recherche pure ولا appliquée؟',
-      ],
-      law: [
-        'avocat ولا notaire؟',
-        'droit privé ولا public؟',
-      ],
-      economy: [
-        'banque ولا finance؟',
-        'macréconomie ولا microéconomie؟',
-      ],
-      education: [
-        'enseignement ولا formation؟',
-        'primaire ولا secondaire؟',
-      ],
+      design: ['graphisme ولا architecture؟', 'mode ولا design intérieur؟'],
+      media: ['journalisme ولا audiovisuel؟', 'radio ولا télévision؟'],
+      science: ['chimie ولا biologie؟', 'recherche pure ولا appliquée؟'],
+      law: ['avocat ولا notaire؟', 'droit privé ولا public؟'],
+      economy: ['banque ولا finance؟', 'macréconomie ولا microéconomie؟'],
+      education: ['enseignement ولا formation؟', 'primaire ولا secondaire؟'],
     };
 
-    const chain =
-      Object.entries(followUpChains).find(([key]) => normalizedField.includes(key))?.[1] ||
-      ['تحب نشوفلك الاختيارات من الأفضل للبديل؟', 'نبدأ نقارن بين البرامج ونختار؟'];
+    const chain = Object.entries(followUpChains).find(([key]) =>
+      normalizedField.includes(key),
+    )?.[1] || [
+      'تحب نشوفلك الاختيارات من الأفضل للبديل؟',
+      'نبدأ نقارن بين البرامج ونختار؟',
+    ];
 
     const askedSet = new Set(memory.askedQuestions);
-    const newQuestion = chain.find((q) => !askedSet.has(q)) || chain[chain.length - 1];
+    const newQuestion =
+      chain.find((q) => !askedSet.has(q)) || chain[chain.length - 1];
 
     return {
       text: `👉 ${newQuestion}`,

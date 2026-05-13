@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bell, Bot, LogOut, Settings, User } from 'lucide-react';
@@ -42,12 +43,21 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 z-50 w-full border-b border-slate-200/80 bg-white/85 shadow-lg backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8">
-        <div className="flex items-center">
+        <div className="flex shrink-0 items-center">
           <Link
-            href="/dashboard"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-xl font-bold text-transparent"
+            href="/"
+            aria-label="ORIA home"
+            className="flex items-center"
           >
-            Orientation IA
+            <Image
+              src="/images/oria-logo.png"
+              alt="ORIA Logo"
+              width={180}
+              height={60}
+              sizes="(max-width: 768px) 128px, 180px"
+              className="h-[52px] w-auto object-contain transition-none"
+              priority
+            />
           </Link>
         </div>
 

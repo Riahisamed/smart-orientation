@@ -16,7 +16,7 @@ export interface OllamaConfig {
 export class OllamaConfigService {
   private config: OllamaConfig = {
     url: process.env.OLLAMA_URL || '',
-    model: process.env.OLLAMA_MODEL || 'gemma4:e2b',
+    model: process.env.OLLAMA_MODEL || 'gemma2:2b',
     // Balanced temperature for varied but accurate responses (avoid repetition while maintaining quality)
     temperature: parseFloat(process.env.OLLAMA_TEMPERATURE || '0.5'),
     // Limit response length to reduce irrelevant content

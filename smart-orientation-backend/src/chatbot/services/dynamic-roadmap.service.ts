@@ -60,12 +60,15 @@ export class DynamicRoadmapService {
       const parsed = JSON.parse(fileContent);
       return { domains: parsed.domains || [] };
     } catch (error) {
-      this.logger.error('Failed to load domains.json', error as any);
+      this.logger.error('Failed to load domains.json', error);
       return { domains: [] };
     }
   }
 
-  public shouldShowRoadmapSelector(message: string, detectedDomain?: string): boolean {
+  public shouldShowRoadmapSelector(
+    message: string,
+    detectedDomain?: string,
+  ): boolean {
     const roadmapKeywords = [
       // French
       'roadmap',
@@ -122,18 +125,18 @@ export class DynamicRoadmapService {
 
     const normalizedMessage = message.toLowerCase();
     const hasRoadmapKeyword = roadmapKeywords.some((keyword) =>
-      normalizedMessage.includes(keyword.toLowerCase())
+      normalizedMessage.includes(keyword.toLowerCase()),
     );
 
-    const isAskingForGuidance = !detectedDomain && (
-      normalizedMessage.includes('شنو') ||
-      normalizedMessage.includes('كيف') ||
-      normalizedMessage.includes('منين') ||
-      normalizedMessage.includes('comment') ||
-      normalizedMessage.includes('quoi') ||
-      normalizedMessage.includes('what') ||
-      normalizedMessage.includes('how')
-    );
+    const isAskingForGuidance =
+      !detectedDomain &&
+      (normalizedMessage.includes('شنو') ||
+        normalizedMessage.includes('كيف') ||
+        normalizedMessage.includes('منين') ||
+        normalizedMessage.includes('comment') ||
+        normalizedMessage.includes('quoi') ||
+        normalizedMessage.includes('what') ||
+        normalizedMessage.includes('how'));
 
     return (hasRoadmapKeyword || isAskingForGuidance) && !detectedDomain;
   }
@@ -142,14 +145,17 @@ export class DynamicRoadmapService {
     message: string,
     bacType?: string,
     _studentScore?: number,
-    detectedInterest?: string
+    detectedInterest?: string,
   ): RoadmapSelectorConfig {
     const language = this.detectLanguage(message);
     const bac = this.normalizeBacType(bacType);
     const suggestions = this.generateDomainSuggestions(bac, detectedInterest);
 
     return {
-      title: language === 'ar' ? 'اختر مجالك المخصص' : 'Choisissez votre domaine personnalisé',
+      title:
+        language === 'ar'
+          ? 'اختر مجالك المخصص'
+          : 'Choisissez votre domaine personnalisé',
       subtitle:
         language === 'ar'
           ? 'بناءً على Bac type و اهتماماتك'
@@ -163,16 +169,16 @@ export class DynamicRoadmapService {
 
   public generateSpecificRoadmap(
     domainField: string,
-    level: 'beginner' | 'intermediate' | 'advanced' = 'beginner'
+    level: 'beginner' | 'intermediate' | 'advanced' = 'beginner',
   ): SpecificRoadmap {
     // Try exact field match first
     let domain = this.domainMatcher.getDomainByField(domainField);
-    
+
     // If exact match fails, try fuzzy matching
     if (!domain) {
       domain = this.domainMatcher.findDomainFuzzy(domainField);
     }
-    
+
     if (!domain) {
       throw new Error(`Domain ${domainField} not found`);
     }
@@ -204,14 +210,16 @@ export class DynamicRoadmapService {
     };
     const result = mapping[n];
     if (bacType && !result) {
-      this.logger.warn(`[RoadmapFilter] Unknown BAC type: "${bacType}" (normalized: "${n}")`);
+      this.logger.warn(
+        `[RoadmapFilter] Unknown BAC type: "${bacType}" (normalized: "${n}")`,
+      );
     }
     return result;
   }
 
   private generateDomainSuggestions(
     bacType?: BacType,
-    detectedInterest?: string
+    detectedInterest?: string,
   ): PersonalizedDomainSuggestion[] {
     const allDomains = this.domainsData.domains || [];
     const suggestions: PersonalizedDomainSuggestion[] = [];
@@ -225,7 +233,7 @@ export class DynamicRoadmapService {
       const relevanceScore = this.calculateBacDomainScore(
         domain,
         bacType,
-        interestMatch?.domain.field
+        interestMatch?.domain.field,
       );
 
       if (relevanceScore <= 0) {
@@ -238,7 +246,7 @@ export class DynamicRoadmapService {
 
     // Log filtering results
     this.logger.debug(
-      `[RoadmapFilter] BAC=${bacType}: ${suggestions.length}/${allDomains.length} domains allowed (${rejectedCount} rejected)`
+      `[RoadmapFilter] BAC=${bacType}: ${suggestions.length}/${allDomains.length} domains allowed (${rejectedCount} rejected)`,
     );
 
     return suggestions.sort((a, b) => b.relevanceScore - a.relevanceScore);
@@ -247,7 +255,7 @@ export class DynamicRoadmapService {
   private calculateBacDomainScore(
     domain: Domain,
     bacType?: BacType,
-    interestDomainField?: string
+    interestDomainField?: string,
   ): number {
     const bacRule = bacType ? BAC_DOMAINS[bacType] : undefined;
     if (!bacRule) return domain.field ? 0.2 : 0;
@@ -255,7 +263,7 @@ export class DynamicRoadmapService {
     // STRICT WHITELIST CHECK: Domain MUST be in the allowed list for this BAC type
     // This ensures students ONLY see compatible domains
     const isAllowed = bacRule.allowedDomains.includes(domain.field);
-    
+
     if (!isAllowed) {
       return 0; // Domain not compatible with this BAC type
     }
@@ -278,7 +286,10 @@ export class DynamicRoadmapService {
     return Math.min(score, 1);
   }
 
-  private createDomainSuggestion(domain: Domain, relevanceScore: number): PersonalizedDomainSuggestion {
+  private createDomainSuggestion(
+    domain: Domain,
+    relevanceScore: number,
+  ): PersonalizedDomainSuggestion {
     return {
       domain: domain.field,
       field: domain.field,
@@ -294,7 +305,8 @@ export class DynamicRoadmapService {
   }
 
   private generateSuggestionReason(score: number): string {
-    if (score > 0.8) return 'Excellent match! High demand and great future prospects';
+    if (score > 0.8)
+      return 'Excellent match! High demand and great future prospects';
     if (score > 0.6) return 'Good compatibility with your profile';
     if (score > 0.4) return 'Potential option, consider your interests';
     return 'Alternative path if interested';
@@ -304,7 +316,7 @@ export class DynamicRoadmapService {
     const icons: Record<string, string> = {
       IT: '💻',
       'AI & Machine Learning': '🤖',
-      'Cybersecurity': '🛡️',
+      Cybersecurity: '🛡️',
       'Frontend Development': '🎨',
       'Backend Development': '🧠',
       'Business / Management': '💼',
@@ -320,7 +332,7 @@ export class DynamicRoadmapService {
   private getDomainColor(domainField: string): string {
     const colors: Record<string, string> = {
       IT: '#3B82F6',
-      'Cybersecurity': '#3B82F6',
+      Cybersecurity: '#3B82F6',
       'Frontend Development': '#F97316',
       'Backend Development': '#10B981',
       'AI & Machine Learning': '#8B5CF6',
@@ -337,16 +349,25 @@ export class DynamicRoadmapService {
   private getDomainDescription(domainField: string): string {
     const descriptions: Record<string, string> = {
       IT: 'Software development, cybersecurity, data science',
-      'AI & Machine Learning': 'Build intelligent systems with ML and deep learning.',
-      'Cybersecurity': 'Protecting systems, detecting threats, and securing networks.',
-      'Frontend Development': 'Build modern user interfaces and web experiences.',
-      'Backend Development': 'Create APIs, databases, and scalable server-side systems.',
-      'Business / Management': 'Finance, marketing, strategy, and entrepreneurship.',
-      'Médecine / Santé': 'Clinical practice, diagnosis, and medical specialization.',
+      'AI & Machine Learning':
+        'Build intelligent systems with ML and deep learning.',
+      Cybersecurity:
+        'Protecting systems, detecting threats, and securing networks.',
+      'Frontend Development':
+        'Build modern user interfaces and web experiences.',
+      'Backend Development':
+        'Create APIs, databases, and scalable server-side systems.',
+      'Business / Management':
+        'Finance, marketing, strategy, and entrepreneurship.',
+      'Médecine / Santé':
+        'Clinical practice, diagnosis, and medical specialization.',
       'Droit / Avocat': 'Legal research, advocacy, and professional practice.',
-      'Traduction / Langues': 'Translation, interpreting, linguistics, and multilingual content.',
-      'Journalisme / Médias': 'Content creation, reporting, broadcasting, and media production.',
-      'Coaching / Sport': 'Training programs, sports nutrition, and performance coaching.',
+      'Traduction / Langues':
+        'Translation, interpreting, linguistics, and multilingual content.',
+      'Journalisme / Médias':
+        'Content creation, reporting, broadcasting, and media production.',
+      'Coaching / Sport':
+        'Training programs, sports nutrition, and performance coaching.',
     };
     return descriptions[domainField] || 'Professional development and growth';
   }
@@ -361,25 +382,29 @@ export class DynamicRoadmapService {
 
   private createDomainSpecificRoadmap(
     domain: Domain,
-    level: 'beginner' | 'intermediate' | 'advanced'
+    level: 'beginner' | 'intermediate' | 'advanced',
   ): SpecificRoadmap {
     const roadmapRoot = domain.roadmap as any;
-    const roadmapLevel = (roadmapRoot && roadmapRoot[level]) || roadmapRoot?.[level];
+    const roadmapLevel =
+      (roadmapRoot && roadmapRoot[level]) || roadmapRoot?.[level];
 
-    const phases: RoadmapPhase[] = (roadmapLevel?.phases || []).map((p: any) => ({
-      title: p.title,
-      duration: p.duration,
-      skills: p.skills || [],
-      projects: p.projects || [],
-      resources: p.resources || [],
-      milestones: p.milestones || [],
-    }));
+    const phases: RoadmapPhase[] = (roadmapLevel?.phases || []).map(
+      (p: any) => ({
+        title: p.title,
+        duration: p.duration,
+        skills: p.skills || [],
+        projects: p.projects || [],
+        resources: p.resources || [],
+        milestones: p.milestones || [],
+      }),
+    );
 
     return {
       domain: domain.field,
       level,
       phases,
-      totalDuration: roadmapLevel?.duration || this.calculateTotalDuration(phases),
+      totalDuration:
+        roadmapLevel?.duration || this.calculateTotalDuration(phases),
       prerequisites: domain.skills || [],
       certifications: roadmapLevel?.certifications || [],
       careerPaths: roadmapLevel?.career_paths || [],
@@ -407,7 +432,8 @@ export class DynamicRoadmapService {
 
   private detectLanguage(message: string): 'fr' | 'ar' {
     const arabicChars = (message.match(/[\u0600-\u06FF]/g) || []).length;
-    const frenchChars = (message.match(/[a-zA-Zàâäéèêëïîôöùûüÿç]/g) || []).length;
+    const frenchChars = (message.match(/[a-zA-Zàâäéèêëïîôöùûüÿç]/g) || [])
+      .length;
     const totalChars = message.replace(/\s/g, '').length;
 
     if (totalChars === 0) return 'fr';

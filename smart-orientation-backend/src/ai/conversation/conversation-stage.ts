@@ -16,48 +16,49 @@ export enum ConversationStage {
  * Stage transition rules
  * Defines allowed next stages from current position
  */
-export const STAGE_TRANSITIONS: Record<ConversationStage, ConversationStage[]> = {
-  [ConversationStage.EXPLORATION]: [
-    ConversationStage.DOMAIN_SELECTION,
-    ConversationStage.EXPLORATION,
-  ],
-  [ConversationStage.DOMAIN_SELECTION]: [
-    ConversationStage.CAREER_DISCOVERY,
-    ConversationStage.DOMAIN_SELECTION,
-    ConversationStage.RECOMMENDATION,
-  ],
-  [ConversationStage.CAREER_DISCOVERY]: [
-    ConversationStage.RECOMMENDATION,
-    ConversationStage.CAREER_DISCOVERY,
-    ConversationStage.COMPARISON,
-  ],
-  [ConversationStage.RECOMMENDATION]: [
-    ConversationStage.COMPARISON,
-    ConversationStage.ROADMAP,
-    ConversationStage.FINAL_DECISION,
-    ConversationStage.RECOMMENDATION,
-  ],
-  [ConversationStage.COMPARISON]: [
-    ConversationStage.RECOMMENDATION,
-    ConversationStage.ROADMAP,
-    ConversationStage.FINAL_DECISION,
-  ],
-  [ConversationStage.ROADMAP]: [
-    ConversationStage.FINAL_DECISION,
-    ConversationStage.RECOMMENDATION,
-  ],
-  [ConversationStage.FINAL_DECISION]: [
-    ConversationStage.FINAL_DECISION,
-    ConversationStage.RECOMMENDATION,
-  ],
-};
+export const STAGE_TRANSITIONS: Record<ConversationStage, ConversationStage[]> =
+  {
+    [ConversationStage.EXPLORATION]: [
+      ConversationStage.DOMAIN_SELECTION,
+      ConversationStage.EXPLORATION,
+    ],
+    [ConversationStage.DOMAIN_SELECTION]: [
+      ConversationStage.CAREER_DISCOVERY,
+      ConversationStage.DOMAIN_SELECTION,
+      ConversationStage.RECOMMENDATION,
+    ],
+    [ConversationStage.CAREER_DISCOVERY]: [
+      ConversationStage.RECOMMENDATION,
+      ConversationStage.CAREER_DISCOVERY,
+      ConversationStage.COMPARISON,
+    ],
+    [ConversationStage.RECOMMENDATION]: [
+      ConversationStage.COMPARISON,
+      ConversationStage.ROADMAP,
+      ConversationStage.FINAL_DECISION,
+      ConversationStage.RECOMMENDATION,
+    ],
+    [ConversationStage.COMPARISON]: [
+      ConversationStage.RECOMMENDATION,
+      ConversationStage.ROADMAP,
+      ConversationStage.FINAL_DECISION,
+    ],
+    [ConversationStage.ROADMAP]: [
+      ConversationStage.FINAL_DECISION,
+      ConversationStage.RECOMMENDATION,
+    ],
+    [ConversationStage.FINAL_DECISION]: [
+      ConversationStage.FINAL_DECISION,
+      ConversationStage.RECOMMENDATION,
+    ],
+  };
 
 /**
  * Check if transition between stages is allowed
  */
 export function isStageTransitionAllowed(
   currentStage: ConversationStage,
-  targetStage: ConversationStage
+  targetStage: ConversationStage,
 ): boolean {
   return STAGE_TRANSITIONS[currentStage].includes(targetStage);
 }
@@ -65,7 +66,9 @@ export function isStageTransitionAllowed(
 /**
  * Get natural next stage based on current progress
  */
-export function getNextNaturalStage(currentStage: ConversationStage): ConversationStage {
+export function getNextNaturalStage(
+  currentStage: ConversationStage,
+): ConversationStage {
   const ordered: ConversationStage[] = [
     ConversationStage.EXPLORATION,
     ConversationStage.DOMAIN_SELECTION,

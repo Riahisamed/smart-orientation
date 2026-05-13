@@ -3,7 +3,7 @@ import { ConversationMemory } from './memory.service';
 
 /**
  * 🎯 PROGRAM SCORING & RANKING ENGINE
- * 
+ *
  * Intelligent university program recommendation system
  * Rank programs based on actual matching criteria, not randomly
  */
@@ -45,18 +45,22 @@ export class ProgramRankingService {
   rankPrograms(
     programs: Program[],
     memory: ConversationMemory,
-    studentScore: number
+    studentScore: number,
   ): RankedProgram[] {
-    this.logger.log(`[RANKING] Starting ranking for ${programs.length} programs, student score: ${studentScore}`);
+    this.logger.log(
+      `[RANKING] Starting ranking for ${programs.length} programs, student score: ${studentScore}`,
+    );
 
     // Step 1: Filter out completely unmatched programs first
-    const validPrograms = programs.filter(p => this.isFieldMatch(p, memory));
+    const validPrograms = programs.filter((p) => this.isFieldMatch(p, memory));
 
-    this.logger.debug(`[RANKING] After field filtering: ${validPrograms.length} programs remaining`);
+    this.logger.debug(
+      `[RANKING] After field filtering: ${validPrograms.length} programs remaining`,
+    );
 
     // Step 2: Score each valid program
-    const scoredPrograms = validPrograms.map(program => 
-      this.scoreProgram(program, memory, studentScore)
+    const scoredPrograms = validPrograms.map((program) =>
+      this.scoreProgram(program, memory, studentScore),
     );
 
     // Step 3: Sort by final score descending
@@ -72,13 +76,15 @@ export class ProgramRankingService {
    */
   private isFieldMatch(program: Program, memory: ConversationMemory): boolean {
     if (!memory.interest) return true;
-    
+
     const normalizedField = program.field.toLowerCase().trim();
     const normalizedInterest = memory.interest.toLowerCase().trim();
-    
-    return normalizedField.includes(normalizedInterest) || 
-           normalizedInterest.includes(normalizedField) ||
-           program.domain.toLowerCase().includes(normalizedInterest);
+
+    return (
+      normalizedField.includes(normalizedInterest) ||
+      normalizedInterest.includes(normalizedField) ||
+      program.domain.toLowerCase().includes(normalizedInterest)
+    );
   }
 
   /**
@@ -87,7 +93,7 @@ export class ProgramRankingService {
   private scoreProgram(
     program: Program,
     memory: ConversationMemory,
-    studentScore: number
+    studentScore: number,
   ): RankedProgram {
     const reasons: string[] = [];
     const scoreBreakdown = {
@@ -95,7 +101,7 @@ export class ProgramRankingService {
       scoreCompatibility: 0,
       difficultyPreference: 0,
       interestBonus: 0,
-      demandBonus: 0
+      demandBonus: 0,
     };
 
     // 1. Field Match Score
@@ -104,7 +110,7 @@ export class ProgramRankingService {
 
     // 2. Score Compatibility
     const gap = studentScore - program.lastScore;
-    
+
     if (gap >= 20) {
       scoreBreakdown.scoreCompatibility = 5;
       reasons.push('✅ فرق النقاط ممتاز جداً');
@@ -147,10 +153,10 @@ export class ProgramRankingService {
     // 4. Interest Bonus
     if (memory.preferredTrack) {
       const trackKeywords = memory.preferredTrack.toLowerCase().split(' ');
-      const hasMatch = trackKeywords.some(keyword => 
-        program.keywords.some(k => k.toLowerCase().includes(keyword))
+      const hasMatch = trackKeywords.some((keyword) =>
+        program.keywords.some((k) => k.toLowerCase().includes(keyword)),
       );
-      
+
       if (hasMatch) {
         scoreBreakdown.interestBonus = 4;
         reasons.push('✅ مطابقة للتخصص المفضل');
@@ -167,14 +173,17 @@ export class ProgramRankingService {
     }
 
     // Calculate final score
-    const finalScore = Object.values(scoreBreakdown).reduce((sum, val) => sum + val, 0);
+    const finalScore = Object.values(scoreBreakdown).reduce(
+      (sum, val) => sum + val,
+      0,
+    );
 
     return {
       ...program,
       finalScore,
       scoreBreakdown,
       reasons,
-      category: 'best'
+      category: 'best',
     };
   }
 
@@ -192,21 +201,23 @@ export class ProgramRankingService {
     // Backup Option: Safest alternative (highest positive gap)
     const backupCandidate = rankedPrograms
       .slice(1)
-      .find(p => (p.scoreBreakdown.scoreCompatibility >= 3));
-    
+      .find((p) => p.scoreBreakdown.scoreCompatibility >= 3);
+
     if (backupCandidate) {
       backupCandidate.category = 'backup';
     }
 
     // Risky Option: Highest potential but difficult
-    const riskyCandidate = rankedPrograms
-      .find(p => p.difficulty === 'challenge' && p.finalScore >= 5);
-    
+    const riskyCandidate = rankedPrograms.find(
+      (p) => p.difficulty === 'challenge' && p.finalScore >= 5,
+    );
+
     if (riskyCandidate && riskyCandidate.category === 'best') {
-      const nextRisky = rankedPrograms.find(p => 
-        p.difficulty === 'challenge' && 
-        p.finalScore >= 3 && 
-        p !== riskyCandidate
+      const nextRisky = rankedPrograms.find(
+        (p) =>
+          p.difficulty === 'challenge' &&
+          p.finalScore >= 3 &&
+          p !== riskyCandidate,
       );
       if (nextRisky) nextRisky.category = 'risky';
     } else if (riskyCandidate) {
@@ -217,8 +228,8 @@ export class ProgramRankingService {
     const topPrograms = rankedPrograms.slice(0, 3);
 
     // Ensure we have all 3 categories if possible
-    const categories = new Set(topPrograms.map(p => p.category));
-    
+    const categories = new Set(topPrograms.map((p) => p.category));
+
     if (!categories.has('backup') && topPrograms.length > 1) {
       topPrograms[1].category = 'backup';
     }
@@ -226,7 +237,9 @@ export class ProgramRankingService {
       topPrograms[2].category = 'risky';
     }
 
-    this.logger.log(`[RANKING] Generated ${topPrograms.length} ranked programs`);
+    this.logger.log(
+      `[RANKING] Generated ${topPrograms.length} ranked programs`,
+    );
 
     return topPrograms;
   }
@@ -235,9 +248,9 @@ export class ProgramRankingService {
    * 💾 GET RANKING SUMMARY FOR AI RESPONSE
    */
   getRankingSummary(rankedPrograms: RankedProgram[]): string {
-    return rankedPrograms.map(p => 
-      `[${p.finalScore}] ${p.name} - ${p.institution}`
-    ).join('\n');
+    return rankedPrograms
+      .map((p) => `[${p.finalScore}] ${p.name} - ${p.institution}`)
+      .join('\n');
   }
 
   /**
@@ -250,7 +263,7 @@ export class ProgramRankingService {
 ⭐ النتيجة النهائية: ${program.finalScore}/20
 
 ✅ الأسباب:
-${program.reasons.map(r => `  ${r}`).join('\n')}
+${program.reasons.map((r) => `  ${r}`).join('\n')}
     `.trim();
   }
 }
