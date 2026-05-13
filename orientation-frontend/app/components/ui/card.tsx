@@ -2,8 +2,19 @@ import * as React from "react"
 
 type DivProps = React.HTMLAttributes<HTMLDivElement>
 
-export function Card({ className = "", ...props }: DivProps) {
-  return <div className={`rounded-2xl border bg-white text-slate-900 shadow-sm ${className}`} {...props} />
+interface CardProps extends DivProps {
+  onClick?: React.MouseEventHandler<HTMLDivElement>
+}
+
+export function Card({ className = "", onClick, style, ...props }: CardProps & { style?: React.CSSProperties }) {
+  return (
+    <div
+      className={`rounded-2xl border bg-white text-slate-900 shadow-sm ${className}`}
+      onClick={onClick}
+      style={style}
+      {...props}
+    />
+  )
 }
 
 export function CardHeader({ className = "", ...props }: DivProps) {

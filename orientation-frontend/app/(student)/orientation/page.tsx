@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Input } from "../../lib/components/ui/input"
-import { Select } from "../../lib/components/ui/select"
-import { Card, CardContent } from "../../lib/components/ui/card"
+import { Input } from "@/lib/components/ui/input"
+import { Select } from "@/lib/components/ui/select"
+import { Card, CardContent } from "@/lib/components/ui/card"
 import { API_BASE_URL } from "@/lib/api/config"
 
 export default function Orientation() {

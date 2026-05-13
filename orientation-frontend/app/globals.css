@@ -19,6 +19,7 @@
   --color-foreground: var(--foreground);
   --font-sans: Arial, Helvetica, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
+  --font-arabic: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -26,16 +27,97 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-@keyframes fadeIn{
 
-from{
-opacity:0;
-transform:translateY(20px);
+/* RTL: Arabic typography */
+[lang="ar"] body,
+[dir="rtl"] body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.8;
 }
 
-to{
-opacity:1;
-transform:translateY(0);
+/* RTL: Input text alignment */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
 }
 
+/* RTL: Flex direction for space-x utility */
+[dir="rtl"] .space-x-reverse-rtl {
+  --tw-space-x-reverse: 1;
+}
+
+/* RTL: Icon and SVG mirroring for directional icons (arrows, chevrons, etc.) */
+[dir="rtl"] .icon-rtl {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .rotate-180-rtl {
+  transform: rotate(180deg);
+}
+
+/* RTL: List styling */
+[dir="rtl"] ul,
+[dir="rtl"] ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+/* RTL: Search input icon positioning */
+[dir="rtl"] .search-icon-left {
+  right: 0.75rem;
+  left: auto;
+}
+
+/* RTL: Card inner spacing fix for border-based left/right */
+[dir="rtl"] .border-l {
+  border-left-width: 0;
+  border-right-width: 1px;
+}
+
+[dir="rtl"] .border-r {
+  border-right-width: 0;
+  border-left-width: 1px;
+}
+
+/* RTL: Dropdown menu positioning */
+[dir="rtl"] .dropdown-menu-right {
+  right: auto;
+  left: 0;
+}
+
+/* RTL: Gradient direction flip for Arabic */
+[dir="rtl"] .bg-gradient-to-r {
+  background-image: linear-gradient(to left, var(--tw-gradient-stops));
+}
+
+[dir="rtl"] .bg-gradient-to-l {
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+/* RTL: Margin/padding right/left flip via custom properties */
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[dir="rtl"] .animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
 }

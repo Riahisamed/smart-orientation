@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Card, CardContent } from "../components/ui/card"
-import { Input } from "../components/ui/input"
-import { Button } from "../components/ui/button"
-import { Label } from "../components/ui/label"
+import { Card, CardContent } from "@/lib/components/ui/card"
+import { Input } from "@/lib/components/ui/input"
+import { Button } from "@/lib/components/ui/button"
+import { Label } from "@/lib/components/ui/label"
 import { API_BASE_URL } from "@/lib/api/config"
 
 const bacSubjects:any = {

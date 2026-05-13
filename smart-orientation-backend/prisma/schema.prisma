@@ -13,6 +13,7 @@ datasource db {
 enum Role {
   ADMIN
   STUDENT
+  ENTERPRISE
 }
 
 enum BacType {
@@ -23,6 +24,27 @@ enum BacType {
   TECH
   LETTRES
   SPORT
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum NotificationType {
+  GENERAL
+  RECOMMENDATION
+  REMINDER
+  NEW_FILIERE
+  MARKET_UPDATE
+  JOB_ALERT
+}
+
+enum DemandLevel {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 //////////////////////////////
@@ -38,8 +60,62 @@ model User {
   resetPasswordExpiresAt DateTime?
 
   student   Student?
+  enterprise Enterprise?
 
   createdAt DateTime @default(now())
+}
+
+//////////////////////////////
+// ENTERPRISE / RH
+//////////////////////////////
+
+model Enterprise {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  logo        String?
+  website     String?
+  sector      String?
+  location    String?
+  contactEmail String?
+  contactPhone String?
+
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id])
+
+  jobOffers   JobOffer[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model JobOffer {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  location    String?
+  contractType String?       // CDI, CDD, Stage, Freelance
+  salary      String?
+  isActive    Boolean  @default(true)
+
+  enterpriseId Int
+  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
+
+  requiredSkills RequiredSkill[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RequiredSkill {
+  id         Int      @id @default(autoincrement())
+  name       String
+  level      String?  // Beginner, Intermediate, Advanced
+
+  jobOfferId Int
+  jobOffer   JobOffer @relation(fields: [jobOfferId], references: [id])
+
+  @@unique([jobOfferId, name])
 }
 
 //////////////////////////////
@@ -223,6 +299,10 @@ model RecommendationReport {
   createdAt DateTime @default(now())
 }
 
+//////////////////////////////
+// NOTIFICATIONS (Enhanced)
+//////////////////////////////
+
 model Notification {
   id        Int      @id @default(autoincrement())
 
@@ -233,8 +313,16 @@ model Notification {
   message   String
   readAt    DateTime?
 
+  priority  NotificationPriority @default(MEDIUM)
+  type      NotificationType     @default(GENERAL)
+  link      String?              // optional deep link
+
   createdAt DateTime @default(now())
 }
+
+//////////////////////////////
+// MARKET TRENDS
+//////////////////////////////
 
 model MarketSignal {
   id        Int      @id @default(autoincrement())
@@ -242,9 +330,38 @@ model MarketSignal {
   domain           String
   title            String
   demand           String?
+  demandLevel      DemandLevel?  @default(MEDIUM)
   unemploymentRate Float?
   source           String?
+  growthRate       Float?        // % de croissance annuelle
+  salaryRange      String?       // fourchette salariale
+  topSkills        Json?         // compétences clés pour ce domaine
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+}
+
+//////////////////////////////
+// MARKET TREND ENRICHED
+//////////////////////////////
+
+model MarketTrend {
+  id            Int      @id @default(autoincrement())
+
+  domain        String
+  title         String
+  description   String?
+  category      String?        // secteur
+  demandLevel   DemandLevel    @default(MEDIUM)
+  growthRate    Float?         // évolution annuelle en %
+  unemploymentRate Float?
+  salaryAvg     Float?         // salaire moyen
+  topSkills     Json?          // top compétences demandées
+  trendYear     Int            // année de référence
+  source        String?
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@unique([domain, title, trendYear])
 }

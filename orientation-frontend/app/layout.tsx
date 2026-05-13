@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import NavbarWrapper from "./components/NavbarWrapper"
 import { ThemeProvider } from "./components/theme-provider"
 import { SessionProviderWrapper } from "./components/session-provider"
-import FloatingAIChat from "./components/FloatingAIChat"
+import { I18nProvider } from "@/lib/i18n/context"
+import RTLProvider from "./components/RTLProvider"
 import PWARegister from "./components/PWARegister"
 import PWAInstallPrompt from "./components/PWAInstallPrompt"
 
@@ -34,13 +34,13 @@ export default function RootLayout({
       >
         <SessionProviderWrapper>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <NavbarWrapper />
-            <main className="min-h-screen w-full pt-16">
-              {children}
-            </main>
-            <FloatingAIChat />
-            <PWARegister />
-            <PWAInstallPrompt />
+            <I18nProvider>
+              <RTLProvider>
+                {children}
+              </RTLProvider>
+              <PWARegister />
+              <PWAInstallPrompt />
+            </I18nProvider>
           </ThemeProvider>
         </SessionProviderWrapper>
       </body>

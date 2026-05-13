@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, Bot, LogOut, Settings, User } from 'lucide-react';
+import { Bell, Bot, LogOut, Settings, User, Building2, TrendingUp } from 'lucide-react';
 import { useAuthUser } from '@/lib/use-auth-user';
 import { ThemeToggle } from './theme-toggle';
+import LanguageSwitcher from './LanguageSwitcher';
 import ChatModal from './ChatModal';
 
 export default function Navbar() {
@@ -85,7 +86,8 @@ export default function Navbar() {
           })}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher compact />
           <ThemeToggle />
 
           <Link href="/notifications" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 transition-all duration-200 hover:scale-110 dark:bg-gray-700">

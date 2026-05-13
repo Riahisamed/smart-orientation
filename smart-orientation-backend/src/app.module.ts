@@ -19,6 +19,8 @@ import { AdminModule } from './admin/admin.module';
 
 import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
+import { EnterpriseModule } from './enterprise/enterprise.module';
+import { MarketTrendsModule } from './market-trends/market-trends.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { RolesGuard } from './auth/roles.guard';
     ReportsModule,
     NotificationsModule,
     AdminModule,
+    EnterpriseModule,
+    MarketTrendsModule,
   ],
   controllers: [AppController],
   providers: [

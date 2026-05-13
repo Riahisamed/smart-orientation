@@ -2,11 +2,11 @@
 
 import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import { Card, CardContent } from "../../lib/components/ui/card"
-import { Input } from "../../lib/components/ui/input"
-import { Button } from "../../lib/components/ui/button"
-import { Label } from "../../lib/components/ui/label"
-import { Select } from "../../lib/components/ui/select"
+import { Card, CardContent } from "@/lib/components/ui/card"
+import { Input } from "@/lib/components/ui/input"
+import { Button } from "@/lib/components/ui/button"
+import { Label } from "@/lib/components/ui/label"
+import { Select } from "@/lib/components/ui/select"
 import { API_BASE_URL } from "@/lib/api/config"
 
 function TCalculatorContent(){
