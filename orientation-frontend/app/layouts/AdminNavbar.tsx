@@ -11,17 +11,19 @@ import { ThemeToggle } from "../components/theme-toggle"
 import LanguageSwitcher from "../components/LanguageSwitcher"
 import { useAuthUser } from "@/lib/use-auth-user"
 import { useState } from "react"
+import { useTranslations } from "@/lib/i18n/context"
 
 const links = [
-  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { label: "Students", href: "/admin/students", icon: Users },
-  { label: "Enterprises", href: "/admin/enterprises", icon: Building2 },
-  { label: "Market Trends", href: "/market-trends", icon: TrendingUp },
-  { label: "Notifications", href: "/admin/notifications", icon: Bell },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
+  { key: "admin.analytics", href: "/admin/analytics", icon: BarChart3 },
+  { key: "admin.students", href: "/admin/students", icon: Users },
+  { key: "admin.enterprises", href: "/admin/enterprises", icon: Building2 },
+  { key: "admin.marketTrends", href: "/market-trends", icon: TrendingUp },
+  { key: "admin.notifications", href: "/admin/notifications", icon: Bell },
+  { key: "admin.settings", href: "/admin/settings", icon: Settings },
 ]
 
 export default function AdminNavbar() {
+  const t = useTranslations()
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuthUser()
@@ -45,7 +47,7 @@ export default function AdminNavbar() {
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
             <Shield className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-slate-900 dark:text-white hidden sm:block">Admin Panel</span>
+          <span className="font-bold text-slate-900 dark:text-white hidden sm:block">{t("admin.title")}</span>
         </div>
 
         <div className="hidden md:flex items-center gap-1">
@@ -62,7 +64,7 @@ export default function AdminNavbar() {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {link.label}
+                {t(link.key)}
               </Link>
             )
           })}
@@ -86,14 +88,14 @@ export default function AdminNavbar() {
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">{user.name}</p>
                     <p className="text-xs text-slate-500">{user.email}</p>
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-medium">Admin</span>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-medium">{t("admin.badge")}</span>
                   </div>
                   <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <Settings className="h-4 w-4" /> Paramètres
+                    <Settings className="h-4 w-4" /> {t("common.settings")}
                   </Link>
                   <hr className="my-1 border-slate-100 dark:border-slate-800" />
                   <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                    <LogOut className="h-4 w-4" /> Déconnexion
+                    <LogOut className="h-4 w-4" /> {t("common.logout")}
                   </button>
                 </div>
               </>
@@ -114,7 +116,7 @@ export default function AdminNavbar() {
               <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium ${pathname === link.href ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100"}`}
               >
-                <Icon className="h-4 w-4" /> {link.label}
+                <Icon className="h-4 w-4" /> {t(link.key)}
               </Link>
             )
           })}

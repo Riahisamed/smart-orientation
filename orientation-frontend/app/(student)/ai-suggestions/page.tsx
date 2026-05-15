@@ -6,8 +6,10 @@ import { Input } from '../../lib/components/ui/input';
 import { Select } from '../../lib/components/ui/select';
 import { fetchAISuggestions } from '../../lib/api/ai-client';
 import type { AIResponse, BacType } from '../../lib/types/ai';
+import { useTranslations } from '@/lib/i18n/context';
 
 export default function AISuggestionsPage() {
+  const t = useTranslations()
   const [score, setScore] = useState('');
   const [bac, setBac] = useState<BacType>('MATH');
   const [language, setLanguage] = useState<'fr' | 'ar'>('fr');
@@ -16,14 +18,13 @@ export default function AISuggestionsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleGetSuggestions = async () => {
-    // Validation
     if (!score || isNaN(Number(score))) {
-      setError('Please enter a valid score');
+      setError(t("errors.required"));
       return;
     }
 
     if (!bac) {
-      setError('Please select a bac type');
+      setError(t("errors.required"));
       return;
     }
 
@@ -41,10 +42,10 @@ export default function AISuggestionsPage() {
       setResult(data);
 
       if (!data.success) {
-        setError(data.error || 'Failed to get suggestions');
+        setError(data.error || t("errors.generic"));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : t("errors.generic"));
     } finally {
       setIsLoading(false);
     }
@@ -55,10 +56,10 @@ export default function AISuggestionsPage() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            AI Orientation Assistant
+            {t("aiSuggestions.title")}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Get personalized program suggestions based on your score and bac type
+            {t("chat.aiAssistantDesc")}
           </p>
         </div>
 
@@ -68,11 +69,11 @@ export default function AISuggestionsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Your Score
+                  {t("chat.yourScore")}
                 </label>
                 <Input
                   type="number"
-                  placeholder="Enter your score (e.g., 140)"
+                  placeholder={t("chat.yourScore")}
                   value={score}
                   onChange={(e) => setScore(e.target.value)}
                   className="rounded-xl"
@@ -81,7 +82,7 @@ export default function AISuggestionsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Bac Type
+                  {t("chat.bacTypeLabel")}
                 </label>
                 <Select
                   value={bac}
@@ -101,7 +102,7 @@ export default function AISuggestionsPage() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Language
+                {t("chat.languageLabel")}
               </label>
               <div className="flex gap-4">
                 <label className="flex items-center">
@@ -134,7 +135,7 @@ export default function AISuggestionsPage() {
               disabled={isLoading}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-slate-400 transition-colors"
             >
-              {isLoading ? 'Loading...' : 'Get Suggestions'}
+              {isLoading ? t("common.loading") : t("common.submit")}
             </button>
           </CardContent>
         </Card>
@@ -155,7 +156,7 @@ export default function AISuggestionsPage() {
             <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                  AI Recommendations
+                  {t("aiSuggestions.title")}
                 </h2>
                 <div className="prose dark:prose-invert max-w-none">
                   <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
@@ -170,7 +171,7 @@ export default function AISuggestionsPage() {
               <Card className="rounded-2xl border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-green-900 dark:text-green-300 mb-3">
-                    ✓ Accessible Programs ({result.accessible.length})
+                    ✓ {t("orientation.availablePrograms")} ({result.accessible.length})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {result.accessible.map((program) => (
@@ -180,7 +181,7 @@ export default function AISuggestionsPage() {
                       >
                         <p className="font-medium text-slate-900 dark:text-slate-100">{program.name}</p>
                         <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Required: {program.lastYearScore}
+                          {t("orientation.lastYearScore")}: {program.lastYearScore}
                         </p>
                       </div>
                     ))}
@@ -194,7 +195,7 @@ export default function AISuggestionsPage() {
               <Card className="rounded-2xl border border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-orange-900 dark:text-orange-300 mb-3">
-                    ⚠ Challenging Programs ({result.difficult.length})
+                    ⚠ {t("orientationTest.noResultsYet")} ({result.difficult.length})
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {result.difficult.map((program) => (
@@ -204,7 +205,7 @@ export default function AISuggestionsPage() {
                       >
                         <p className="font-medium text-slate-900 dark:text-slate-100">{program.name}</p>
                         <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Required: {program.lastYearScore}
+                          {t("orientation.lastYearScore")}: {program.lastYearScore}
                         </p>
                       </div>
                     ))}

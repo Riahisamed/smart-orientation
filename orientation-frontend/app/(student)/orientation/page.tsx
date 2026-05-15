@@ -6,8 +6,10 @@ import { Input } from "@/lib/components/ui/input"
 import { Select } from "@/lib/components/ui/select"
 import { Card, CardContent } from "@/lib/components/ui/card"
 import { API_BASE_URL } from "@/lib/api/config"
+import { useTranslations } from "@/lib/i18n/context"
 
 export default function Orientation() {
+  const t = useTranslations()
   const [search, setSearch] = useState("")
   const [domainFilter, setDomainFilter] = useState("")
   const [institutionFilter, setInstitutionFilter] = useState("")
@@ -55,7 +57,7 @@ export default function Orientation() {
   // Get last score for a filiere and bac type
   const getLastScore = (f: any, bacType?: string) => {
     const targetBacType = bacType || student?.bacType
-    if (!targetBacType) return "Not available"
+    if (!targetBacType) return t("orientation.notAvailable")
 
     const bacTypeData = f.bacTypes?.find((bt: any) => 
       bt.type?.toLowerCase() === targetBacType.toLowerCase()
@@ -64,7 +66,7 @@ export default function Orientation() {
     if (bacTypeData && bacTypeData.lastScore != null) {
       return Number(bacTypeData.lastScore).toFixed(2)
     }
-    return "Not available"
+    return t("orientation.notAvailable")
   }
 
   // Filtered and sorted filieres
@@ -90,28 +92,28 @@ export default function Orientation() {
       const scoreA = getLastScore(a, bacTypeFilter)
       const scoreB = getLastScore(b, bacTypeFilter)
       
-      if (scoreA === "Not available") return 1
-      if (scoreB === "Not available") return -1
+      if (scoreA === t("orientation.notAvailable")) return 1
+      if (scoreB === t("orientation.notAvailable")) return -1
       
       return parseFloat(scoreB) - parseFloat(scoreA)
     })
 
     return filtered
-  }, [filieres, search, domainFilter, institutionFilter, bacTypeFilter, student])
+  }, [filieres, search, domainFilter, institutionFilter, bacTypeFilter, student, t])
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 py-8">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">Orientation Assistant</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">{t("orientation.title")}</h1>
 
         {/* Search and Filters */}
         <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90 mb-6">
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Search Programs</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t("orientation.searchPrograms")}</label>
                 <Input
-                  placeholder="Search by program or institution..."
+                  placeholder={t("orientation.searchPlaceholder")}
                   value={search}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                   className="rounded-xl"
@@ -119,29 +121,29 @@ export default function Orientation() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Domain</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t("orientation.domain")}</label>
                 <Select
                   value={domainFilter}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDomainFilter(e.target.value)}
                   className="rounded-xl"
                 >
-                  <option value="">All Domains</option>
-                  <option value="engineering">Engineering</option>
-                  <option value="medicine">Medicine</option>
-                  <option value="science">Science</option>
-                  <option value="humanities">Humanities</option>
-                  <option value="business">Business</option>
+                  <option value="">{t("orientation.allDomains")}</option>
+                  <option value="engineering">{t("orientation.engineering")}</option>
+                  <option value="medicine">{t("orientation.medicine")}</option>
+                  <option value="science">{t("orientation.science")}</option>
+                  <option value="humanities">{t("orientation.humanities")}</option>
+                  <option value="business">{t("orientation.business")}</option>
                 </Select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Institution</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t("orientation.institution")}</label>
                 <Select
                   value={institutionFilter}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setInstitutionFilter(e.target.value)}
                   className="rounded-xl"
                 >
-                  <option value="">All Institutions</option>
+                  <option value="">{t("orientation.allInstitutions")}</option>
                   {uniqueInstitutions.map(inst => (
                     <option key={inst} value={inst}>{inst}</option>
                   ))}
@@ -149,13 +151,13 @@ export default function Orientation() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Bac Type</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t("orientation.bacType")}</label>
                 <Select
                   value={bacTypeFilter}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setBacTypeFilter(e.target.value)}
                   className="rounded-xl"
                 >
-                  <option value="">All Bac Types</option>
+                  <option value="">{t("orientation.allBacTypes")}</option>
                   {uniqueBacTypes.map(bac => (
                     <option key={bac} value={bac}>{bac}</option>
                   ))}
@@ -167,14 +169,14 @@ export default function Orientation() {
 
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            Available Programs ({filteredFilieres.length})
+            {t("orientation.availablePrograms")} ({filteredFilieres.length})
           </h2>
         </div>
 
         {filteredFilieres.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              No programs found. Try adjusting your filters.
+              {t("orientation.noProgramsFound")}
             </p>
           </div>
         ) : (
@@ -204,7 +206,7 @@ export default function Orientation() {
                     </div>
                     <div className="mt-auto">
                       <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        Last Year Score:
+                        {t("orientation.lastYearScore")}:
                       </p>
                       <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
                         {getLastScore(f, bacTypeFilter)}

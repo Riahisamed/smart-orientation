@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { API_BASE_URL } from "@/lib/api/config"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "lib/components/ui/card"
 import { TrendingUp, BarChart3, DollarSign, Users, Award, Target, Clock, Sparkles, Loader2 } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
 
 function getDemandColor(level: string): string {
   switch (level) {
@@ -14,16 +15,17 @@ function getDemandColor(level: string): string {
   }
 }
 
-function getDemandBadge(level: string): { text: string; color: string } {
+function getDemandBadge(t: (path: string) => string, level: string): { text: string; color: string } {
   switch (level) {
-    case "HIGH": return { text: "Haute", color: "green" }
-    case "MEDIUM": return { text: "Moyenne", color: "amber" }
-    case "LOW": return { text: "Faible", color: "red" }
-    default: return { text: "Inconnue", color: "slate" }
+    case "HIGH": return { text: t("marketTrends.highDemandLabel"), color: "green" }
+    case "MEDIUM": return { text: t("marketTrends.mediumDemandLabel"), color: "amber" }
+    case "LOW": return { text: t("marketTrends.lowDemandLabel"), color: "red" }
+    default: return { text: t("marketTrends.unknownDemand"), color: "slate" }
   }
 }
 
 export default function MarketTrends() {
+  const t = useTranslations()
   const [loading, setLoading] = useState(true)
   const [dashboard, setDashboard] = useState<any>(null)
   const [selectedSector, setSelectedSector] = useState<string>("all")
@@ -67,16 +69,16 @@ export default function MarketTrends() {
               <TrendingUp className="h-7 w-7" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Tendances du Marché</h1>
-              <p className="text-indigo-100">Analyse en temps réel du marché du travail Tunisien</p>
+              <h1 className="text-3xl font-bold">{t("marketTrends.title")}</h1>
+              <p className="text-indigo-100">{t("marketTrends.subtitle")}</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-4">
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-white/20 backdrop-blur-sm">
-              <Clock className="h-3 w-3" /> Mis à jour: {new Date(dashboard?.lastUpdated).toLocaleDateString()}
+              <Clock className="h-3 w-3" /> {t("marketTrends.updated")}: {new Date(dashboard?.lastUpdated).toLocaleDateString()}
             </span>
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-white/20 backdrop-blur-sm">
-              <Sparkles className="h-3 w-3" /> {trends.length} métiers analysés
+              <Sparkles className="h-3 w-3" /> {trends.length} {t("marketTrends.jobsAnalyzed")}
             </span>
           </div>
         </div>
@@ -93,7 +95,7 @@ export default function MarketTrends() {
                 </div>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{trends.length}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Métiers Analysés</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("marketTrends.analyzedJobs")}</p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
@@ -106,7 +108,7 @@ export default function MarketTrends() {
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {dashboard?.mostDemanded?.length || 0}
               </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Métiers en Forte Demande</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("marketTrends.highDemand")}</p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
@@ -119,7 +121,7 @@ export default function MarketTrends() {
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {dashboard?.salariesBySector?.length || 0}
               </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Secteurs Salariaux</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("marketTrends.sectors")}</p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
@@ -132,7 +134,7 @@ export default function MarketTrends() {
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {dashboard?.topSkills?.length || 0}
               </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Compétences Clés</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("marketTrends.keySkills")}</p>
             </CardContent>
           </Card>
         </div>
@@ -146,7 +148,7 @@ export default function MarketTrends() {
               onChange={(e) => setSelectedSector(e.target.value)}
               className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">Tous les Secteurs</option>
+              <option value="all">{t("marketTrends.allSectors")}</option>
               {sectors.map((s: any, i: number) => (
                 <option key={i} value={s.name}>{s.name} ({s.count})</option>
               ))}
@@ -159,21 +161,21 @@ export default function MarketTrends() {
               onChange={(e) => setSelectedDemand(e.target.value)}
               className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">Tous Niveaux</option>
-              <option value="HIGH">Haute Demande</option>
-              <option value="MEDIUM">Demande Moyenne</option>
-              <option value="LOW">Faible Demande</option>
+              <option value="all">{t("marketTrends.allLevels")}</option>
+              <option value="HIGH">{t("marketTrends.highDemand2")}</option>
+              <option value="MEDIUM">{t("marketTrends.mediumDemand")}</option>
+              <option value="LOW">{t("marketTrends.lowDemand")}</option>
             </select>
           </div>
           <span className="text-sm text-slate-500 self-center">
-            {filteredTrends.length} résultats
+            {filteredTrends.length} {t("marketTrends.results")}
           </span>
         </div>
 
         {/* Market Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {filteredTrends.map((item: any, index: number) => {
-            const badge = getDemandBadge(item.demandLevel)
+            const badge = getDemandBadge(t, item.demandLevel)
             return (
               <div
                 key={index}
@@ -192,25 +194,25 @@ export default function MarketTrends() {
 
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                      <p className="text-xs text-slate-500">Croissance</p>
+                      <p className="text-xs text-slate-500">{t("marketTrends.growth")}</p>
                       <p className="text-sm font-bold text-green-600 dark:text-green-400">+{item.growthRate}%</p>
                     </div>
                     <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                      <p className="text-xs text-slate-500">Salaire</p>
+                      <p className="text-xs text-slate-500">{t("marketTrends.salary")}</p>
                       <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{item.salaryAvg.toLocaleString()} TND</p>
                     </div>
                     <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                      <p className="text-xs text-slate-500">Chômage</p>
+                      <p className="text-xs text-slate-500">{t("marketTrends.unemployment")}</p>
                       <p className="text-sm font-bold text-red-600 dark:text-red-400">{item.unemploymentRate}%</p>
                     </div>
                     <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                      <p className="text-xs text-slate-500">Demande</p>
+                      <p className="text-xs text-slate-500">{t("marketTrends.demand")}</p>
                       <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{item.demand}</p>
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-xs text-slate-500 mb-2">Compétences clés:</p>
+                    <p className="text-xs text-slate-500 mb-2">{t("marketTrends.keySkillsLabel")}</p>
                     <div className="flex flex-wrap gap-1">
                       {item.topSkills?.slice(0, 4).map((skill: string, i: number) => (
                         <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300">
@@ -237,7 +239,7 @@ export default function MarketTrends() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Award className="h-5 w-5 text-amber-500" />
-                Top Compétences Demandées
+                {t("marketTrends.topSkillsTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -248,7 +250,7 @@ export default function MarketTrends() {
                     <div className="flex-1">
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{skill.skill}</span>
-                        <span className="text-xs text-slate-400">{skill.count} métiers</span>
+                        <span className="text-xs text-slate-400">{skill.count} {t("marketTrends.jobsCount")}</span>
                       </div>
                       <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                         <div
@@ -268,7 +270,7 @@ export default function MarketTrends() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-green-500" />
-                Salaire Moyen par Secteur
+                {t("marketTrends.salaryBySector")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -293,7 +295,7 @@ export default function MarketTrends() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-indigo-500" />
-              Répartition de la Demande
+              {t("marketTrends.demandDistribution")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -302,9 +304,9 @@ export default function MarketTrends() {
                 <div key={i} className={`p-4 rounded-xl ${d.level === "HIGH" ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" : d.level === "MEDIUM" ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800" : "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"}`}>
                   <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{d.percentage}%</p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {d.level === "HIGH" ? "Haute Demande" : d.level === "MEDIUM" ? "Demande Moyenne" : "Faible Demande"}
+                    {d.level === "HIGH" ? t("marketTrends.highDemand2") : d.level === "MEDIUM" ? t("marketTrends.mediumDemand") : t("marketTrends.lowDemand")}
                   </p>
-                  <p className="text-xs text-slate-400">{d.count} métiers</p>
+                  <p className="text-xs text-slate-400">{d.count} {t("marketTrends.jobsCount")}</p>
                 </div>
               ))}
             </div>
@@ -316,7 +318,7 @@ export default function MarketTrends() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-purple-500" />
-              Évolution Annuelle par Secteur (%)
+              {t("marketTrends.annualEvolution")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -324,12 +326,12 @@ export default function MarketTrends() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="text-left py-2 px-3 text-slate-500 font-medium">Année</th>
-                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Tech</th>
-                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Medical</th>
-                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Business</th>
-                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Engineering</th>
-                    <th className="text-right py-2 px-3 text-slate-500 font-medium">Social</th>
+                    <th className="text-left py-2 px-3 text-slate-500 font-medium">{t("marketTrends.year")}</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">{t("marketTrends.techSector")}</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">{t("marketTrends.medicalSector")}</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">{t("marketTrends.businessSector")}</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">{t("marketTrends.engineeringSector")}</th>
+                    <th className="text-right py-2 px-3 text-slate-500 font-medium">{t("marketTrends.socialSector")}</th>
                   </tr>
                 </thead>
                 <tbody>

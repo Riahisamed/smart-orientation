@@ -7,29 +7,28 @@ import { Check, Loader2, LogOut, Monitor, Moon, Settings2, Sun, UserCircle2 } fr
 import { useTheme } from "next-themes"
 import { Card, CardContent } from "lib/components/ui/card"
 import { useAuthUser } from "@/lib/use-auth-user"
+import { useTranslations } from "@/lib/i18n/context"
 
 const themeOptions = [
   {
-    label: "System",
+    labelKey: "settings.system",
     value: "system",
-    description: "Use your device preference automatically.",
     icon: Monitor,
   },
   {
-    label: "Light",
+    labelKey: "settings.light",
     value: "light",
-    description: "Bright interface for daytime work.",
     icon: Sun,
   },
   {
-    label: "Dark",
+    labelKey: "settings.dark",
     value: "dark",
-    description: "Low-glare mode for evening sessions.",
     icon: Moon,
   },
 ] as const
 
 export default function SettingsPage() {
+  const t = useTranslations()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { isAuthenticated, isLoading, logout, user } = useAuthUser()
@@ -58,12 +57,9 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-              Preferences
+              {t("settings.title")}
             </p>
-            <h1 className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Manage appearance and account actions for {user.name}.
-            </p>
+            <h1 className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">{t("settings.title")}</h1>
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -72,14 +68,14 @@ export default function SettingsPage() {
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-300"
             >
               <UserCircle2 className="h-4 w-4" />
-              Profile
+              {t("settings.profileTab")}
             </Link>
             <button
               onClick={logout}
               className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
             >
               <LogOut className="h-4 w-4" />
-              Sign out
+              {t("common.logout")}
             </button>
           </div>
         </div>
@@ -89,11 +85,11 @@ export default function SettingsPage() {
             <CardContent className="space-y-6 p-6">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  Appearance
+                  {t("settings.themeLabel")}
                 </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Theme selection</h2>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{t("settings.themeLabel")}</h2>
                 <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                  Choose how Orientation IA looks. The header toggle stays in sync with the option you pick here.
+                  {t("settings.themeDesc")}
                 </p>
               </div>
 
@@ -119,8 +115,7 @@ export default function SettingsPage() {
                         </div>
                         {isActive && <Check className="h-5 w-5" />}
                       </div>
-                      <p className="mt-4 text-base font-semibold">{option.label}</p>
-                      <p className="mt-2 text-sm opacity-80">{option.description}</p>
+                      <p className="mt-4 text-base font-semibold">{t(option.labelKey)}</p>
                     </button>
                   )
                 })}
@@ -137,49 +132,39 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                      Account
+                      {t("profile.userAccount")}
                     </p>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Connection details</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t("profile.userAccount")}</h2>
                   </div>
                 </div>
 
                 <div className="space-y-3 rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
                   <div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Email</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t("auth.email")}</p>
                     <p className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
-                      {user.email || "Not available"}
+                      {user.email || t("common.notAvailable")}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Provider</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t("profile.connectionMethod")}</p>
                     <p className="mt-1 text-base font-semibold capitalize text-slate-900 dark:text-slate-100">
-                      {user.authProvider === "guest" ? "Not connected" : user.authProvider}
+                      {user.authProvider === "guest" ? t("common.notConnected") : user.authProvider}
                     </p>
                   </div>
                 </div>
-
-                <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
-                  Local accounts can reset passwords from the login screen. Google accounts continue to be managed from Google.
-                </p>
               </CardContent>
             </Card>
 
             <Card className="rounded-3xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
               <CardContent className="space-y-4 p-6">
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  Navigation
+                  {t("profile.shortcuts")}
                 </p>
                 <Link
                   href="/dashboard"
                   className="block rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-300"
                 >
-                  Back to dashboard
-                </Link>
-                <Link
-                  href="/profile"
-                  className="block rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-300"
-                >
-                  Review profile details
+                  {t("settings.backToDashboard")}
                 </Link>
               </CardContent>
             </Card>

@@ -10,8 +10,10 @@ import {
   LogOut, Loader2, MapPin, Globe, Mail, Phone,
   ArrowUpRight, Target, Award
 } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
 
 export default function EnterpriseDashboard() {
+  const t = useTranslations()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<any>(null)
@@ -75,8 +77,8 @@ export default function EnterpriseDashboard() {
                 <Building2 className="h-8 w-8" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{profile?.name || "Enterprise Dashboard"}</h1>
-                <p className="text-blue-100 text-sm">{profile?.sector || "Entreprise"} • {profile?.location || "Tunisie"}</p>
+                <h1 className="text-2xl font-bold">{profile?.name || t("enterprise.dashboardTitle")}</h1>
+                <p className="text-blue-100 text-sm">{profile?.sector || t("enterprise.sector")} • {profile?.location || t("enterprise.location")}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -85,7 +87,7 @@ export default function EnterpriseDashboard() {
                 className="bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-medium"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Nouvelle Offre
+                {t("enterprise.newOffer")}
               </Button>
               <Button
                 onClick={handleLogout}
@@ -108,10 +110,10 @@ export default function EnterpriseDashboard() {
                 <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                   <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">Total</span>
+                <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">{t("common.all")}</span>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{totalOffers}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Offres d'Emploi</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("enterprise.myOffers")}</p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
@@ -120,10 +122,10 @@ export default function EnterpriseDashboard() {
                 <div className="h-10 w-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                   <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
-                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">Actives</span>
+                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">{t("common.active")}</span>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{activeOffers}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Offres Actives</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("enterprise.myOffers")}</p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
@@ -132,10 +134,10 @@ export default function EnterpriseDashboard() {
                 <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                   <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
-                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded-full">Talents</span>
+                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded-full">{t("enterprise.compatibleStudents")}</span>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{stats?.totalStudents || 0}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Étudiants Disponibles</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("enterprise.compatibleStudents")}</p>
             </CardContent>
           </Card>
           <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
@@ -144,10 +146,10 @@ export default function EnterpriseDashboard() {
                 <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
                   <Target className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
-                <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">Domaine</span>
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">{t("enterprise.sector")}</span>
               </div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{profile?.sector || "—"}</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Secteur</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("enterprise.sector")}</p>
             </CardContent>
           </Card>
         </div>
@@ -163,9 +165,9 @@ export default function EnterpriseDashboard() {
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 }`}
             >
-              {tab === "overview" && "Vue d'Ensemble"}
-              {tab === "offers" && "Mes Offres"}
-              {tab === "stats" && "Statistiques"}
+              {tab === "overview" && t("enterprise.overview")}
+              {tab === "offers" && t("enterprise.myOffers")}
+              {tab === "stats" && t("enterprise.statistics")}
             </button>
           ))}
         </div>
@@ -178,17 +180,17 @@ export default function EnterpriseDashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-blue-600" />
-                    Offres Récentes
+                    {t("enterprise.recentOffers")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {offers.length === 0 ? (
                     <div className="text-center py-8">
                       <Briefcase className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-                      <p className="text-slate-500 dark:text-slate-400">Aucune offre pour le moment</p>
+                      <p className="text-slate-500 dark:text-slate-400">{t("enterprise.noOffers")}</p>
                       <Button onClick={() => router.push("/enterprise/offers/new")} className="mt-4 rounded-xl" size="sm">
                         <Plus className="h-4 w-4 mr-2" />
-                        Créer une Offre
+                        {t("enterprise.createOffer")}
                       </Button>
                     </div>
                   ) : (
@@ -203,11 +205,11 @@ export default function EnterpriseDashboard() {
                             <div className={`h-3 w-3 rounded-full ${offer.isActive ? "bg-green-500" : "bg-slate-400"}`} />
                             <div>
                               <p className="font-medium text-slate-900 dark:text-slate-100">{offer.title}</p>
-                              <p className="text-xs text-slate-500">{offer.contractType || "Non spécifié"} • {offer.location || "Non spécifié"}</p>
+                              <p className="text-xs text-slate-500">{offer.contractType || t("common.no")} • {offer.location || t("common.no")}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-xs text-slate-400">{offer.requiredSkills?.length || 0} compétences</span>
+                            <span className="text-xs text-slate-400">{offer.requiredSkills?.length || 0} {t("enterprise.requiredSkills")}</span>
                             <ArrowUpRight className="h-4 w-4 text-slate-400" />
                           </div>
                         </div>
@@ -221,7 +223,7 @@ export default function EnterpriseDashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-blue-600" />
-                    Profil Entreprise
+                    {t("enterprise.companyProfile")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -229,29 +231,29 @@ export default function EnterpriseDashboard() {
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                       <Globe className="h-4 w-4 text-slate-400" />
                       <div>
-                        <p className="text-xs text-slate-500">Site Web</p>
-                        <p className="text-sm font-medium">{profile?.website || "Non renseigné"}</p>
+                        <p className="text-xs text-slate-500">{t("enterprise.website")}</p>
+                        <p className="text-sm font-medium">{profile?.website || t("common.noData")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                       <MapPin className="h-4 w-4 text-slate-400" />
                       <div>
-                        <p className="text-xs text-slate-500">Localisation</p>
-                        <p className="text-sm font-medium">{profile?.location || "Non renseigné"}</p>
+                        <p className="text-xs text-slate-500">{t("enterprise.location")}</p>
+                        <p className="text-sm font-medium">{profile?.location || t("common.noData")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                       <Mail className="h-4 w-4 text-slate-400" />
                       <div>
-                        <p className="text-xs text-slate-500">Email Contact</p>
-                        <p className="text-sm font-medium">{profile?.contactEmail || "Non renseigné"}</p>
+                        <p className="text-xs text-slate-500">{t("enterprise.contactEmail")}</p>
+                        <p className="text-sm font-medium">{profile?.contactEmail || t("common.noData")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                       <Phone className="h-4 w-4 text-slate-400" />
                       <div>
-                        <p className="text-xs text-slate-500">Téléphone</p>
-                        <p className="text-sm font-medium">{profile?.contactPhone || "Non renseigné"}</p>
+                        <p className="text-xs text-slate-500">{t("enterprise.contactPhone")}</p>
+                        <p className="text-sm font-medium">{profile?.contactPhone || t("common.noData")}</p>
                       </div>
                     </div>
                   </div>
@@ -267,17 +269,17 @@ export default function EnterpriseDashboard() {
             <div className="space-y-6">
               <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-lg">Actions Rapides</CardTitle>
+                  <CardTitle className="text-lg">{t("enterprise.quickActions")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button onClick={() => router.push("/enterprise/offers/new")} className="w-full rounded-xl justify-start" variant="outline">
-                    <Plus className="h-4 w-4 mr-2" /> Publier une Offre
+                    <Plus className="h-4 w-4 mr-2" /> {t("enterprise.publishOffer")}
                   </Button>
                   <Button onClick={() => router.push("/enterprise/offers")} className="w-full rounded-xl justify-start" variant="outline">
-                    <Briefcase className="h-4 w-4 mr-2" /> Voir les Offres
+                    <Briefcase className="h-4 w-4 mr-2" /> {t("enterprise.myOffers")}
                   </Button>
                   <Button onClick={() => router.push("/market-trends")} className="w-full rounded-xl justify-start" variant="outline">
-                    <TrendingUp className="h-4 w-4 mr-2" /> Tendances du Marché
+                    <TrendingUp className="h-4 w-4 mr-2" /> {t("enterprise.viewMarketTrends")}
                   </Button>
                 </CardContent>
               </Card>
@@ -286,7 +288,7 @@ export default function EnterpriseDashboard() {
                 <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Award className="h-5 w-5 text-amber-500" /> Top Compétences
+                      <Award className="h-5 w-5 text-amber-500" /> {t("enterprise.topSkills")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -294,7 +296,7 @@ export default function EnterpriseDashboard() {
                       {stats.topSkills.slice(0, 8).map((skill: any, i: number) => (
                         <div key={i} className="flex items-center justify-between">
                           <span className="text-sm text-slate-700 dark:text-slate-300">{skill.skill}</span>
-                          <span className="text-xs text-slate-400">{skill.count} étudiants</span>
+                          <span className="text-xs text-slate-400">{skill.count} {t("enterprise.compatibleStudents")}</span>
                         </div>
                       ))}
                     </div>
@@ -308,21 +310,21 @@ export default function EnterpriseDashboard() {
         {activeTab === "offers" && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Toutes les Offres</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("enterprise.myOffers")}</h2>
               <Button onClick={() => router.push("/enterprise/offers/new")} className="rounded-xl" size="sm">
-                <Plus className="h-4 w-4 mr-2" /> Nouvelle Offre
+                <Plus className="h-4 w-4 mr-2" /> {t("enterprise.newOffer")}
               </Button>
             </div>
             {offers.length === 0 ? (
               <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
                 <CardContent className="py-12 text-center">
                   <Briefcase className="h-16 w-16 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-                  <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">Aucune offre</h3>
+                  <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">{t("enterprise.noOffers")}</h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                    Commencez par créer votre première offre d'emploi
+                    {t("enterprise.registerDesc")}
                   </p>
                   <Button onClick={() => router.push("/enterprise/offers/new")} className="rounded-xl">
-                    <Plus className="h-4 w-4 mr-2" /> Créer une Offre
+                    <Plus className="h-4 w-4 mr-2" /> {t("enterprise.createOffer")}
                   </Button>
                 </CardContent>
               </Card>
@@ -336,15 +338,15 @@ export default function EnterpriseDashboard() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${offer.isActive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"}`}>
-                        {offer.isActive ? "Active" : "Inactive"}
+                        {offer.isActive ? t("common.active") : t("common.inactive")}
                       </span>
                       <span className="text-xs text-slate-400">{offer.contractType || "—"}</span>
                     </div>
                     <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">{offer.title}</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4">{offer.description}</p>
                     <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span>{offer.location || "Non spécifié"}</span>
-                      <span>{offer.requiredSkills?.length || 0} compétences</span>
+                      <span>{offer.location || t("common.noData")}</span>
+                      <span>{offer.requiredSkills?.length || 0} {t("enterprise.requiredSkills")}</span>
                     </div>
                   </div>
                 ))}
@@ -355,11 +357,11 @@ export default function EnterpriseDashboard() {
 
         {activeTab === "stats" && (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Statistiques des Étudiants</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("enterprise.statistics")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-lg">Par Type de Bac</CardTitle>
+                  <CardTitle className="text-lg">{t("enterprise.studentsByBac")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {stats?.byBacType && Object.keys(stats.byBacType).length > 0 ? (
@@ -372,13 +374,13 @@ export default function EnterpriseDashboard() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-500 dark:text-slate-400 text-center py-4">Aucune donnée disponible</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-center py-4">{t("common.noData")}</p>
                   )}
                 </CardContent>
               </Card>
               <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-lg">Domaines d'Intérêt</CardTitle>
+                  <CardTitle className="text-lg">{t("enterprise.interestDomains")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {stats?.byDomain && stats.byDomain.length > 0 ? (
@@ -391,7 +393,7 @@ export default function EnterpriseDashboard() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-500 dark:text-slate-400 text-center py-4">Aucune donnée disponible</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-center py-4">{t("common.noData")}</p>
                   )}
                 </CardContent>
               </Card>

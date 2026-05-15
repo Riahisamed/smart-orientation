@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Download } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -9,6 +10,7 @@ type BeforeInstallPromptEvent = Event & {
 }
 
 export default function PWAInstallPrompt() {
+  const t = useTranslations()
   const [event, setEvent] = useState<BeforeInstallPromptEvent | null>(null)
   const [visible, setVisible] = useState(false)
 
@@ -39,13 +41,13 @@ export default function PWAInstallPrompt() {
         <div className="flex min-w-0 items-center gap-3">
           <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-blue-600 font-black text-white">SO</div>
           <div className="min-w-0">
-          <p className="font-semibold text-slate-900 dark:text-slate-100">Installer Smart Orientation</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Acces rapide et pages essentielles hors ligne.</p>
+          <p className="font-semibold text-slate-900 dark:text-slate-100">{t("pwa.installTitle")}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t("pwa.installDesc")}</p>
           </div>
         </div>
         <button onClick={install} className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700">
           <Download className="h-4 w-4" />
-          Installer
+          {t("common.installApp")}
         </button>
       </div>
     </div>

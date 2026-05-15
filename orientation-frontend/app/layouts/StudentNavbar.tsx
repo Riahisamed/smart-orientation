@@ -10,16 +10,20 @@ import { useAuthUser } from "@/lib/use-auth-user"
 import { ThemeToggle } from "../components/theme-toggle"
 import LanguageSwitcher from "../components/LanguageSwitcher"
 import { useState } from "react"
+import { useTranslations } from "@/lib/i18n/context"
 
 const links = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Orientation", href: "/orientation", icon: Compass },
-  { label: "FG Calculator", href: "/fg-calculator", icon: Calculator },
-  { label: "Test", href: "/orientation-test", icon: FileQuestion },
-  { label: "AI Assistant", href: "/chat", icon: Bot },
-]
+  { key: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { key: "nav.orientation", href: "/orientation", icon: Compass },
+  { key: "nav.fgCalculator", href: "/fg-calculator", icon: Calculator },
+  { key: "nav.test", href: "/orientation-test", icon: FileQuestion },
+  { key: "nav.aiAssistant", href: "/chat", icon: Bot },
+] as const
+
+
 
 export default function StudentNavbar() {
+  const t = useTranslations()
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuthUser()
@@ -43,7 +47,7 @@ export default function StudentNavbar() {
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
             <Sparkles className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-slate-900 dark:text-white hidden sm:block">Smart Orientation</span>
+          <span className="font-bold text-slate-900 dark:text-white hidden sm:block">{t("common.appName")}</span>
         </div>
 
         {/* Desktop Nav */}
@@ -61,7 +65,7 @@ export default function StudentNavbar() {
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {link.label}
+                {t(link.key)}
               </Link>
             )
           })}
@@ -88,14 +92,14 @@ export default function StudentNavbar() {
                     <p className="text-xs text-slate-500">{user.email}</p>
                   </div>
                   <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <User className="h-4 w-4" /> Profil
+                    <User className="h-4 w-4" /> {t("common.profile")}
                   </Link>
                   <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <Settings className="h-4 w-4" /> Paramètres
+                    <Settings className="h-4 w-4" /> {t("common.settings")}
                   </Link>
                   <hr className="my-1 border-slate-100 dark:border-slate-800" />
                   <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                    <LogOut className="h-4 w-4" /> Déconnexion
+                    <LogOut className="h-4 w-4" /> {t("common.logout")}
                   </button>
                 </div>
               </>
@@ -118,13 +122,13 @@ export default function StudentNavbar() {
               <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium ${pathname === link.href ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"}`}
               >
-                <Icon className="h-4 w-4" /> {link.label}
+                <Icon className="h-4 w-4" /> {t(link.key)}
               </Link>
             )
           })}
           <Link href="/notifications" onClick={() => setMobileOpen(false)}
             className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <Bell className="h-4 w-4" /> Notifications
+            <Bell className="h-4 w-4" /> {t("common.notifications")}
           </Link>
         </div>
       )}

@@ -11,8 +11,11 @@ import {
 } from "lucide-react"
 import { Button } from "lib/components/ui/button"
 import { Card, CardContent } from "lib/components/ui/card"
+import { useTranslations } from "@/lib/i18n/context"
+import LanguageSwitcher from "./components/LanguageSwitcher"
 
 export default function HomePage() {
+  const t = useTranslations()
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
 
@@ -33,14 +36,15 @@ export default function HomePage() {
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-lg text-slate-900 dark:text-white">Smart Orientation</span>
+            <span className="font-bold text-lg text-slate-900 dark:text-white">{t("common.appName")}</span>
           </div>
           <div className="flex items-center gap-4">
+            <LanguageSwitcher compact />
             <Link href="/choose-role" className="text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
-              Connexion
+              {t("home.login")}
             </Link>
             <Button onClick={() => router.push("/choose-role")} className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm h-9">
-              Commencer
+              {t("home.getStarted")}
             </Button>
           </div>
         </div>
@@ -57,39 +61,34 @@ export default function HomePage() {
         <div className="relative max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-8 animate-[fadeIn_0.5s_ease-in-out]">
             <Sparkles className="h-4 w-4" />
-            Plateforme d'Orientation Intelligente
+            {t("home.smartPlatform")}
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight animate-[fadeIn_0.6s_ease-in-out]">
-            Trouve ta voie{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              avec l'IA
-            </span>
+            {t("home.heroTagline")}
           </h1>
 
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-10 animate-[fadeIn_0.7s_ease-in-out]">
-            Une plateforme intelligente qui analyse ton profil académique, 
-            tes compétences et les tendances du marché pour te recommander 
-            la meilleure orientation professionnelle et académique.
+            {t("home.heroDesc")}
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 animate-[fadeIn_0.8s_ease-in-out]">
             <Button onClick={handleStart} className="rounded-xl h-12 px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-base font-medium shadow-lg shadow-blue-500/25">
               <Rocket className="h-5 w-5 mr-2" />
-              Commencer l'Orientation
+              {t("home.startOrientation")}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
             <Button onClick={() => router.push("/market-trends")} variant="outline" className="rounded-xl h-12 px-8 border-slate-300 dark:border-slate-700 text-base">
               <TrendingUp className="h-5 w-5 mr-2" />
-              Explorer le Marché
+              {t("home.exploreMarket")}
             </Button>
           </div>
 
           <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
             {[
-              { value: "50+", label: "Filières" },
-              { value: "1000+", label: "Étudiants" },
-              { value: "95%", label: "Satisfaction" },
+              { value: "50+", label: t("home.statsFilieres") },
+              { value: "1000+", label: t("home.statsStudents") },
+              { value: "95%", label: t("home.statsSatisfaction") },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
@@ -105,19 +104,19 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Comment ça marche ?
+              {t("home.howItWorks")}
             </h2>
             <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-              Un processus simple et guidé en 4 étapes
+              {t("home.simpleProcess")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
-              { step: "1", title: "Crée ton Profil", desc: "Ajoute tes notes, ton bac et tes centres d'intérêt", icon: User },
-              { step: "2", title: "Test d'Orientation", desc: "Réponds à notre questionnaire intelligent", icon: BookOpen },
-              { step: "3", title: "Analyse IA", desc: "Notre IA analyse ton profil et le marché", icon: Lightbulb },
-              { step: "4", title: "Recommandations", desc: "Reçois des filières adaptées à ton profil", icon: Target },
+              { step: "1", title: t("home.step1Title"), desc: t("home.step1Desc"), icon: User },
+              { step: "2", title: t("home.step2Title"), desc: t("home.step2Desc"), icon: BookOpen },
+              { step: "3", title: t("home.step3Title"), desc: t("home.step3Desc"), icon: Lightbulb },
+              { step: "4", title: t("home.step4Title"), desc: t("home.step4Desc"), icon: Target },
             ].map((item) => {
               const Icon = item.icon
               return (
@@ -139,21 +138,21 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Fonctionnalités Puissantes
+              {t("home.features")}
             </h2>
             <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-              Tout ce dont tu as besoin pour faire le bon choix
+              {t("home.featuresDesc")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: BarChart3, title: "Analyse Académique", desc: "Calcul précis du FG et du T-score basé sur ton bac et tes matières", color: "blue" },
-              { icon: Target, title: "Matching Intelligent", desc: "Algorithme déterministe qui compare ton profil aux filières disponibles", color: "indigo" },
-              { icon: TrendingUp, title: "Tendances du Marché", desc: "Données temps réel sur les métiers en demande et les salaires", color: "purple" },
-              { icon: Bot, title: "Assistant IA", desc: "Chatbot intelligent pour répondre à toutes tes questions d'orientation", color: "pink" },
-              { icon: Building2, title: "Espace Entreprise", desc: "Les recruteurs publient des offres et trouvent des talents compatibles", color: "green" },
-              { icon: Shield, title: "Recommandations", desc: "Suggestions personnalisées basées sur ton profil unique", color: "orange" },
+              { icon: BarChart3, title: t("home.academicAnalysis"), desc: t("home.featureAcademicDesc"), color: "blue" },
+              { icon: Target, title: t("home.matching"), desc: t("home.featureMatchingDesc"), color: "indigo" },
+              { icon: TrendingUp, title: t("home.marketData"), desc: t("home.featureMarketDesc"), color: "purple" },
+              { icon: Bot, title: t("home.aiAssistant"), desc: t("home.featureAIDesc"), color: "pink" },
+              { icon: Building2, title: t("home.enterpriseSpace"), desc: t("home.featureEnterpriseDesc"), color: "green" },
+              { icon: Shield, title: t("home.recommendations"), desc: t("home.featureRecommendationsDesc"), color: "orange" },
             ].map((feature) => {
               const Icon = feature.icon
               return (
@@ -176,17 +175,17 @@ export default function HomePage() {
       <section className="py-20 px-4 sm:px-6 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Marché du Travail Tunisien
+            {t("home.marketPreview")}
           </h2>
           <p className="text-indigo-100 text-lg mb-12 max-w-3xl mx-auto">
-            Découvre les métiers les plus demandés et les compétences clés du marché
+            {t("home.marketDesc")}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {[
-              { value: "40%", label: "Croissance Tech/an" },
-              { value: "55K TND", label: "Salaire moyen en IA" },
-              { value: "18+", label: "Secteurs analysés" },
+              { value: "40%", label: t("home.marketGrowthTech") },
+              { value: "55K TND", label: t("home.marketSalaryAI") },
+              { value: "18+", label: t("home.marketSectors") },
             ].map((stat) => (
               <div key={stat.label} className="p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
                 <p className="text-3xl font-bold mb-1">{stat.value}</p>
@@ -196,7 +195,7 @@ export default function HomePage() {
           </div>
 
           <Button onClick={() => router.push("/market-trends")} className="rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 h-12 px-8 font-medium">
-            Voir les Tendances
+            {t("home.viewTrends")}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
@@ -209,21 +208,20 @@ export default function HomePage() {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-6">
                 <Building2 className="h-4 w-4" />
-                Espace Recruteur
+                {t("home.recruiterSpace")}
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                Vous êtes une Entreprise ?
+                {t("home.enterpriseSection")}
               </h2>
               <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
-                Publiez vos offres de stage et d'emploi, trouvez les talents 
-                les plus compatibles grâce à notre système de matching intelligent.
+                {t("home.enterpriseDesc")}
               </p>
               <div className="space-y-4 mb-8">
                 {[
-                  "Publication d'offres avec compétences requises",
-                  "Matching automatique avec les profils étudiants",
-                  "Statistiques détaillées par domaine",
-                  "Dashboard RH complet",
+                  t("home.enterpriseFeature1"),
+                  t("home.enterpriseFeature2"),
+                  t("home.enterpriseFeature3"),
+                  t("home.enterpriseFeature4"),
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />
@@ -233,7 +231,7 @@ export default function HomePage() {
               </div>
               <Button onClick={() => router.push("/enterprise/register")} className="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white h-12 px-8">
                 <Building2 className="h-5 w-5 mr-2" />
-                Rejoindre comme Entreprise
+                {t("home.joinEnterprise")}
               </Button>
             </div>
             <div className="relative">
@@ -259,19 +257,19 @@ export default function HomePage() {
       <section className="py-20 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900/50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-            Prêt à Construire ton Avenir ?
+            {t("home.ctaTitle")}
           </h2>
           <p className="text-lg text-slate-500 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
-            Rejoins des milliers d'étudiants qui ont trouvé leur voie grâce à Smart Orientation
+            {t("home.ctaSubtitle")}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button onClick={handleStart} className="rounded-xl h-12 px-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-base font-medium shadow-lg">
               <Rocket className="h-5 w-5 mr-2" />
-              Commencer Maintenant
+              {t("home.startNow")}
             </Button>
             <Button onClick={() => router.push("/enterprise/register")} variant="outline" className="rounded-xl h-12 px-8 border-slate-300 dark:border-slate-700 text-base">
               <Building2 className="h-5 w-5 mr-2" />
-              Espace Entreprise
+              {t("home.enterpriseSpace")}
             </Button>
           </div>
         </div>
@@ -286,16 +284,16 @@ export default function HomePage() {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-white" />
                 </div>
-                <span className="font-bold text-slate-900 dark:text-white">Smart Orientation</span>
+                <span className="font-bold text-slate-900 dark:text-white">{t("common.appName")}</span>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Plateforme intelligente d'orientation professionnelle et académique
+                {t("home.footerDesc")}
               </p>
             </div>
             {[
-              { title: "Plateforme", links: ["Orientation", "Test", "Marché", "Chat IA"] },
-              { title: "Entreprises", links: ["Publier une Offre", "Talents", "Statistiques"] },
-              { title: "Support", links: ["FAQ", "Contact", "Aide", "Confidentialité"] },
+              { title: t("home.footerPlatform"), links: t("home.footerPlatformLinks").split(",") },
+              { title: t("home.footerEnterprises"), links: t("home.footerEnterpriseLinks").split(",") },
+              { title: t("home.footerSupport"), links: t("home.footerSupportLinks").split(",") },
             ].map((col) => (
               <div key={col.title}>
                 <h4 className="font-semibold text-slate-900 dark:text-white mb-4">{col.title}</h4>
@@ -312,7 +310,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-sm text-slate-400">
-            © 2026 Smart Orientation. Tous droits réservés.
+            {t("home.copyright")}
           </div>
         </div>
       </footer>

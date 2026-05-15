@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from '@/lib/i18n/context';
 
 export default function FloatingAIChat() {
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{role: string, content: string}[]>([
-    { role: 'assistant', content: 'مرحباً! أنا مساعد الذكاء الاصطناعي الخاص بك. كيف يمكنني مساعدتك اليوم؟' }
+    { role: 'assistant', content: t("chatbot.welcomeMessage") }
   ]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -29,7 +31,7 @@ export default function FloatingAIChat() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'شكراً على رسالتك! هذا رد تجريبي، يمكنك توصيل هذا المكون بخدمة الذكاء الاصطناعي الفعلية لاحقاً.' 
+        content: t("chatbot.error")
       }]);
     }, 1000);
   };
@@ -46,7 +48,7 @@ export default function FloatingAIChat() {
         focus:outline-none focus:ring-4 focus:ring-blue-500/30
         dark:from-blue-500 dark:to-indigo-500 dark:shadow-blue-500/20
         ${isOpen ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`}
-        aria-label="فتح دردشة الذكاء الاصطناعي"
+        aria-label={t("chatbot.title")}
       >
         <span className="text-2xl">🤖</span>
       </button>
@@ -67,15 +69,15 @@ export default function FloatingAIChat() {
               <span>🤖</span>
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900 dark:text-white text-sm">مساعد الذكاء الاصطناعي</h3>
-              <p className="text-xs text-green-500">متصل الآن</p>
+              <h3 className="font-semibold text-slate-900 dark:text-white text-sm">{t("chatbot.title")}</h3>
+              <p className="text-xs text-green-500">{t("common.active")}</p>
             </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
             className="w-8 h-8 rounded-full flex items-center justify-center
             hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            aria-label="إغلاق"
+            aria-label={t("common.close")}
           >
             <svg className="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -111,7 +113,7 @@ export default function FloatingAIChat() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="اكتب رسالتك هنا..."
+              placeholder={t("chatbot.placeholder")}
               className="flex-1 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 
               text-slate-900 dark:text-slate-100
               focus:outline-none focus:ring-2 focus:ring-blue-500

@@ -5,15 +5,20 @@ import { useRouter, useParams } from "next/navigation"
 import { API_BASE_URL } from "@/lib/api/config"
 import { Card, CardContent, CardHeader, CardTitle } from "lib/components/ui/card"
 import { Button } from "lib/components/ui/button"
-import { ArrowLeft, Loader2, MapPin, Briefcase, Users, Calendar, DollarSign, CheckCircle, XCircle, Award } from "lucide-react"
+import { ArrowLeft, MapPin, Briefcase, Users, Calendar, DollarSign, CheckCircle, XCircle, Award, Zap, Target, TrendingUp } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
+import { SkeletonLoader } from "@/lib/components/ui/skeleton-loader"
+import { EmptyState } from "@/lib/components/ui/empty-state"
+import { MatchingBadge } from "@/lib/components/ui/matching-badge"
+import { SkillTag } from "@/lib/components/ui/skill-tag"
 
 export default function OfferDetailPage() {
+  const t = useTranslations()
   const router = useRouter()
   const params = useParams()
   const [offer, setOffer] = useState<any>(null)
   const [compatibleStudents, setCompatibleStudents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [showMatching, setShowMatching] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -44,66 +49,96 @@ export default function OfferDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-8">
+            <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6">
+              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+            </button>
+          </div>
+          <SkeletonLoader count={1} type="chart" />
+        </div>
       </div>
     )
   }
 
   if (!offer) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card><CardContent className="p-8 text-center"><p className="text-slate-500">Offre non trouvée</p></CardContent></Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-4 flex items-center justify-center">
+        <EmptyState
+          icon={Briefcase}
+          title="Offer not found"
+          description="This offer may have been deleted or is no longer available."
+          action={{ label: "Back to offers", onClick: () => router.back() }}
+        />
       </div>
     )
   }
 
+  const avgCompatibility = compatibleStudents.length > 0
+    ? Math.round(compatibleStudents.reduce((sum, s) => sum + s.compatibility, 0) / compatibleStudents.length)
+    : 0
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-4">
       <div className="max-w-5xl mx-auto">
-        <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-6">
-          <ArrowLeft className="h-4 w-4" /> Retour
+        <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-6">
+          <ArrowLeft className="h-4 w-4" /> {t("common.back")}
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
+            {/* Main Card */}
             <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">{offer.title}</h1>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${offer.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}`}>
-                      {offer.isActive ? "Active" : "Inactive"}
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">{offer.title}</h1>
+                    <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${offer.isActive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"}`}>
+                      {offer.isActive ? t("enterprisePages.active") : t("enterprisePages.inactive")}
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                    <MapPin className="h-4 w-4 text-slate-400 mb-1" />
-                    <p className="text-xs text-slate-500">Localisation</p>
-                    <p className="text-sm font-medium">{offer.location || "Non spécifié"}</p>
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t("enterprise.location")}</p>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{offer.location || "—"}</p>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                    <Briefcase className="h-4 w-4 text-slate-400 mb-1" />
-                    <p className="text-xs text-slate-500">Contrat</p>
-                    <p className="text-sm font-medium">{offer.contractType || "Non spécifié"}</p>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t("enterprise.contractType")}</p>
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{offer.contractType || "—"}</p>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                    <DollarSign className="h-4 w-4 text-slate-400 mb-1" />
-                    <p className="text-xs text-slate-500">Salaire</p>
-                    <p className="text-sm font-medium">{offer.salary || "Non spécifié"}</p>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t("enterprise.salary")}</p>
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{offer.salary || "—"}</p>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                    <Calendar className="h-4 w-4 text-slate-400 mb-1" />
-                    <p className="text-xs text-slate-500">Publiée le</p>
-                    <p className="text-sm font-medium">{new Date(offer.createdAt).toLocaleDateString()}</p>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t("common.updated")}</p>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{new Date(offer.createdAt).toLocaleDateString()}</p>
+                    </div>
                   </div>
                 </div>
 
+                {/* Description */}
                 <div>
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Description</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{offer.description}</p>
+                  <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+                    <Target className="h-5 w-5 text-blue-600" />
+                    {t("enterprise.jobDescription")}
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">{offer.description}</p>
                 </div>
               </CardContent>
             </Card>
@@ -113,38 +148,36 @@ export default function OfferDetailPage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Users className="h-5 w-5 text-blue-600" />
-                  Étudiants Compatibles ({compatibleStudents.length})
+                  {t("enterprise.compatibleStudents")}
+                  <span className="ml-auto text-base font-normal text-slate-500">({compatibleStudents.length})</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {compatibleStudents.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Users className="h-12 w-12 mx-auto text-slate-300 mb-3" />
-                    <p className="text-slate-500">Aucun étudiant compatible trouvé pour cette offre</p>
-                    <p className="text-xs text-slate-400 mt-1">Ajoutez des compétences requises pour améliorer le matching</p>
-                  </div>
+                  <EmptyState
+                    icon={Users}
+                    title="No compatible students yet"
+                    description="Students will appear here when they match your offer requirements"
+                    iconColor="blue"
+                    className="p-8"
+                  />
                 ) : (
                   <div className="space-y-3">
                     {compatibleStudents.map((student: any) => (
-                      <div key={student.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                            <span className="font-bold text-blue-600 dark:text-blue-400">{student.name.charAt(0)}</span>
+                      <div key={student.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800 transition-colors gap-3">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <span className="font-bold text-white text-sm">{student.name.charAt(0)}</span>
                           </div>
-                          <div>
-                            <p className="font-medium text-slate-900 dark:text-slate-100">{student.name}</p>
-                            <p className="text-xs text-slate-500">{student.bacType} • MG: {student.bacAverage}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">{student.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {student.bacType} {student.bacAverage && `• Avg: ${student.bacAverage}`}
+                            </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                            student.compatibility >= 70 ? "bg-green-100 text-green-700" :
-                            student.compatibility >= 40 ? "bg-amber-100 text-amber-700" :
-                            "bg-red-100 text-red-700"
-                          }`}>
-                            <Award className="h-3 w-3" />
-                            {student.compatibility}%
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <MatchingBadge percentage={student.compatibility} size="md" />
                         </div>
                       </div>
                     ))}
@@ -156,25 +189,57 @@ export default function OfferDetailPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Matching Stats */}
+            <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-500" />
+                  Matching Stats
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Avg. Compatibility</p>
+                  <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{avgCompatibility}%</p>
+                </div>
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Total Students</span>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{compatibleStudents.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Excellent Match (80%+)</span>
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                      {compatibleStudents.filter((s) => s.compatibility >= 80).length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-600 dark:text-slate-400">Good Match (60-79%)</span>
+                    <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                      {compatibleStudents.filter((s) => s.compatibility >= 60 && s.compatibility < 80).length}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Required Skills */}
             <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  Compétences Requises
+                  {t("enterprise.requiredSkills")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {offer.requiredSkills?.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {offer.requiredSkills.map((skill: any, i: number) => (
-                      <span key={i} className="px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
-                        {skill.name}
-                      </span>
+                      <SkillTag key={i} name={skill.name} variant="secondary" />
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500 text-center py-4">Aucune compétence spécifiée</p>
+                  <p className="text-sm text-slate-500 text-center py-4">{t("common.noData")}</p>
                 )}
               </CardContent>
             </Card>
@@ -182,23 +247,27 @@ export default function OfferDetailPage() {
             {/* Actions */}
             <Card className="rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-lg">Actions</CardTitle>
+                <CardTitle className="text-lg">{t("common.actions")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full rounded-xl" variant={offer.isActive ? "outline" : "default"} onClick={async () => {
-                  const token = localStorage.getItem("token")
-                  await fetch(`${API_BASE_URL}/enterprise/offers/${offer.id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ isActive: !offer.isActive }),
-                  })
-                  window.location.reload()
-                }}>
+                <Button
+                  className="w-full rounded-xl"
+                  variant={offer.isActive ? "outline" : "default"}
+                  onClick={async () => {
+                    const token = localStorage.getItem("token")
+                    await fetch(`${API_BASE_URL}/enterprise/offers/${offer.id}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ isActive: !offer.isActive }),
+                    })
+                    window.location.reload()
+                  }}
+                >
                   {offer.isActive ? <XCircle className="h-4 w-4 mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-                  {offer.isActive ? "Désactiver" : "Activer"}
+                  {offer.isActive ? t("enterprisePages.deactivate") : t("enterprisePages.activate")}
                 </Button>
                 <Button className="w-full rounded-xl" variant="outline" onClick={() => router.push(`/enterprise/offers/${offer.id}/edit`)}>
-                  Modifier l'Offre
+                  {t("enterprise.editOffer")}
                 </Button>
               </CardContent>
             </Card>

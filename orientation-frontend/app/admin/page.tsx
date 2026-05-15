@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Bell, FileUp, GraduationCap, LineChart, PieChart, TrendingUp, Users } from "lucide-react"
 import { API_BASE_URL } from "@/lib/api/config"
+import { useTranslations } from "@/lib/i18n/context"
 
 type ChartItem = { label: string; value: number; color?: string }
 
@@ -93,6 +94,7 @@ function LineTrend({ items }: { items: ChartItem[] }) {
 }
 
 export default function AdminDashboard() {
+  const t = useTranslations()
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -115,7 +117,7 @@ export default function AdminDashboard() {
     })
       .then((res) => res.json())
       .then(setStats)
-      .catch(() => setMessage("Impossible de charger les statistiques"))
+      .catch(() => setMessage(t("errors.generic")))
 
     fetch(`${API_BASE_URL}/admin/students`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -155,9 +157,9 @@ export default function AdminDashboard() {
         body: formData,
       })
       const data = await res.json()
-      setMessage(data.message || "Guide importe")
+      setMessage(data.message || t("common.success"))
     } catch {
-      setMessage("Erreur pendant l'import")
+      setMessage(t("errors.generic"))
     } finally {
       setLoading(false)
     }
@@ -176,23 +178,23 @@ export default function AdminDashboard() {
         body: JSON.stringify(notification),
       })
       setNotification({ title: "", message: "" })
-      setMessage("Notification envoyee")
+      setMessage(t("common.success"))
       setNotifications((current) => [
         { id: Date.now(), ...notification, createdAt: new Date().toISOString() },
         ...current,
       ])
     } catch {
-      setMessage("Erreur notification")
+      setMessage(t("errors.generic"))
     } finally {
       setLoading(false)
     }
   }
 
   const cards = [
-    { label: "Etudiants", value: stats?.totals?.students ?? 0, icon: Users },
-    { label: "Utilisateurs", value: stats?.totals?.users ?? 0, icon: GraduationCap },
-    { label: "Filieres", value: stats?.totals?.filieres ?? 0, icon: LineChart },
-    { label: "Tests", value: stats?.totals?.tests ?? 0, icon: Bell },
+    { label: t("admin.students"), value: stats?.totals?.students ?? 0, icon: Users },
+    { label: t("common.users"), value: stats?.totals?.users ?? 0, icon: GraduationCap },
+    { label: t("dashboard.title"), value: stats?.totals?.filieres ?? 0, icon: LineChart },
+    { label: t("nav.test"), value: stats?.totals?.tests ?? 0, icon: Bell },
   ]
   const bacChart = (stats?.bacTypes ?? []).map((item: any, index: number) => ({ label: item.bacType, value: item.count, color: palette[index % palette.length] }))
   const domainChart = (stats?.popularDomains ?? []).map((item: any, index: number) => ({ label: item.domain, value: item.count, color: palette[index % palette.length] }))
@@ -203,9 +205,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950">
       <div className="mx-auto max-w-7xl space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Administration</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{t("admin.title")}</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Gestion des etudiants, statistiques, notifications et import du guide.
+            {t("admin.dashboard")}
           </p>
         </div>
 
@@ -233,7 +235,7 @@ export default function AdminDashboard() {
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Domaines populaires</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("enterprise.interestDomains")}</h2>
               <LineChart className="h-5 w-5 text-blue-600" />
             </div>
             <div className="mt-5">
@@ -243,7 +245,7 @@ export default function AdminDashboard() {
 
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Distribution bac</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("dashboard.bacType")}</h2>
               <PieChart className="h-5 w-5 text-emerald-600" />
             </div>
             <div className="mt-5">
@@ -253,7 +255,7 @@ export default function AdminDashboard() {
 
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Tendances orientation</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("marketTrends.title")}</h2>
               <TrendingUp className="h-5 w-5 text-violet-600" />
             </div>
             <div className="mt-2">
@@ -262,14 +264,14 @@ export default function AdminDashboard() {
           </section>
 
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Demande marche</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("marketTrends.demand")}</h2>
             <div className="mt-5">
               {marketChart.length > 0 ? <MiniBarChart items={marketChart} /> : <p className="text-sm text-slate-500">Aucun snapshot marche.</p>}
             </div>
           </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Importer le guide PDF</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("common.import")}</h2>
             <div className="mt-4 flex flex-col gap-3">
               <input type="file" accept=".pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
               <button
@@ -278,36 +280,36 @@ export default function AdminDashboard() {
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white disabled:bg-slate-400"
               >
                 <FileUp className="h-4 w-4" />
-                {loading ? "Traitement..." : "Importer"}
+                {loading ? t("common.loading") : t("common.import")}
               </button>
             </div>
           </section>
         </div>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Envoyer une notification</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("notifications.title")}</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-[1fr_2fr_auto]">
             <input
               className="rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
-              placeholder="Titre"
+              placeholder={t("notifications.title")}
               value={notification.title}
               onChange={(event) => setNotification((current) => ({ ...current, title: event.target.value }))}
             />
             <input
               className="rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
-              placeholder="Message"
+              placeholder={t("common.message")}
               value={notification.message}
               onChange={(event) => setNotification((current) => ({ ...current, message: event.target.value }))}
             />
             <button onClick={sendNotification} className="rounded-lg bg-slate-900 px-4 py-2 text-white dark:bg-slate-100 dark:text-slate-950">
-              Envoyer
+              {t("chatbot.send")}
             </button>
           </div>
         </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Gestion des domaines</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("enterprise.interestDomains")}</h2>
             <div className="mt-4 max-h-80 space-y-2 overflow-auto">
               {domains.slice(0, 30).map((domain) => (
                 <div key={domain.id || domain.field} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-950">
@@ -322,7 +324,7 @@ export default function AdminDashboard() {
           </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Notifications envoyees</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("notifications.pageTitle")}</h2>
             <div className="mt-4 max-h-80 space-y-2 overflow-auto">
               {notifications.map((item) => (
                 <div key={item.id} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-950">
@@ -336,15 +338,15 @@ export default function AdminDashboard() {
         </div>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Etudiants recents</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("admin.students")}</h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="text-slate-500">
                 <tr>
-                  <th className="py-2">Nom</th>
-                  <th className="py-2">Email</th>
-                  <th className="py-2">Bac</th>
-                  <th className="py-2">FG</th>
+                  <th className="py-2">{t("profile.displayName")}</th>
+                  <th className="py-2">{t("auth.email")}</th>
+                  <th className="py-2">{t("dashboard.bacType")}</th>
+                  <th className="py-2">{t("dashboard.fgScore")}</th>
                 </tr>
               </thead>
               <tbody>

@@ -9,8 +9,10 @@ import { useAuthUser } from '@/lib/use-auth-user';
 import { ThemeToggle } from './theme-toggle';
 import LanguageSwitcher from './LanguageSwitcher';
 import ChatModal from './ChatModal';
+import { useTranslations } from '@/lib/i18n/context';
 
 export default function Navbar() {
+  const t = useTranslations();
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -18,12 +20,12 @@ export default function Navbar() {
   const { isAuthenticated, logout, user } = useAuthUser();
 
   const navigationLinks = [
-    { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Orientation', href: '/orientation' },
-    { label: 'Test', href: '/orientation-test' },
-    { label: 'T Calculator', href: '/t-calculator' },
-    { label: 'FG Calculator', href: '/fg-calculator' },
-    { label: 'AI Assistant', href: '/chat', icon: Bot },
+    { key: 'nav.dashboard', href: '/dashboard' },
+    { key: 'nav.orientation', href: '/orientation' },
+    { key: 'nav.test', href: '/orientation-test' },
+    { key: 'nav.tCalculator', href: '/t-calculator' },
+    { key: 'nav.fgCalculator', href: '/fg-calculator' },
+    { key: 'nav.aiAssistant', href: '/chat', icon: Bot },
   ];
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export default function Navbar() {
                 }`}
               >
                 {Icon ? <Icon className="h-4 w-4" /> : null}
-                {link.label}
+                {t(link.key)}
                 {pathname === link.href && (
                   <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-blue-600 dark:bg-blue-400" />
                 )}
@@ -122,7 +124,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                   >
                     <User className="h-4 w-4" />
-                    Profil
+                    {t("common.profile")}
                   </Link>
 
                   <Link
@@ -131,7 +133,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
                   >
                     <Settings className="h-4 w-4" />
-                    Parametres
+                    {t("common.settings")}
                   </Link>
 
                   <hr className="my-1 border-gray-200 dark:border-gray-700" />
@@ -142,7 +144,7 @@ export default function Navbar() {
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-red-950/20"
                   >
                     <LogOut className="h-4 w-4" />
-                    {isLoggingOut ? 'Deconnexion...' : 'Deconnexion'}
+                    {isLoggingOut ? t("common.loading") : t("common.logout")}
                   </button>
                 </div>
               </>

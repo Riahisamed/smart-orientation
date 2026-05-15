@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import AdminNavbar from "../layouts/AdminNavbar"
+import HomeButton from "../components/navigation/HomeButton"
+import DashboardButton from "../components/navigation/DashboardButton"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -54,6 +56,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="min-h-screen w-full pt-16">
         {children}
       </main>
+      {/* Fixed navigation buttons - bottom-left for quick access */}
+      <div className="fixed bottom-6 left-6 z-40 flex flex-col gap-2">
+        <HomeButton compact />
+        <DashboardButton compact />
+      </div>
     </>
   )
 }

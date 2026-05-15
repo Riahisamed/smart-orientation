@@ -7,6 +7,7 @@ import { Input } from "@/lib/components/ui/input"
 import { Button } from "@/lib/components/ui/button"
 import { Label } from "@/lib/components/ui/label"
 import { API_BASE_URL } from "@/lib/api/config"
+import { useTranslations } from "@/lib/i18n/context"
 
 const bacSubjects:any = {
 
@@ -21,6 +22,7 @@ sport:["MG","BioSport","Sport","EP","Physics","Philosophy","French","English"]
 }
 
 export default function FGCalculator(){
+const t = useTranslations()
 
 const [bacType,setBacType] = useState("math")
 const [mode,setMode] = useState("principale")
@@ -158,20 +160,20 @@ await fetch(`${API_BASE_URL}/student/update`,{
        className="mb-4 rounded-xl"
        onClick={()=>router.push("/dashboard")}
      >
-       ← Back to Dashboard
+       {t("common.back")} {t("fgCalculator.backToDashboard")}
      </Button>
 
      <div className="space-y-3">
-       <p className="text-sm uppercase tracking-[0.3em] text-blue-600">FG Calculator</p>
-       <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">Calculate your final FG score</h1>
-       <p className="text-sm text-slate-500 dark:text-slate-400">Enter your bac inputs and get your FG score instantly.</p>
+       <p className="text-sm uppercase tracking-[0.3em] text-blue-600">{t("fgCalculator.title")}</p>
+       <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{t("fgCalculator.subtitle")}</h1>
+       <p className="text-sm text-slate-500 dark:text-slate-400">{t("fgCalculator.description")}</p>
      </div>
 
      <Card className="rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-xl shadow-slate-300/20 dark:border-slate-800 dark:bg-slate-900/95">
        <CardContent className="p-6 space-y-6">
          
          <div className="space-y-2">
-           <Label>Bac Type</Label>
+           <Label>{t("fgCalculator.bacType")}</Label>
            <select
              value={bacType}
              onChange={(e)=>setBacType(e.target.value)}
@@ -193,7 +195,7 @@ await fetch(`${API_BASE_URL}/student/update`,{
              className="flex-1 rounded-xl"
              onClick={()=>setMode("principale")}
            >
-             Principale
+             {t("fgCalculator.principale")}
            </Button>
 
            <Button
@@ -201,7 +203,7 @@ await fetch(`${API_BASE_URL}/student/update`,{
              className="flex-1 rounded-xl"
              onClick={()=>setMode("controle")}
            >
-             Controle
+             {t("fgCalculator.controle")}
            </Button>
          </div>
 
@@ -214,7 +216,7 @@ await fetch(`${API_BASE_URL}/student/update`,{
 
                <Input
                  className="rounded-xl"
-                 placeholder={s+" principale"}
+                 placeholder={t("fgCalculator.placeholderPrincipale", { subject: s })}
                  type="number"
                  onChange={(e)=>handleChange(s,Number(e.target.value))}
                />
@@ -222,7 +224,7 @@ await fetch(`${API_BASE_URL}/student/update`,{
                {mode==="controle" && (
                  <Input
                    className="rounded-xl mt-2"
-                   placeholder={s+" controle"}
+                   placeholder={t("fgCalculator.placeholderControle", { subject: s })}
                    type="number"
                    onChange={(e)=>handleChange(s+"_control",Number(e.target.value))}
                  />
@@ -237,14 +239,14 @@ await fetch(`${API_BASE_URL}/student/update`,{
            onClick={calculate}
            className="w-full rounded-2xl py-3 mt-4"
          >
-           Calculate FG
+           {t("fgCalculator.calculate")}
          </Button>
 
          {fg !== null && (
 
            <div className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950/50">
 
-             <p className="text-sm text-blue-600 dark:text-blue-400">FG Score</p>
+             <p className="text-sm text-blue-600 dark:text-blue-400">{t("fgCalculator.result")}</p>
 
              <p className="text-4xl font-bold text-blue-700 dark:text-blue-300 mt-2">
                {fg.toFixed(2)}

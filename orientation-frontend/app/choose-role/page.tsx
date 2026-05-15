@@ -4,16 +4,18 @@ import { useRouter } from "next/navigation"
 import { GraduationCap, Building2, Shield, ArrowRight, Sparkles } from "lucide-react"
 import { Card, CardContent, CardDescription, CardTitle } from "lib/components/ui/card"
 import { Button } from "lib/components/ui/button"
+import { useTranslations } from "@/lib/i18n/context"
 
 export default function ChooseRolePage() {
+  const t = useTranslations()
   const router = useRouter()
 
   const roles = [
     {
       id: "student",
       icon: GraduationCap,
-      title: "Étudiant",
-      description: "Découvre les filières qui te correspondent, test ton orientation et explore le marché du travail",
+      title: t("chooseRole.student"),
+      description: t("chooseRole.studentDesc"),
       href: "/login",
       gradient: "from-blue-500 to-indigo-600",
       bgLight: "bg-blue-50 dark:bg-blue-950/30",
@@ -22,8 +24,8 @@ export default function ChooseRolePage() {
     {
       id: "enterprise",
       icon: Building2,
-      title: "Entreprise / RH",
-      description: "Publie des offres, trouve les talents compatibles et analyse les statistiques étudiants",
+      title: t("chooseRole.enterprise"),
+      description: t("chooseRole.enterpriseDesc"),
       href: "/enterprise/login",
       gradient: "from-green-500 to-emerald-600",
       bgLight: "bg-green-50 dark:bg-green-950/30",
@@ -32,8 +34,8 @@ export default function ChooseRolePage() {
     {
       id: "admin",
       icon: Shield,
-      title: "Administrateur",
-      description: "Accède au tableau de bord administrateur, gère les utilisateurs et les données",
+      title: t("chooseRole.admin"),
+      description: t("chooseRole.adminDesc"),
       href: "/admin/login",
       gradient: "from-purple-500 to-violet-600",
       bgLight: "bg-purple-50 dark:bg-purple-950/30",
@@ -47,13 +49,13 @@ export default function ChooseRolePage() {
         <div className="text-center mb-12 animate-[fadeIn_0.5s_ease-in-out]">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4">
             <Sparkles className="h-4 w-4" />
-            Smart Orientation
+            {t("common.appName")}
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
-            Choisissez votre espace
+            {t("chooseRole.title")}
           </h1>
           <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-            Sélectionnez le type de compte qui correspond à votre profil
+            {t("chooseRole.subtitle")}
           </p>
         </div>
 
@@ -77,7 +79,7 @@ export default function ChooseRolePage() {
                     onClick={() => router.push(role.href)}
                     className={`w-full rounded-xl h-11 bg-gradient-to-r ${role.gradient} hover:opacity-90 text-white font-medium inline-flex items-center justify-center gap-2`}
                   >
-                    Continuer
+                    {t("chooseRole.continue")}
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -88,7 +90,7 @@ export default function ChooseRolePage() {
 
         <div className="text-center">
           <button onClick={() => router.push("/")} className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
-            ← Retour à l'accueil
+            ← {t("chooseRole.backToHome")}
           </button>
         </div>
       </div>

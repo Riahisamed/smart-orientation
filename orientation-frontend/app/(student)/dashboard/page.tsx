@@ -9,8 +9,10 @@ import { Button } from "lib/components/ui/button"
 import { Input } from "lib/components/ui/input"
 import { Select } from "lib/components/ui/select"
 import { API_BASE_URL } from "@/lib/api/config"
+import { useTranslations } from "@/lib/i18n/context"
 
 export default function Dashboard() {
+  const t = useTranslations()
   const [fg, setFG] = useState(0)
   const [student, setStudent] = useState<any>(null)
   const [filieres, setFilieres] = useState<any[]>([])
@@ -82,9 +84,9 @@ export default function Dashboard() {
         {/* TOP */}
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between mb-10">
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{t("dashboard.title")}</h1>
             <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-              Access score summaries, comparisons, and quick navigation to your orientation tools.
+              {t("dashboard.subtitle")}
             </p>
           </div>
 
@@ -98,7 +100,7 @@ export default function Dashboard() {
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">FG Score</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.fgScore")}</p>
                   <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-2">{fg}</p>
                 </div>
               </CardContent>
@@ -110,7 +112,7 @@ export default function Dashboard() {
                   <User className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Bac Type</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.bacType")}</p>
                   <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-2">
                     {student?.bacType || "-"}
                   </p>
@@ -124,7 +126,7 @@ export default function Dashboard() {
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Average</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.average")}</p>
                   <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-2">
                     {student?.bacAverage ?? 0}
                   </p>
@@ -135,7 +137,7 @@ export default function Dashboard() {
         {/* Comparison Section */}
         <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Latest Calculation</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">{t("dashboard.latestCalculation")}</h2>
 
             {comparison ? (
               <>
@@ -146,7 +148,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
                     <CardContent className="p-4 text-center">
-                      <h3 className="text-sm text-slate-500 dark:text-slate-400">Your T Score</h3>
+                      <h3 className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.yourScore")}</h3>
                       <p className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-1">
                         {parseFloat(comparison.tScore).toFixed(2)}
                       </p>
@@ -155,7 +157,7 @@ export default function Dashboard() {
 
                   <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
                     <CardContent className="p-4 text-center">
-                      <h3 className="text-sm text-slate-500 dark:text-slate-400">Last Year Score</h3>
+                      <h3 className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.lastYearScore")}</h3>
                       <p className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-1">
                         {parseFloat(comparison.lastScore).toFixed(2)}
                       </p>
@@ -164,7 +166,7 @@ export default function Dashboard() {
 
                   <Card className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
                     <CardContent className="p-4 text-center">
-                      <h3 className="text-sm text-slate-500 dark:text-slate-400">Acceptance Probability</h3>
+                      <h3 className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.acceptanceProbability")}</h3>
                       <p className={`text-xl font-bold ${
                         comparison.probability >= 70 ? "green" : 
                         comparison.probability >= 40 ? "orange" : "red"
@@ -180,7 +182,7 @@ export default function Dashboard() {
               </>
             ) : (
               <p className="text-slate-500 dark:text-slate-400 text-center py-8">
-                No calculation data available yet. Go to T Calculator to compute your score.
+                {t("dashboard.noCalculationData")}
               </p>
             )}
           </CardContent>

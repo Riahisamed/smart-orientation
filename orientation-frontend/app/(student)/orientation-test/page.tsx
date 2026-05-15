@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Award, BriefcaseBusiness, Download, GraduationCap, Lightbulb, Send, TrendingUp } from "lucide-react"
 import { API_BASE_URL } from "@/lib/api/config"
+import { useTranslations } from "@/lib/i18n/context"
 
 type OrientationQuestion = {
   id: string
@@ -30,6 +31,7 @@ const demandFor = (percent: number) => (percent >= 80 ? "Elevee" : percent >= 55
 const outlookFor = (percent: number) => (percent >= 80 ? "Tres prometteur" : percent >= 55 ? "Bon potentiel" : "A explorer")
 
 export default function OrientationTestPage() {
+  const t = useTranslations()
   const [answers, setAnswers] = useState<Record<string, number>>({})
   const [questions, setQuestions] = useState<OrientationQuestion[]>([])
   const [interests, setInterests] = useState("")
@@ -80,12 +82,12 @@ export default function OrientationTestPage() {
         body: JSON.stringify(payload),
       })
 
-      if (!res.ok) throw new Error("Submit failed")
+      if (!res.ok) throw new Error(t("orientationTest.errorSave"))
       const data = await res.json()
       setResult(data)
       setLatest(data.test)
     } catch {
-      setError("Impossible d'enregistrer le test. Connectez-vous puis reessayez.")
+      setError(t("orientationTest.errorSave"))
     } finally {
       setLoading(false)
     }
@@ -115,9 +117,9 @@ export default function OrientationTestPage() {
     <div className="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950">
       <div className="mx-auto max-w-4xl space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Test d'orientation</h1>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{t("orientationTest.title")}</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Repondez aux questions pour generer des recommandations et un rapport PDF.
+            {t("orientationTest.description")}
           </p>
         </div>
 
@@ -141,7 +143,7 @@ export default function OrientationTestPage() {
 
           <textarea
             className="min-h-24 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
-            placeholder="Interets personnels, metiers preferes, contraintes..."
+            placeholder={t("orientationTest.personalInterests")}
             value={interests}
             onChange={(event) => setInterests(event.target.value)}
           />
@@ -152,7 +154,7 @@ export default function OrientationTestPage() {
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-medium text-white disabled:bg-slate-400"
           >
             <Send className="h-4 w-4" />
-            {loading ? "Analyse..." : "Envoyer le test"}
+            {loading ? t("orientationTest.analyzing") : t("orientationTest.submitTest")}
           </button>
         </section>
 
@@ -161,14 +163,14 @@ export default function OrientationTestPage() {
             <div className="border-b border-slate-100 bg-slate-50 px-5 py-4 dark:border-slate-800 dark:bg-slate-950/50">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Resultats intelligents</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Compatibilite, demande marche et perspectives par domaine.</p>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("orientationTest.smartResults")}</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("orientationTest.compatibilityDesc")}</p>
                 </div>
                 {topDomain && (
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
                       <Award className="h-4 w-4" />
-                      Top recommandation
+                      {t("orientationTest.topRecommendation")}
                     </div>
                     <p className="mt-1 font-bold">{topDomain.domain}</p>
                   </div>
@@ -199,22 +201,22 @@ export default function OrientationTestPage() {
                     </div>
                     <div className="mt-4">
                       <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                        <span>Score {item.score}</span>
-                        <span>Compatibilite</span>
+                        <span>{t("orientationTest.score")} {item.score}</span>
+                        <span>{t("orientationTest.compatibility")}</span>
                       </div>
                       <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/80 dark:bg-slate-800">
                         <div className={`h-full rounded-full ${tone.bar} transition-all duration-700 ease-out`} style={{ width: `${percent}%` }} />
                       </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium">
-                      <span className="rounded-full bg-white px-2.5 py-1 text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">Demande: {demandFor(percent)}</span>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">Avenir: {outlookFor(percent)}</span>
-                      {index === 0 && <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-white">Recommande</span>}
+                      <span className="rounded-full bg-white px-2.5 py-1 text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">{t("orientationTest.demand")}: {demandFor(percent)}</span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-200">{t("orientationTest.outlook")}: {outlookFor(percent)}</span>
+                      {index === 0 && <span className="rounded-full bg-emerald-600 px-2.5 py-1 text-white">{t("orientationTest.recommended")}</span>}
                     </div>
                   </div>
                 )
               })}
-              {domainResults.length === 0 && <p className="text-sm text-slate-500">Pas encore de resultats disponibles.</p>}
+              {domainResults.length === 0 && <p className="text-sm text-slate-500">{t("orientationTest.noResultsYet")}</p>}
             </div>
             {reportId && (
               <button
@@ -222,7 +224,7 @@ export default function OrientationTestPage() {
                 className="mx-5 mb-5 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-100 dark:text-slate-950"
               >
                 <Download className="h-4 w-4" />
-                Telecharger le rapport PDF
+                {t("orientationTest.downloadPdf")}
               </button>
             )}
           </section>

@@ -10,8 +10,11 @@ import { Label } from "../components/ui/label"
 import { Chrome } from "lucide-react"
 import Link from "next/link"
 import { API_BASE_URL } from "@/lib/api/config"
+import { useTranslations } from "@/lib/i18n/context"
+import BackToHomeButton from "../components/navigation/BackToHomeButton"
 
 export default function AuthPage() {
+  const t = useTranslations()
 
   const router = useRouter()
   const { data: session, status } = useSession()
@@ -39,7 +42,7 @@ export default function AuthPage() {
     setError("")
 
     if (!email || !password) {
-      setError("Fill all fields")
+      setError(t("auth.fillAllFields"))
       return
     }
 
@@ -58,7 +61,7 @@ export default function AuthPage() {
       const data = await res.json()
       
       if (!res.ok) {
-        setError(data.message || "Login failed")
+        setError(data.message || t("auth.loginFailed"))
         return
       }
 
@@ -77,7 +80,7 @@ if (data.user.role === "ADMIN") {
 
     } catch (err) {
       console.error(err)
-      setError("Server error")
+      setError(t("auth.serverError"))
     } finally {
       setLoading(false)
     }
@@ -98,12 +101,12 @@ if (data.user.role === "ADMIN") {
     setError("")
 
     if (!email || !password || !confirmPassword) {
-      setError("Fill all fields")
+      setError(t("auth.fillAllFields"))
       return
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
+      setError(t("auth.passwordsDoNotMatch"))
       return
     }
 
@@ -122,16 +125,16 @@ if (data.user.role === "ADMIN") {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message || "Register failed")
+        setError(data.message || t("auth.registerFailed"))
         return
       }
 
       setMode("login")
-      setError("Account created, login now")
+      setError(t("auth.accountCreated"))
 
     } catch (err) {
       console.error(err)
-      setError("Server error")
+      setError(t("auth.serverError"))
     } finally {
       setLoading(false)
     }
@@ -142,18 +145,22 @@ if (data.user.role === "ADMIN") {
 
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-100 via-slate-50 to-white px-4 py-10 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
 
+      <div className="fixed top-4 left-4 z-50">
+        <BackToHomeButton />
+      </div>
+
       <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md items-center justify-center">
 
         <Card className="w-full rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-xl shadow-slate-300/20 dark:border-slate-800 dark:bg-slate-900/95">
 
           <CardHeader className="space-y-3 pb-6">
             <CardTitle className="text-3xl text-slate-900 dark:text-slate-100">
-              {mode === "login" ? "Welcome Back" : "Create Your Account"}
+              {mode === "login" ? t("auth.welcomeBack") : t("auth.createAccount")}
             </CardTitle>
             <CardDescription className="text-sm text-slate-500 dark:text-slate-400">
               {mode === "login"
-                ? "Welcome back! Please enter your details."
-                : "Create your account to continue."}
+                ? t("auth.welcomeBackDesc")
+                : t("auth.createAccountDesc")}
             </CardDescription>
           </CardHeader>
 
@@ -164,22 +171,22 @@ if (data.user.role === "ADMIN") {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 className="rounded-xl"
-                placeholder="Email"
+                placeholder={t("auth.email")}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Input
                 id="password"
                 type="password"
                 className="rounded-xl"
-                placeholder="Password"
+                placeholder={t("auth.password")}
                 onChange={(e) => setPassword(e.target.value)}
               />
 
@@ -188,19 +195,19 @@ if (data.user.role === "ADMIN") {
                   href="/forgot-password"
                   className="block text-right text-sm font-medium text-slate-600 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                 >
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Link>
               )}
             </div>
 
             {mode === "register" && (
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   className="rounded-xl"
-                  placeholder="Confirm Password"
+                  placeholder={t("auth.confirmPassword")}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
@@ -209,7 +216,7 @@ if (data.user.role === "ADMIN") {
             {mode === "login" && (
               <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                 <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-slate-900 dark:border-slate-600 dark:bg-slate-900" />
-                Remember me
+                {t("common.rememberMe")}
               </label>
             )}
 
@@ -219,10 +226,10 @@ if (data.user.role === "ADMIN") {
               className="h-11 w-full rounded-xl"
             >
               {loading
-                ? "Loading..."
+                ? t("common.loading")
                 : mode === "login"
-                  ? "SIGN IN"
-                  : "SIGN UP"}
+                  ? t("auth.signIn").toUpperCase()
+                  : t("auth.signUp").toUpperCase()}
             </Button>
 
             {mode === "login" && (
@@ -232,7 +239,7 @@ if (data.user.role === "ADMIN") {
                     <span className="w-full border-t border-slate-200 dark:border-slate-700" />
                   </div>
                   <span className="relative mx-auto block w-fit bg-white px-2 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/90 dark:text-slate-400">
-                    Or continue with
+                    {t("auth.orContinueWith")}
                   </span>
                 </div>
 
@@ -243,7 +250,7 @@ if (data.user.role === "ADMIN") {
                   className="h-11 w-full rounded-xl gap-2"
                 >
                   <Chrome className="h-4 w-4" />
-                  Sign in with Google
+                  {t("auth.signInWithGoogle")}
                 </Button>
               </>
             )}
@@ -253,24 +260,24 @@ if (data.user.role === "ADMIN") {
           <CardFooter className="justify-center pt-1">
             {mode === "login" ? (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Don&apos;t have an account?{" "}
+                {t("auth.dontHaveAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => setMode("register")}
                   className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
                 >
-                  Sign up
+                  {t("auth.signUpLink")}
                 </button>
               </p>
             ) : (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Already have an account?{" "}
+                {t("auth.alreadyHaveAccount")}{" "}
                 <button
                   type="button"
                   onClick={() => setMode("login")}
                   className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
                 >
-                  Sign in
+                  {t("auth.signInLink")}
                 </button>
               </p>
             )}

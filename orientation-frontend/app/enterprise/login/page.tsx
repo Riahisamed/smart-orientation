@@ -9,8 +9,11 @@ import { Input } from "lib/components/ui/input"
 import { Label } from "lib/components/ui/label"
 import { Building2, ArrowLeft, Eye, EyeOff, Loader2, LogIn } from "lucide-react"
 import { storeRole } from "@/lib/use-role"
+import { useTranslations } from "@/lib/i18n/context"
+import BackToHomeButton from "../../components/navigation/BackToHomeButton"
 
 export default function EnterpriseLogin() {
+  const t = useTranslations()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -31,7 +34,7 @@ export default function EnterpriseLogin() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message || "Email ou mot de passe incorrect")
+        setError(data.message || t("auth.invalidCredentials"))
         return
       }
 
@@ -41,7 +44,7 @@ export default function EnterpriseLogin() {
 
       router.push("/enterprise/dashboard")
     } catch {
-      setError("Erreur réseau. Veuillez réessayer.")
+      setError(t("errors.networkError"))
     } finally {
       setLoading(false)
     }
@@ -49,10 +52,13 @@ export default function EnterpriseLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
+      <div className="fixed top-4 left-4 z-50">
+        <BackToHomeButton />
+      </div>
       <div className="w-full max-w-md">
         <button onClick={() => router.push("/choose-role")} className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-6 transition-colors">
           <ArrowLeft className="h-4 w-4" />
-          Choisir un autre rôle
+          {t("chooseRole.title")}
         </button>
 
         <Card className="rounded-3xl border border-green-200/80 dark:border-green-800/80 shadow-[0_24px_70px_-30px_rgba(22,163,74,0.35)] dark:bg-slate-900/90">
@@ -60,9 +66,9 @@ export default function EnterpriseLogin() {
             <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
               <Building2 className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">Connexion Entreprise</CardTitle>
+            <CardTitle className="text-2xl">{t("auth.enterpriseLogin")}</CardTitle>
             <CardDescription className="text-slate-500 dark:text-slate-400">
-              Accédez à votre espace RH
+              {t("enterprise.dashboardTitle")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
@@ -71,11 +77,11 @@ export default function EnterpriseLogin() {
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contact@entreprise.com" required className="rounded-xl" />
+                <Label htmlFor="email">{t("auth.email")}</Label>
+                <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={t("auth.email")} required className="rounded-xl" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <div className="relative">
                   <Input id="password" type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required className="rounded-xl pr-10" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -84,15 +90,15 @@ export default function EnterpriseLogin() {
                 </div>
               </div>
               <Button type="submit" disabled={loading} className="w-full rounded-xl h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium">
-                {loading ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Connexion...</span> : (
-                  <span className="flex items-center gap-2"><LogIn className="h-4 w-4" /> Se connecter</span>
+                {loading ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}</span> : (
+                  <span className="flex items-center gap-2"><LogIn className="h-4 w-4" /> {t("auth.signIn")}</span>
                 )}
               </Button>
             </form>
             <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
-              Pas encore inscrit ?{" "}
+              {t("auth.noAccount")}{" "}
               <button onClick={() => router.push("/enterprise/register")} className="text-green-600 dark:text-green-400 hover:underline font-medium">
-                Créer un compte
+                {t("enterprise.createAccount")}
               </button>
             </p>
           </CardContent>

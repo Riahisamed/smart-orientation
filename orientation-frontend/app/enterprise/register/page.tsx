@@ -8,8 +8,11 @@ import { Button } from "lib/components/ui/button"
 import { Input } from "lib/components/ui/input"
 import { Label } from "lib/components/ui/label"
 import { Building2, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react"
+import { useTranslations } from "@/lib/i18n/context"
+import BackToHomeButton from "../../components/navigation/BackToHomeButton"
 
 export default function EnterpriseRegister() {
+  const t = useTranslations()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -46,14 +49,14 @@ export default function EnterpriseRegister() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message || "Registration failed")
+        setError(data.message || t("enterprisePages.registrationFailed"))
         return
       }
 
       setSuccess(true)
       setTimeout(() => router.push("/enterprise/login"), 2000)
     } catch (err) {
-      setError("Network error. Please try again.")
+      setError(t("errors.networkError"))
     } finally {
       setLoading(false)
     }
@@ -66,12 +69,12 @@ export default function EnterpriseRegister() {
           <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
             <Building2 className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
-          <CardTitle className="text-2xl mb-2">Compte Entreprise Créé !</CardTitle>
+          <CardTitle className="text-2xl mb-2">{t("enterprise.registerTitle")}</CardTitle>
           <p className="text-slate-500 dark:text-slate-400 mb-4">
-            Votre demande a été soumise. Vous pouvez maintenant vous connecter.
+            {t("enterprise.registerDesc")}
           </p>
-<Button onClick={() => router.push("/enterprise/login")} className="rounded-xl">
-            Se Connecter
+          <Button onClick={() => router.push("/enterprise/login")} className="rounded-xl">
+            {t("auth.signIn")}
           </Button>
         </Card>
       </div>
@@ -80,13 +83,16 @@ export default function EnterpriseRegister() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
+      <div className="fixed top-4 left-4 z-50">
+        <BackToHomeButton />
+      </div>
       <div className="w-full max-w-2xl">
         <button
           onClick={() => router.push("/")}
           className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Retour à l'accueil
+          {t("common.back")}
         </button>
 
         <Card className="rounded-3xl border border-slate-200/80 shadow-[0_24px_70px_-30px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900/90">
@@ -94,9 +100,9 @@ export default function EnterpriseRegister() {
             <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
               <Building2 className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">Inscription Entreprise / RH</CardTitle>
+            <CardTitle className="text-2xl">{t("enterprise.registerTitle")}</CardTitle>
             <CardDescription className="text-slate-500 dark:text-slate-400">
-              Créez votre compte pour publier des offres et trouver les meilleurs talents
+              {t("enterprise.registerDesc")}
             </CardDescription>
           </CardHeader>
 
@@ -110,26 +116,26 @@ export default function EnterpriseRegister() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nom de l'Entreprise *</Label>
+                  <Label htmlFor="name">{t("enterprise.companyName")} *</Label>
                   <Input
                     id="name"
                     name="name"
                     value={form.name}
                     onChange={handleChange}
-                    placeholder="Votre entreprise"
+                    placeholder={t("enterprisePages.companyPlaceholder")}
                     required
                     className="rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sector">Secteur d'Activité</Label>
+                  <Label htmlFor="sector">{t("enterprise.sector")}</Label>
                   <Input
                     id="sector"
                     name="sector"
                     value={form.sector}
                     onChange={handleChange}
-                    placeholder="Ex: Technologie, Santé..."
+                    placeholder={t("enterprise.sector")}
                     className="rounded-xl"
                   />
                 </div>
@@ -137,21 +143,21 @@ export default function EnterpriseRegister() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">{t("auth.email")} *</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     value={form.email}
                     onChange={handleChange}
-                    placeholder="contact@entreprise.com"
+                    placeholder={t("auth.email")}
                     required
                     className="rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Mot de Passe *</Label>
+                  <Label htmlFor="password">{t("auth.password")} *</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -159,7 +165,7 @@ export default function EnterpriseRegister() {
                       type={showPassword ? "text" : "password"}
                       value={form.password}
                       onChange={handleChange}
-                      placeholder="Min. 8 caractères"
+                      placeholder={t("auth.password")}
                       required
                       minLength={8}
                       className="rounded-xl pr-10"
@@ -177,25 +183,25 @@ export default function EnterpriseRegister() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="location">Localisation</Label>
+                  <Label htmlFor="location">{t("enterprise.location")}</Label>
                   <Input
                     id="location"
                     name="location"
                     value={form.location}
                     onChange={handleChange}
-                    placeholder="Tunis, Sfax..."
+                    placeholder={t("enterprise.location")}
                     className="rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="website">Site Web</Label>
+                  <Label htmlFor="website">{t("enterprise.website")}</Label>
                   <Input
                     id="website"
                     name="website"
                     value={form.website}
                     onChange={handleChange}
-                    placeholder="https://entreprise.com"
+                    placeholder={t("enterprise.website")}
                     className="rounded-xl"
                   />
                 </div>
@@ -203,39 +209,39 @@ export default function EnterpriseRegister() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Email de Contact</Label>
+                  <Label htmlFor="contactEmail">{t("enterprise.contactEmail")}</Label>
                   <Input
                     id="contactEmail"
                     name="contactEmail"
                     type="email"
                     value={form.contactEmail}
                     onChange={handleChange}
-                    placeholder="rh@entreprise.com"
+                    placeholder={t("enterprise.contactEmail")}
                     className="rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Téléphone</Label>
+                  <Label htmlFor="contactPhone">{t("enterprise.contactPhone")}</Label>
                   <Input
                     id="contactPhone"
                     name="contactPhone"
                     value={form.contactPhone}
                     onChange={handleChange}
-                    placeholder="+216 XX XXX XXX"
+                    placeholder={t("enterprise.contactPhone")}
                     className="rounded-xl"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description de l'Entreprise</Label>
+                <Label htmlFor="description">{t("enterprise.description")}</Label>
                 <textarea
                   id="description"
                   name="description"
                   value={form.description}
                   onChange={handleChange}
-                  placeholder="Présentez votre entreprise..."
+                  placeholder={t("enterprise.description")}
                   className="w-full min-h-[80px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -248,18 +254,18 @@ export default function EnterpriseRegister() {
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Création en cours...
+                    {t("common.loading")}
                   </span>
                 ) : (
-                  "Créer un Compte Entreprise"
+                  t("enterprise.createAccount")
                 )}
               </Button>
             </form>
 
             <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-4">
-              Déjà inscrit ?{" "}
+              {t("auth.hasAccount")}{" "}
               <button onClick={() => router.push("/enterprise/login")} className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                Connectez-vous
+                {t("auth.signInLink")}
               </button>
             </p>
           </CardContent>

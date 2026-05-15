@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { BadgePercent, GraduationCap, Loader2, LogOut, Mail, Settings, UserCircle2 } from "lucide-react"
 import { Card, CardContent } from "lib/components/ui/card"
 import { useAuthUser } from "@/lib/use-auth-user"
+import { useTranslations } from "@/lib/i18n/context"
 
 const formatMetric = (value: number | null) => {
   if (value == null) return "--"
@@ -13,6 +14,7 @@ const formatMetric = (value: number | null) => {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations()
   const router = useRouter()
   const { isAuthenticated, isLoading, logout, user } = useAuthUser()
 
@@ -35,9 +37,9 @@ export default function ProfilePage() {
   }
 
   const stats = [
-    { label: "Bac Type", value: user.bacType, icon: GraduationCap },
-    { label: "Bac Average", value: formatMetric(user.bacAverage), icon: BadgePercent },
-    { label: "FG Score", value: formatMetric(user.fg), icon: BadgePercent },
+    { label: t("profile.bacType"), value: user.bacType, icon: GraduationCap },
+    { label: t("profile.bacAverage"), value: formatMetric(user.bacAverage), icon: BadgePercent },
+    { label: t("profile.fgScore"), value: formatMetric(user.fg), icon: BadgePercent },
   ]
 
   return (
@@ -52,11 +54,11 @@ export default function ProfilePage() {
                     <UserCircle2 className="h-12 w-12" />
                   </div>
                   <div>
-                    <p className="text-sm uppercase tracking-[0.2em] text-blue-100">Compte utilisateur</p>
+                    <p className="text-sm uppercase tracking-[0.2em] text-blue-100">{t("profile.userAccount")}</p>
                     <h1 className="mt-2 text-3xl font-bold">{user.name}</h1>
                     <p className="mt-2 flex items-center gap-2 text-sm text-blue-50">
                       <Mail className="h-4 w-4" />
-                      {user.email || "Email non disponible"}
+                      {user.email || t("profile.emailNotAvailable")}
                     </p>
                   </div>
                 </div>
@@ -67,14 +69,14 @@ export default function ProfilePage() {
                     className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
                   >
                     <Settings className="h-4 w-4" />
-                    Parametres
+                    {t("profile.settings")}
                   </Link>
                   <button
                     onClick={logout}
                     className="inline-flex items-center gap-2 rounded-xl bg-slate-950/20 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-950/30"
                   >
                     <LogOut className="h-4 w-4" />
-                    Deconnexion
+                    {t("profile.logout")}
                   </button>
                 </div>
               </div>
@@ -109,26 +111,26 @@ export default function ProfilePage() {
             <CardContent className="space-y-5 p-6">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  Informations
+                  {t("profile.information")}
                 </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Resume du profil</h2>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{t("profile.profileSummary")}</h2>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Nom affiche</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("profile.displayName")}</p>
                   <p className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">{user.name}</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Methode de connexion</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("profile.connectionMethod")}</p>
                   <p className="mt-2 text-base font-semibold capitalize text-slate-900 dark:text-slate-100">
-                    {user.authProvider === "guest" ? "Non connecte" : user.authProvider}
+                    {user.authProvider === "guest" ? t("profile.notConnected") : user.authProvider}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800 sm:col-span-2">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Adresse email</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("profile.emailAddress")}</p>
                   <p className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100">
-                    {user.email || "Aucun email enregistre"}
+                    {user.email || t("profile.noEmailRegistered")}
                   </p>
                 </div>
               </div>
@@ -139,28 +141,28 @@ export default function ProfilePage() {
             <CardContent className="space-y-4 p-6">
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                  Raccourcis
+                  {t("profile.shortcuts")}
                 </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Acces rapide</h2>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{t("profile.quickAccess")}</h2>
               </div>
 
               <Link
                 href="/dashboard"
                 className="block rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-300"
               >
-                Retour au dashboard
+                {t("profile.backToDashboard")}
               </Link>
               <Link
                 href="/orientation"
                 className="block rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-300"
               >
-                Voir les orientations
+                {t("profile.viewOrientations")}
               </Link>
               <Link
                 href="/settings"
                 className="block rounded-2xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-800 dark:text-slate-200 dark:hover:border-blue-700 dark:hover:text-blue-300"
               >
-                Ouvrir les parametres
+                {t("profile.openSettings")}
               </Link>
             </CardContent>
           </Card>

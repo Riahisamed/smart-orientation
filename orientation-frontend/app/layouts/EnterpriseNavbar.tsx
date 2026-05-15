@@ -2,24 +2,35 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { 
-  LayoutDashboard, Briefcase, PlusCircle, Users, TrendingUp, 
-  Bell, Building2, LogOut, Settings, Menu, X, Sparkles
+import {
+  LayoutDashboard,
+  Briefcase,
+  PlusCircle,
+  Users,
+  TrendingUp,
+  Bell,
+  Building2,
+  LogOut,
+  Settings,
+  Menu,
+  X,
 } from "lucide-react"
 import { ThemeToggle } from "../components/theme-toggle"
 import LanguageSwitcher from "../components/LanguageSwitcher"
 import { useAuthUser } from "@/lib/use-auth-user"
 import { useState } from "react"
+import { useTranslations } from "@/lib/i18n/context"
 
 const links = [
-  { label: "Dashboard", href: "/enterprise/dashboard", icon: LayoutDashboard },
-  { label: "Mes Offres", href: "/enterprise/offers", icon: Briefcase },
-  { label: "Nouvelle Offre", href: "/enterprise/offers/new", icon: PlusCircle },
-  { label: "Market Trends", href: "/market-trends", icon: TrendingUp },
-  { label: "Compatible Students", href: "/enterprise/compatible-students", icon: Users },
-]
+  { key: "nav.dashboard", href: "/enterprise/dashboard", icon: LayoutDashboard },
+  { key: "nav.myOffers", href: "/enterprise/offers", icon: Briefcase },
+  { key: "nav.newOffer", href: "/enterprise/offers/new", icon: PlusCircle },
+  { key: "nav.marketTrends", href: "/market-trends", icon: TrendingUp },
+  { key: "nav.compatibleStudents", href: "/enterprise/compatible-students", icon: Users },
+] as const
 
 export default function EnterpriseNavbar() {
+  const t = useTranslations()
   const pathname = usePathname()
   const router = useRouter()
   const { user } = useAuthUser()
@@ -27,7 +38,6 @@ export default function EnterpriseNavbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const handleLogout = async () => {
-    // local cleanup
     localStorage.removeItem("role")
     if (typeof window !== "undefined") {
       window.localStorage.removeItem("token")
@@ -35,7 +45,6 @@ export default function EnterpriseNavbar() {
       window.localStorage.removeItem("comparisonData")
     }
 
-    // If NextAuth session exists, signOut and force enterprise login
     try {
       const { signOut } = await import("next-auth/react")
       await signOut({ callbackUrl: "/enterprise/login" })
@@ -47,7 +56,6 @@ export default function EnterpriseNavbar() {
     router.replace("/enterprise/login")
   }
 
-
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-green-200/80 dark:border-green-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
@@ -55,7 +63,7 @@ export default function EnterpriseNavbar() {
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
             <Building2 className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-slate-900 dark:text-white hidden sm:block">Espace RH</span>
+          <span className="font-bold text-slate-900 dark:text-white hidden sm:block">{t("enterprise.dashboardTitle")}</span>
         </div>
 
         <div className="hidden md:flex items-center gap-1">
@@ -66,13 +74,14 @@ export default function EnterpriseNavbar() {
                 key={link.href}
                 href={link.href}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                  pathname === link.href || (link.href !== "/enterprise/dashboard" && pathname.startsWith(link.href))
+                  pathname === link.href ||
+                  (link.href !== "/enterprise/dashboard" && pathname.startsWith(link.href))
                     ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {link.label}
+                {t(link.key)}
               </Link>
             )
           })}
@@ -81,14 +90,21 @@ export default function EnterpriseNavbar() {
         <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher compact />
           <ThemeToggle />
-          <Link href="/notifications" className="relative h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700">
+          <Link
+            href="/notifications"
+            className="relative h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700"
+          >
             <Bell className="h-4 w-4 text-slate-600" />
           </Link>
 
           <div className="relative">
-            <button onClick={() => setDropdownOpen(!dropdownOpen)} className="h-9 w-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-sm font-medium">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="h-9 w-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-sm font-medium"
+            >
               {user.initials}
             </button>
+
             {dropdownOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
@@ -97,22 +113,40 @@ export default function EnterpriseNavbar() {
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">{user.name}</p>
                     <p className="text-xs text-slate-500">{user.email}</p>
                   </div>
-                  <Link href="/enterprise/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <Building2 className="h-4 w-4" /> Mon Entreprise
+
+                  <Link
+                    href="/enterprise/dashboard"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <Building2 className="h-4 w-4" /> {t("nav.enterpriseProfile")}
                   </Link>
-                  <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
-                    <Settings className="h-4 w-4" /> Paramètres
+
+                  <Link
+                    href="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <Settings className="h-4 w-4" /> {t("common.settings")}
                   </Link>
+
                   <hr className="my-1 border-slate-100 dark:border-slate-800" />
-                  <button onClick={handleLogout} className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                    <LogOut className="h-4 w-4" /> Déconnexion
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  >
+                    <LogOut className="h-4 w-4" /> {t("common.logout")}
                   </button>
                 </div>
               </>
             )}
           </div>
 
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
+          >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
@@ -123,10 +157,17 @@ export default function EnterpriseNavbar() {
           {links.map((link) => {
             const Icon = link.icon
             return (
-              <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium ${pathname === link.href ? "bg-green-100 dark:bg-green-900/30 text-green-700" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100"}`}
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium ${
+                  pathname === link.href
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-700"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
               >
-                <Icon className="h-4 w-4" /> {link.label}
+                <Icon className="h-4 w-4" /> {t(link.key)}
               </Link>
             )
           })}
@@ -135,3 +176,4 @@ export default function EnterpriseNavbar() {
     </nav>
   )
 }
+
